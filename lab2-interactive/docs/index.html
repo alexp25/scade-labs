@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 2 – SDLC: Cruise Control Safety System</title>
+
+  <!-- Skulpt: Python runtime that runs entirely in the browser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt-stdlib.js"></script>
+
+  <!-- CodeMirror: code editor with Python syntax highlighting -->
+  <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0D1B3E;
+      --blue:    #1565C0;
+      --sky:     #1E88E5;
+      --ice:     #E3F2FD;
+      --white:   #FFFFFF;
+      --off:     #F5F7FA;
+      --muted:   #78909C;
+      --orange:  #F57C00;
+      --green:   #2E7D32;
+      --teal:    #00695C;
+      --gray:    #455A64;
+      --border:  #D0D8E8;
+      --pass:    #1B5E20;
+      --pass-bg: #E8F5E9;
+      --fail:    #B71C1C;
+      --fail-bg: #FFEBEE;
+      --font:    'Segoe UI', system-ui, sans-serif;
+      --mono:    'Consolas', 'Fira Mono', monospace;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      color: var(--gray);
+      background: var(--off);
+      line-height: 1.65;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────────── */
+    .page-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 4px solid var(--sky);
+    }
+    .page-header h1 { font-size: 1.75rem; font-weight: 700; color: var(--white); }
+    .page-header .meta {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      margin-top: .6rem; font-size: .85rem; color: #90A4AE;
+    }
+    .page-header .meta span::before { content: "● "; color: var(--sky); }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ── Typography ───────────────────────────────────────────────────────── */
+    h2 {
+      font-size: 1.35rem; font-weight: 700;
+      color: var(--navy);
+      margin: 2.5rem 0 .75rem;
+      padding-bottom: .35rem;
+      border-bottom: 2px solid var(--border);
+    }
+    h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--blue);
+      margin: 1.75rem 0 .5rem;
+    }
+    p  { margin-bottom: .85rem; }
+    ul, ol { padding-left: 1.4rem; margin-bottom: .85rem; }
+    li { margin-bottom: .3rem; }
+    strong { color: var(--navy); }
+    em { color: var(--muted); }
+    code {
+      font-family: var(--mono);
+      font-size: .88em;
+      background: #EEF2F7;
+      padding: .1em .35em;
+      border-radius: 3px;
+      color: var(--blue);
+    }
+
+    /* ── Callout boxes ────────────────────────────────────────────────────── */
+    .callout {
+      border-left: 4px solid var(--sky);
+      background: var(--ice);
+      padding: .85rem 1rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1rem 0;
+    }
+    .callout.orange { border-color: var(--orange); background: #FFF8E1; }
+    .callout.green  { border-color: var(--green);  background: #E8F5E9; }
+    .callout.navy   { border-color: var(--navy);   background: #E8EAF6; }
+    .callout p:last-child { margin-bottom: 0; }
+
+    /* ── Tables ───────────────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+    th {
+      background: var(--navy);
+      color: var(--white);
+      padding: .55rem .75rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: .5rem .75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #F8FAFC; }
+    tr:hover td { background: var(--ice); }
+    td code { font-size: .83em; }
+
+    /* TC-05 highlight */
+    tr.key-test td { background: #FFF8E1; }
+    tr.key-test td:first-child { font-weight: 700; color: var(--orange); }
+
+    /* ── Code block (static display) ─────────────────────────────────────── */
+    pre.code-block {
+      background: #0D1B2A;
+      color: #CDD3DE;
+      font-family: var(--mono);
+      font-size: .88rem;
+      padding: 1.1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: .75rem 0 1rem;
+      line-height: 1.55;
+    }
+    pre.code-block .kw  { color: #C792EA; font-weight: 600; }
+    pre.code-block .fn  { color: #82AAFF; }
+    pre.code-block .cm  { color: #546E7A; font-style: italic; }
+    pre.code-block .st  { color: #C3E88D; }
+    pre.code-block .nm  { color: #F78C6C; }
+
+    /* ── Phase badge ──────────────────────────────────────────────────────── */
+    .phase-badge {
+      display: inline-block;
+      background: var(--blue);
+      color: var(--white);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: .2rem .6rem;
+      border-radius: 3px;
+      margin-right: .5rem;
+      vertical-align: middle;
+    }
+    .phase-badge.teal   { background: var(--teal); }
+    .phase-badge.orange { background: var(--orange); }
+    .phase-badge.green  { background: var(--green); }
+
+    .time-tag {
+      display: inline-block;
+      font-size: .78rem;
+      color: var(--muted);
+      background: #EEF2F7;
+      padding: .15rem .5rem;
+      border-radius: 3px;
+      vertical-align: middle;
+    }
+
+    /* ── State machine diagram ────────────────────────────────────────────── */
+    .state-machine {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 1.25rem 0;
+      flex-wrap: wrap;
+    }
+    .state-box {
+      border: 2px solid;
+      border-radius: 6px;
+      padding: .65rem 1.1rem;
+      font-weight: 700;
+      font-size: .95rem;
+      font-family: var(--mono);
+      min-width: 110px;
+      text-align: center;
+    }
+    .state-box.off       { border-color: var(--muted); color: var(--muted); background: #F5F5F5; }
+    .state-box.active    { border-color: var(--blue);  color: var(--blue);  background: #E3F2FD; }
+    .state-box.suspended { border-color: var(--orange); color: var(--orange); background: #FFF8E1; }
+
+    .arrow-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+      margin: 0 .5rem;
+      min-width: 140px;
+    }
+    .arrow-line {
+      width: 100%;
+      height: 2px;
+      background: var(--gray);
+      position: relative;
+    }
+    .arrow-line::after {
+      content: "▶";
+      position: absolute;
+      right: -8px;
+      top: -9px;
+      color: var(--gray);
+      font-size: .9rem;
+    }
+    .arrow-label {
+      font-size: .75rem;
+      color: var(--gray);
+      text-align: center;
+    }
+
+    /* ── Live editor section ──────────────────────────────────────────────── */
+    #editor-section {
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    #editor-section h2 {
+      color: var(--white);
+      border-bottom-color: #1A3A5C;
+      margin-top: 0;
+    }
+    #editor-section p { color: #90A4AE; }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .5rem;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    .editor-toolbar span {
+      font-size: .8rem;
+      color: #607D8B;
+      font-family: var(--mono);
+    }
+
+    .btn-run {
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      padding: .55rem 1.4rem;
+      font-size: .95rem;
+      font-weight: 700;
+      border-radius: 5px;
+      cursor: pointer;
+      letter-spacing: .03em;
+      transition: background .15s;
+    }
+    .btn-run:hover { background: #1B5E20; }
+    .btn-run:active { transform: scale(.97); }
+
+    .btn-reset {
+      background: transparent;
+      color: #90A4AE;
+      border: 1px solid #2A3F5F;
+      padding: .5rem 1rem;
+      font-size: .85rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .btn-reset:hover { color: var(--white); border-color: #607D8B; }
+
+    /* CodeMirror overrides */
+    .CodeMirror {
+      height: 480px;
+      font-family: var(--mono);
+      font-size: .88rem;
+      border-radius: 6px;
+      border: 1px solid #1A3A5C;
+    }
+
+    /* Output area */
+    #output-wrap { margin-top: 1rem; }
+    #output {
+      background: #020C1B;
+      color: #CDD3DE;
+      font-family: var(--mono);
+      font-size: .85rem;
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      min-height: 80px;
+      white-space: pre-wrap;
+      border: 1px solid #0D2137;
+      line-height: 1.6;
+    }
+    #output .pass  { color: #69F0AE; font-weight: 700; }
+    #output .fail  { color: #FF5252; font-weight: 700; }
+    #output .head  { color: #82AAFF; }
+    #output .div   { color: #2A3F5F; }
+
+    /* Validation banner */
+    #validation-banner {
+      display: none;
+      margin-top: .75rem;
+      padding: .75rem 1rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+    }
+    #validation-banner.pass { background: var(--pass-bg); color: var(--pass); }
+    #validation-banner.fail { background: var(--fail-bg); color: var(--fail); }
+
+    /* ── Summary table ────────────────────────────────────────────────────── */
+    .summary-table { margin: 2rem 0; }
+    .summary-table td:first-child { font-weight: 600; color: var(--navy); width: 35%; }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header class="page-header">
+  <h1>Lab 2 &mdash; Applying the SDLC: Cruise Control Safety System</h1>
+  <div class="meta">
+    <span>Software Engineering</span>
+    <span>SDLC · Lesson 2</span>
+    <span>2 hours</span>
+    <span>Python 3 · runs in browser</span>
+    <span>Individual work</span>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- ── Objectives ──────────────────────────────────────────────────────── -->
+  <h2>Objectives</h2>
+  <p>By the end of this lab you will be able to:</p>
+  <ul>
+    <li>Apply all SDLC phases on a concrete safety-critical problem</li>
+    <li>Explain why requirements must be precise and unambiguous</li>
+    <li>Build a state machine as a design artifact and trace it back to requirements</li>
+    <li>Implement a function whose logic is fully driven by a design — not intuition</li>
+    <li>Run a structured V&amp;V test suite and interpret the results</li>
+    <li>Explain how traceability connects requirements, design, code, and tests</li>
+    <li>Reflect on Waterfall, Agile, and V-Cycle in a safety-critical context</li>
+  </ul>
+
+  <!-- ── The problem ─────────────────────────────────────────────────────── -->
+  <h2>The Problem</h2>
+  <p>You are a junior software engineer on a safety-critical automotive project. Your system controls <strong>cruise control</strong> on a vehicle.</p>
+  <div class="callout orange">
+    <p><strong>Client description (informal):</strong><br>
+    <em>"Cruise control must be safe. It should stop when needed, should not start in dangerous conditions, and if it stops for a safety reason the driver must be aware that they need to restart it manually."</em></p>
+  </div>
+  <p>Your job is to take this through all SDLC phases: requirements &rarr; design &rarr; implementation &rarr; verification &amp; validation.</p>
+
+  <!-- ── Structure ───────────────────────────────────────────────────────── -->
+  <h2>Structure</h2>
+  <p>Work through each Part in order. Do not skip ahead — each part builds on the previous one. Write your answers directly in the editor at the bottom of the page.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Part</th><th>Topic</th><th>Time</th></tr>
+      <tr><td>0</td><td>Python in 15 Minutes</td><td>15 min</td></tr>
+      <tr><td>1</td><td>Requirements Analysis</td><td>20 min</td></tr>
+      <tr><td>2</td><td>System Design</td><td>20 min</td></tr>
+      <tr><td>3</td><td>Implementation</td><td>25 min</td></tr>
+      <tr><td>4</td><td>Verification &amp; Validation</td><td>25 min</td></tr>
+      <tr><td>5</td><td>Reflection</td><td>15 min</td></tr>
+    </table>
+  </div>
+
+  <!-- ── Part 0 ───────────────────────────────────────────────────────────── -->
+  <h2><span class="phase-badge">PART 0</span> Python in 15 Minutes <span class="time-tag">⏱ 15 min</span></h2>
+  <p>You do <strong>not</strong> need to be a programmer. Python is used here to make requirements and design <strong>executable and testable</strong> — exactly what Scade One does, but manually. Everything you need is below.</p>
+
+  <h3>Variables</h3>
+<pre class="code-block"><span class="nm">speed</span>         = <span class="nm">85</span>       <span class="cm"># integer</span>
+<span class="nm">brake_pressed</span> = <span class="kw">True</span>    <span class="cm"># boolean: True or False</span>
+<span class="nm">state</span>         = <span class="st">"ACTIVE"</span> <span class="cm"># string</span></pre>
+
+  <h3>Conditions</h3>
+<pre class="code-block"><span class="kw">if</span> brake_pressed:
+    <span class="fn">print</span>(<span class="st">"Brake is pressed"</span>)
+<span class="kw">elif</span> speed &lt; <span class="nm">30</span>:
+    <span class="fn">print</span>(<span class="st">"Speed too low"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"All good"</span>)</pre>
+
+  <h3>Functions</h3>
+<pre class="code-block"><span class="kw">def</span> <span class="fn">check_system</span>(speed, brake):
+    <span class="kw">if</span> brake:
+        <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">return</span> <span class="kw">True</span>
+
+result = check_system(<span class="nm">80</span>, <span class="kw">False</span>)
+<span class="fn">print</span>(result)   <span class="cm"># True</span></pre>
+
+  <!-- ── Part 1 ───────────────────────────────────────────────────────────── -->
+  <h2><span class="phase-badge">PART 1</span> Requirements Analysis <span class="time-tag">⏱ 20 min</span></h2>
+  <p>Before any line of code is written, the team must agree on exactly <strong>what</strong> the system must do. Vague requirements lead to different implementations, untestable behavior, and expensive fixes discovered late.</p>
+
+  <h3>Activity 1A — Poorly written requirements</h3>
+  <p>Another team received this version. <strong>Do not implement these.</strong></p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Req. ID</th><th>Description</th></tr>
+      <tr><td>REQ-A</td><td>The system must stop cruise control when it is dangerous.</td></tr>
+      <tr><td>REQ-B</td><td>Speed must be OK to start cruise control.</td></tr>
+      <tr><td>REQ-C</td><td>If it stops, the driver must do something.</td></tr>
+    </table>
+  </div>
+  <div class="callout navy">
+    <p><strong>Question:</strong> What is wrong with these requirements? Why can you NOT implement or test anything based on them? Write 2–3 sentences as <code>answer_1a</code> in the editor.</p>
+  </div>
+
+  <h3>Activity 1B — Software Requirements Specification (SRS)</h3>
+  <p>Well-written requirements follow the pattern: <code>"The system SHALL [action] WHEN/IF [condition]."</code></p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Req. ID</th><th>Description</th><th>Type</th></tr>
+      <tr><td><strong>REQ-01</strong></td><td>The system SHALL deactivate cruise control if the brake is pressed.</td><td>Functional</td></tr>
+      <tr><td><strong>REQ-02</strong></td><td>The system SHALL deactivate cruise control if speed exceeds 130 km/h.</td><td>Functional</td></tr>
+      <tr><td><strong>REQ-03</strong></td><td>The system SHALL refuse to activate if speed is below 30 km/h.</td><td>Functional</td></tr>
+      <tr><td><strong>REQ-04</strong></td><td>The system SHALL enter state <code>SUSPENDED</code> (not <code>OFF</code>) when deactivated by a safety condition, so that reactivation must be explicit by the driver.</td><td>Functional</td></tr>
+      <tr><td><strong>REQ-05</strong></td><td>The system SHALL respond to any input in less than 100 ms.</td><td>Non-functional</td></tr>
+      <tr><td><strong>REQ-06</strong></td><td>The system SHALL be testable with simulated boolean inputs.</td><td>Non-functional</td></tr>
+    </table>
+  </div>
+  <div class="callout orange">
+    <p><strong>Critical question:</strong> Read REQ-02 and REQ-04 together. When speed exceeds 130 km/h, does the system go to <code>SUSPENDED</code> or directly to <code>OFF</code>? Do the requirements state this clearly? Write your answer as <code>answer_1b</code> in the editor — you will revisit this in Part 2.</p>
+  </div>
+
+  <!-- ── Part 2 ───────────────────────────────────────────────────────────── -->
+  <h2><span class="phase-badge teal">PART 2</span> System Design <span class="time-tag">⏱ 20 min</span></h2>
+  <p>Without a design you do not know: how many states the system has, what happens when brake AND high speed occur simultaneously, or where current state is stored. Design answers all of this <strong>before</strong> you write a single line of code.</p>
+
+  <h3>Activity 2A — State Machine</h3>
+  <p>The system has <strong>three states</strong>:</p>
+
+  <div class="state-machine">
+    <div class="state-box off">OFF</div>
+    <div class="arrow-group">
+      <div class="arrow-label">driver activates<br>(speed ≥ 30)</div>
+      <div class="arrow-line"></div>
+    </div>
+    <div class="state-box active">ACTIVE</div>
+    <div class="arrow-group">
+      <div class="arrow-label">brake OR speed &gt; 130</div>
+      <div class="arrow-line"></div>
+    </div>
+    <div class="state-box suspended">SUSPENDED</div>
+  </div>
+  <p style="text-align:center; font-size:.85rem; color:var(--muted); margin-top:-.5rem; margin-bottom:1rem;">
+    SUSPENDED → ACTIVE only via <strong>explicit driver reactivation</strong> &nbsp;|&nbsp; SUSPENDED → OFF: never (driver must reactivate)
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>State</th><th>Meaning</th></tr>
+      <tr><td><code>OFF</code></td><td>System is off; driver can activate if speed ≥ 30</td></tr>
+      <tr><td><code>ACTIVE</code></td><td>Cruise control is running</td></tr>
+      <tr><td><code>SUSPENDED</code></td><td>Stopped by a safety condition; driver <strong>must</strong> reactivate explicitly</td></tr>
+    </table>
+  </div>
+
+  <h3>Transition table</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>From</th><th>Event</th><th>To</th><th>REQ covered</th></tr>
+      <tr><td><code>OFF</code></td><td>driver activates AND speed ≥ 30</td><td><code>ACTIVE</code></td><td>REQ-03</td></tr>
+      <tr><td><code>OFF</code></td><td>driver activates AND speed &lt; 30</td><td><code>OFF</code></td><td>REQ-03</td></tr>
+      <tr><td><code>ACTIVE</code></td><td>brake pressed</td><td><code>SUSPENDED</code></td><td>REQ-01, REQ-04</td></tr>
+      <tr><td><code>ACTIVE</code></td><td>speed &gt; 130</td><td><code>SUSPENDED</code></td><td>REQ-02, REQ-04</td></tr>
+      <tr><td><code>SUSPENDED</code></td><td>driver reactivates explicitly</td><td><code>ACTIVE</code></td><td>REQ-04</td></tr>
+      <tr><td><code>SUSPENDED</code></td><td>driver activates (no reactivation)</td><td><code>SUSPENDED</code></td><td>REQ-04</td></tr>
+    </table>
+  </div>
+
+  <h3>Activity 2B — Traceability: Design → Requirements</h3>
+  <p>Fill in the <code>traceability_design</code> dictionary in the editor with the correct REQ IDs for each design element.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Design Element</th><th>REQ covered</th></tr>
+      <tr><td>State SUSPENDED (distinct from OFF)</td><td><em>fill in editor</em></td></tr>
+      <tr><td>Transition ACTIVE → SUSPENDED on brake</td><td><em>fill in editor</em></td></tr>
+      <tr><td>Block activation if speed &lt; 30</td><td><em>fill in editor</em></td></tr>
+      <tr><td>Transition ACTIVE → SUSPENDED on speed &gt; 130</td><td><em>fill in editor</em></td></tr>
+      <tr><td>Transition SUSPENDED → ACTIVE only on explicit action</td><td><em>fill in editor</em></td></tr>
+    </table>
+  </div>
+
+  <h3>Activity 2C — Design decision</h3>
+  <p>The state machine resolves the REQ-02 / REQ-04 ambiguity: speed &gt; 130 → <code>SUSPENDED</code> (not <code>OFF</code>), because REQ-04 covers <em>all</em> safety-condition deactivations.</p>
+  <div class="callout navy">
+    <p><strong>Question:</strong> This is a design decision you made — not something the client specified. What should happen before implementing it in a real project? What could go wrong if two developers resolved it differently? Write your answer as <code>answer_2c</code> in the editor.</p>
+  </div>
+
+  <!-- ── Part 3 ───────────────────────────────────────────────────────────── -->
+  <h2><span class="phase-badge orange">PART 3</span> Implementation <span class="time-tag">⏱ 25 min</span></h2>
+  <p>Implement <code>update_cruise_control()</code> in the editor following the transition table exactly. <strong>Do not guess</strong> — every line should trace back to a REQ ID.</p>
+
+  <h3>Recommended order inside the function</h3>
+  <ol>
+    <li><strong>Step 1 — Safety conditions</strong> (from <code>ACTIVE</code> only): brake OR speed &gt; 130 → <code>SUSPENDED</code></li>
+    <li><strong>Step 2 — SUSPENDED state</strong>: <code>driver_reactivates</code> → <code>ACTIVE</code>; <code>driver_activates</code> only → stay <code>SUSPENDED</code> <em>(REQ-04!)</em></li>
+    <li><strong>Step 3 — OFF state</strong>: activates + speed ≥ 30 → <code>ACTIVE</code>; activates + speed &lt; 30 → stay <code>OFF</code> <em>(REQ-03!)</em></li>
+    <li><strong>Step 4 — Default</strong>: return <code>current_state</code> unchanged</li>
+  </ol>
+
+  <!-- ── Part 4 ───────────────────────────────────────────────────────────── -->
+  <h2><span class="phase-badge green">PART 4</span> Verification &amp; Validation <span class="time-tag">⏱ 25 min</span></h2>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th></th><th>Question</th><th>Focus</th></tr>
+      <tr><td><strong>Verification</strong></td><td>Are we building the system <em>right</em>?</td><td>Code matches design</td></tr>
+      <tr><td><strong>Validation</strong></td><td>Are we building the <em>right</em> system?</td><td>All requirements are met</td></tr>
+    </table>
+  </div>
+
+  <h3>Activity 4A — Test table</h3>
+  <p>The test suite is already written in the editor. Run it using the <strong>▶ Run</strong> button below. All 7 tests must print PASS.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Test ID</th><th>state</th><th>speed</th><th>brake</th><th>activates</th><th>reactivates</th><th>Expected</th><th>REQ</th></tr>
+      <tr><td>TC-01</td><td>ACTIVE</td><td>80</td><td>True</td><td>False</td><td>False</td><td>SUSPENDED</td><td>REQ-01</td></tr>
+      <tr><td>TC-02</td><td>ACTIVE</td><td>140</td><td>False</td><td>False</td><td>False</td><td>SUSPENDED</td><td>REQ-02</td></tr>
+      <tr><td>TC-03</td><td>OFF</td><td>20</td><td>False</td><td>True</td><td>False</td><td>OFF</td><td>REQ-03</td></tr>
+      <tr><td>TC-04</td><td>OFF</td><td>80</td><td>False</td><td>True</td><td>False</td><td>ACTIVE</td><td>REQ-03</td></tr>
+      <tr class="key-test"><td>TC-05 ⚠️</td><td>SUSPENDED</td><td>80</td><td>False</td><td>True</td><td>False</td><td>SUSPENDED</td><td>REQ-04</td></tr>
+      <tr><td>TC-06</td><td>SUSPENDED</td><td>80</td><td>False</td><td>False</td><td>True</td><td>ACTIVE</td><td>REQ-04</td></tr>
+      <tr><td>TC-07</td><td>ACTIVE</td><td>80</td><td>False</td><td>False</td><td>False</td><td>ACTIVE</td><td>REQ-01,02</td></tr>
+    </table>
+  </div>
+  <div class="callout orange">
+    <p><strong>⚠️ TC-05 is the key test.</strong> A student who skipped the design or misread REQ-04 will return <code>ACTIVE</code> instead of <code>SUSPENDED</code>. This is intentional — it shows exactly why the design phase matters. If TC-05 fails, re-read REQ-04 and row 6 of the transition table.</p>
+  </div>
+
+  <h3>Activity 4B — TC-05 analysis</h3>
+  <p>Answer in the editor as <code>answer_4b_1</code>, <code>answer_4b_2</code>, <code>answer_4b_3</code>:</p>
+  <ol>
+    <li>Did TC-05 pass or fail on your first implementation attempt?</li>
+    <li>If it failed — where was the root cause: in the requirement, the design, or the code?</li>
+    <li>What would happen if this bug reached a deployed real vehicle system?</li>
+  </ol>
+
+  <h3>Activity 4C — Full Traceability Matrix</h3>
+  <p>Fill in the <code>status</code> field in the <code>traceability_matrix</code> dictionary in the editor after all tests pass.</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Req. ID</th><th>Design Element</th><th>Code Element</th><th>Test ID(s)</th><th>Status</th></tr>
+      <tr><td>REQ-01</td><td>ACTIVE → SUSPENDED on brake</td><td><code>brake_pressed and ACTIVE</code></td><td>TC-01, TC-07</td><td><em>fill in editor</em></td></tr>
+      <tr><td>REQ-02</td><td>ACTIVE → SUSPENDED on speed &gt; 130</td><td><code>speed &gt; 130 and ACTIVE</code></td><td>TC-02, TC-07</td><td><em>fill in editor</em></td></tr>
+      <tr><td>REQ-03</td><td>Block activation below 30 km/h</td><td><code>speed &lt; 30: stay OFF</code></td><td>TC-03, TC-04</td><td><em>fill in editor</em></td></tr>
+      <tr><td>REQ-04</td><td>SUSPENDED → ACTIVE only if reactivates</td><td><code>if driver_reactivates</code></td><td>TC-05, TC-06</td><td><em>fill in editor</em></td></tr>
+      <tr><td>REQ-05</td><td>Single-pass, no delay</td><td>returns immediately</td><td>All TCs</td><td><em>fill in editor</em></td></tr>
+      <tr><td>REQ-06</td><td>Simulatable inputs</td><td>bool/int parameters</td><td>All TCs</td><td><em>fill in editor</em></td></tr>
+    </table>
+  </div>
+
+  <!-- ── Part 5 ───────────────────────────────────────────────────────────── -->
+  <h2><span class="phase-badge">PART 5</span> Reflection <span class="time-tag">⏱ 15 min</span></h2>
+  <p>Answer each question in 3–5 sentences in the editor (<code>answer_q1</code> through <code>answer_q4</code>).</p>
+  <dl>
+    <dt><strong>Q1 — Value of design</strong></dt>
+    <dd>TC-05 exposed an ambiguity in the requirements. How did the State Machine from Part 2 help you resolve this ambiguity <em>before</em> writing code? What would have happened without it?</dd>
+    <dt style="margin-top:.75rem"><strong>Q2 — Waterfall</strong></dt>
+    <dd>Imagine you discovered the REQ-04 ambiguity only during testing in a pure Waterfall project. What would the impact be? How costly would it be to go back to the requirements phase?</dd>
+    <dt style="margin-top:.75rem"><strong>Q3 — Agile in safety-critical systems</strong></dt>
+    <dd>A colleague suggests skipping REQ-05 (&lt; 100 ms) and adding it "in a later sprint". Why is this specifically dangerous in safety-critical systems, compared to a regular web application?</dd>
+    <dt style="margin-top:.75rem"><strong>Q4 — Scade One</strong></dt>
+    <dd>With 400 requirements instead of 6, what would happen to the traceability matrix if maintained manually? What parts of what you did by hand today would Scade One automate?</dd>
+  </dl>
+
+  <!-- ── Live editor ──────────────────────────────────────────────────────── -->
+  <div id="editor-section">
+    <h2>▶ Live Python Editor</h2>
+    <p>Write your implementation here. Click <strong>Run</strong> to execute and see the test results instantly.</p>
+
+    <div class="editor-toolbar">
+      <span>lab2_cruise_control_starter.py</span>
+      <div style="display:flex; gap:.5rem;">
+        <button class="btn-reset" onclick="resetEditor()">↺ Reset</button>
+        <button class="btn-run"   onclick="runCode()">▶ Run</button>
+      </div>
+    </div>
+
+    <textarea id="code-editor"></textarea>
+
+    <div id="output-wrap">
+      <div id="output">Output will appear here after you click ▶ Run…</div>
+      <div id="validation-banner"></div>
+    </div>
+  </div>
+
+  <!-- ── Expected output ─────────────────────────────────────────────────── -->
+  <h2>Expected Output</h2>
+  <p>When your implementation is correct, running the file produces:</p>
+<pre class="code-block">Quick checks:
+SUSPENDED
+SUSPENDED
+
+======================================================================
+  VERIFICATION REPORT -- Cruise Control Safety System
+======================================================================
+  TC-01 [REQ-01      ] | Expected=SUSPENDED  Got=SUSPENDED  | PASS
+  TC-02 [REQ-02      ] | Expected=SUSPENDED  Got=SUSPENDED  | PASS
+  TC-03 [REQ-03      ] | Expected=OFF        Got=OFF        | PASS
+  TC-04 [REQ-03      ] | Expected=ACTIVE     Got=ACTIVE     | PASS
+  TC-05 [REQ-04      ] | Expected=SUSPENDED  Got=SUSPENDED  | PASS
+  TC-06 [REQ-04      ] | Expected=ACTIVE     Got=ACTIVE     | PASS
+  TC-07 [REQ-01,02   ] | Expected=ACTIVE     Got=ACTIVE     | PASS
+----------------------------------------------------------------------
+  VALIDATION: ALL REQUIREMENTS MET.
+======================================================================</pre>
+
+  <!-- ── Connection to Lecture 2 ─────────────────────────────────────────── -->
+  <h2>Connection to Lecture 2</h2>
+  <div class="table-wrap summary-table">
+    <table>
+      <tr><th>SDLC Phase</th><th>What you did today</th></tr>
+      <tr><td>Requirements Analysis</td><td>Wrote REQ-01 to REQ-06 with IDs, precise language, and types</td></tr>
+      <tr><td>System Design</td><td>Built a 3-state machine and mapped every transition to a requirement</td></tr>
+      <tr><td>Implementation</td><td>Coded logic driven entirely by the design — not intuition</td></tr>
+      <tr><td>Verification &amp; Validation</td><td>Ran 7 structured tests, each linked to a requirement</td></tr>
+      <tr><td>Traceability</td><td>Maintained REQ → Design → Code → Test links throughout</td></tr>
+    </table>
+  </div>
+  <div class="callout green">
+    <p><strong>Key takeaway:</strong> Traceability is not paperwork — it is what makes a safety-critical system auditable and certifiable. This is exactly what tools like <strong>Scade One</strong> automate at industrial scale.</p>
+  </div>
+
+</main>
+
+<footer>
+  Lab 2 · Software Engineering · SDLC Lesson &nbsp;|&nbsp; Presented by Nirvana Popescu
+</footer>
+
+<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script>
+// ── Starter code ────────────────────────────────────────────────────────────
+const STARTER_CODE = `# Lab 2 – Cruise Control Safety System
+# Fill in every [your answer here] block, then implement the function.
+# Click ▶ Run to check your work.
+
+# System states — do not change
+OFF       = "OFF"
+ACTIVE    = "ACTIVE"
+SUSPENDED = "SUSPENDED"
+
+
+# --- PART 1 — Requirements Analysis ------------------------------------------
+
+answer_1a = """
+[your answer here]
+"""
+
+answer_1b = """
+[your answer here]
+"""
+
+
+# --- PART 2 — System Design --------------------------------------------------
+
+traceability_design = {
+    "State SUSPENDED (distinct from OFF)":                    "",
+    "Transition ACTIVE -> SUSPENDED on brake":                "",
+    "Block activation if speed < 30":                         "",
+    "Transition ACTIVE -> SUSPENDED on speed > 130":          "",
+    "Transition SUSPENDED -> ACTIVE only on explicit action": "",
+}
+
+answer_2c = """
+[your answer here]
+"""
+
+
+# --- PART 3 — Implementation -------------------------------------------------
+
+def update_cruise_control(current_state, speed, brake_pressed,
+                          driver_activates, driver_reactivates):
+    # Step 1 — Safety conditions (from ACTIVE)
+    #          brake OR speed > 130  ->  SUSPENDED   [REQ-01, REQ-02, REQ-04]
+
+
+    # Step 2 — SUSPENDED state
+    #          driver_reactivates    ->  ACTIVE       [REQ-04]
+    #          driver_activates only ->  SUSPENDED    [REQ-04]  KEY TRAP!
+
+
+    # Step 3 — OFF state
+    #          activates + speed >= 30  ->  ACTIVE    [REQ-03]
+    #          activates + speed < 30   ->  OFF       [REQ-03]
+
+
+    # Step 4 — Default
+    return current_state
+
+
+# --- PART 4 — Verification & Validation --------------------------------------
+
+def run_tests():
+    test_cases = [
+        (ACTIVE,    80,  True,  False, False, SUSPENDED, "TC-01", "REQ-01"),
+        (ACTIVE,   140,  False, False, False, SUSPENDED, "TC-02", "REQ-02"),
+        (OFF,       20,  False, True,  False, OFF,       "TC-03", "REQ-03"),
+        (OFF,       80,  False, True,  False, ACTIVE,    "TC-04", "REQ-03"),
+        (SUSPENDED, 80,  False, True,  False, SUSPENDED, "TC-05", "REQ-04"),
+        (SUSPENDED, 80,  False, False, True,  ACTIVE,    "TC-06", "REQ-04"),
+        (ACTIVE,    80,  False, False, False, ACTIVE,    "TC-07", "REQ-01,02"),
+    ]
+    print("=" * 70)
+    print("  VERIFICATION REPORT -- Cruise Control Safety System")
+    print("=" * 70)
+    all_passed = True
+    for state, speed, brake, act, react, expected, tid, req in test_cases:
+        result = update_cruise_control(state, speed, brake, act, react)
+        status = "PASS" if result == expected else "FAIL"
+        if status == "FAIL":
+            all_passed = False
+        print(f"  {tid} [{req:12s}] | Expected={expected:9s}  Got={str(result):9s} | {status}")
+    print("-" * 70)
+    if all_passed:
+        print("  VALIDATION: ALL REQUIREMENTS MET.")
+    else:
+        print("  VALIDATION: ISSUES FOUND -- review your implementation.")
+    print("=" * 70)
+    return all_passed
+
+answer_4b_1 = """[your answer here]"""
+answer_4b_2 = """[your answer here]"""
+answer_4b_3 = """[your answer here]"""
+
+traceability_matrix = {
+    "REQ-01": {"status": ""},
+    "REQ-02": {"status": ""},
+    "REQ-03": {"status": ""},
+    "REQ-04": {"status": ""},
+    "REQ-05": {"status": ""},
+    "REQ-06": {"status": ""},
+}
+
+
+# --- PART 5 — Reflection -----------------------------------------------------
+
+answer_q1 = """[your answer here]"""
+answer_q2 = """[your answer here]"""
+answer_q3 = """[your answer here]"""
+answer_q4 = """[your answer here]"""
+
+
+# --- Entry point -------------------------------------------------------------
+
+print("Quick checks:")
+print(update_cruise_control(ACTIVE, 80, True, False, False))    # SUSPENDED
+print(update_cruise_control(SUSPENDED, 80, False, True, False)) # SUSPENDED (not ACTIVE!)
+print()
+run_tests()
+`;
+
+// ── CodeMirror setup ─────────────────────────────────────────────────────────
+let editor;
+window.addEventListener('DOMContentLoaded', () => {
+  editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+    mode: 'python',
+    theme: 'dracula',
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    lineWrapping: false,
+    autofocus: false,
+  });
+  editor.setValue(STARTER_CODE);
+});
+
+function resetEditor() {
+  if (confirm('Reset the editor to the starter code? Your changes will be lost.')) {
+    editor.setValue(STARTER_CODE);
+    document.getElementById('output').textContent = 'Output will appear here after you click ▶ Run…';
+    document.getElementById('output').style.color = '';
+    const banner = document.getElementById('validation-banner');
+    banner.style.display = 'none';
+    banner.className = '';
+  }
+}
+
+// ── Skulpt Python runner ─────────────────────────────────────────────────────
+function runCode() {
+  const outputEl  = document.getElementById('output');
+  const bannerEl  = document.getElementById('validation-banner');
+
+  outputEl.textContent = '';
+  bannerEl.style.display = 'none';
+  bannerEl.className = '';
+
+  let outputText = '';
+
+  function outf(text) {
+    outputText += text;
+  }
+
+  function builtinRead(x) {
+    if (Sk.builtinFiles === undefined ||
+        Sk.builtinFiles["files"][x] === undefined) {
+      throw "File not found: '" + x + "'";
+    }
+    return Sk.builtinFiles["files"][x];
+  }
+
+  Sk.configure({
+    output: outf,
+    read: builtinRead,
+    __future__: Sk.python3,
+  });
+
+  const code = editor.getValue();
+
+  Sk.misceval.asyncToPromise(() =>
+    Sk.importMainWithBody("<stdin>", false, code, true)
+  ).then(() => {
+    // Colorize output
+    const html = outputText
+      .split('\n')
+      .map(line => {
+        if (line.includes('| PASS'))  return `<span class="pass">${escHtml(line)}</span>`;
+        if (line.includes('| FAIL'))  return `<span class="fail">${escHtml(line)}</span>`;
+        if (line.startsWith('==='))   return `<span class="head">${escHtml(line)}</span>`;
+        if (line.startsWith('---'))   return `<span class="div">${escHtml(line)}</span>`;
+        return escHtml(line);
+      })
+      .join('\n');
+
+    outputEl.innerHTML = html;
+
+    // Validation banner
+    if (outputText.includes('ALL REQUIREMENTS MET')) {
+      bannerEl.textContent = '✅  All 7 tests PASS — ALL REQUIREMENTS MET';
+      bannerEl.className = 'pass';
+    } else if (outputText.includes('ISSUES FOUND')) {
+      bannerEl.textContent = '❌  Some tests FAIL — review your implementation';
+      bannerEl.className = 'fail';
+    }
+    bannerEl.style.display = 'block';
+
+  }).catch(err => {
+    outputEl.textContent = '⚠ Error:\n' + (err.toString() || String(err));
+    outputEl.style.color = '#FF5252';
+  });
+}
+
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+</script>
+
+</body>
+</html>
