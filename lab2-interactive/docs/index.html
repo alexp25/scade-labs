@@ -5,15 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lab 2 – SDLC: Cruise Control Safety System</title>
 
-  <!-- Skulpt: Python runtime that runs entirely in the browser -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt-stdlib.js"></script>
-
-  <!-- CodeMirror: code editor with Python syntax highlighting -->
+  <!-- CodeMirror CSS only in <head> — JS loaded at end of body -->
   <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
   <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
 
   <style>
     /* ── Reset & base ─────────────────────────────────────────────────────── */
@@ -608,7 +602,7 @@ result = check_system(<span class="nm">80</span>, <span class="kw">False</span>)
       <span>lab2_cruise_control_starter.py</span>
       <div style="display:flex; gap:.5rem;">
         <button class="btn-reset" onclick="resetEditor()">↺ Reset</button>
-        <button class="btn-run"   onclick="runCode()">▶ Run</button>
+        <button class="btn-run" id="run-btn" disabled onclick="runCode()">Loading Python…</button>
       </div>
     </div>
 
@@ -817,7 +811,14 @@ function runCode() {
   const outputEl  = document.getElementById('output');
   const bannerEl  = document.getElementById('validation-banner');
 
+  if (!window._skulptReady || typeof Sk === 'undefined') {
+    outputEl.textContent = '⚠ Python engine is still loading. Please wait a moment and try again.';
+    outputEl.style.color = '#FF5252';
+    return;
+  }
+
   outputEl.textContent = '';
+  outputEl.style.color = '';
   bannerEl.style.display = 'none';
   bannerEl.className = '';
 
@@ -882,6 +883,42 @@ function escHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 }
+</script>
+
+
+<!-- Load all JS at end of body so page renders first -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+<!-- Skulpt: load main first, then stdlib, then signal ready -->
+<script>
+(function() {
+  function loadScript(src, onload) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = onload;
+    s.onerror = function() {
+      document.getElementById('run-btn').textContent = '⚠ Python engine failed to load — try refreshing';
+      document.getElementById('run-btn').disabled = true;
+    };
+    document.body.appendChild(s);
+  }
+
+  // Chain: skulpt.min -> skulpt-stdlib -> mark ready
+  loadScript(
+    'https://skulpt.org/js/skulpt.min.js',
+    function() {
+      loadScript(
+        'https://skulpt.org/js/skulpt-stdlib.js',
+        function() {
+          window._skulptReady = true;
+          var btn = document.getElementById('run-btn');
+          if (btn) { btn.disabled = false; btn.textContent = '▶ Run'; }
+        }
+      );
+    }
+  );
+})();
 </script>
 
 </body>
