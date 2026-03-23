@@ -96,7 +96,6 @@ Another team received this version. **Do not implement these.**
 | REQ-C | If it stops, the driver must do something. |
 
 > **Question:** What is wrong with these requirements? Why can you NOT implement or test anything based on them?
-> Write 2–3 sentences as `answer_1a` in the editor.
 
 ### Activity 1B — Software Requirements Specification (SRS)
 
@@ -112,7 +111,6 @@ Well-written requirements follow the pattern: `"The system SHALL [action] WHEN/I
 | **REQ-06** | The system SHALL be testable with simulated boolean inputs. | Non-functional |
 
 > **Critical question:** Read REQ-02 and REQ-04 together. When speed exceeds 130 km/h, does the system go to `SUSPENDED` or directly to `OFF`? Do the requirements state this clearly?
-> Write your answer as `answer_1b` in the editor — you will revisit this in Part 2.
 
 ---
 
@@ -150,7 +148,6 @@ Fill in the `traceability_design` dictionary in the editor — confirm you under
 The decision table makes the REQ-02 / REQ-04 ambiguity from Part 1 explicit: row 2 sends `ACTIVE + speed > 130` to `SUSPENDED` (not `OFF`), because REQ-04 covers *all* safety-condition deactivations.
 
 > **Question:** This is a design decision you made — not something the client specified. What should happen before implementing it in a real project? What could go wrong if two developers resolved it differently?
-> Write your answer as `answer_2c` in the editor.
 
 ---
 
@@ -187,8 +184,6 @@ Each test targets a specific decision table row. The REQ column here is the **Te
 
 ### Activity 4B — TC-05 analysis
 
-Answer in the editor as `answer_4b_1`, `answer_4b_2`, `answer_4b_3`:
-
 1. Did TC-05 pass or fail on your first implementation attempt?
 2. If it failed — where was the root cause: in the requirement, the design, or the code?
 3. What would happen if this bug reached a deployed real vehicle system?
@@ -221,9 +216,7 @@ After all tests pass, fill in the `status` field in the `traceability_matrix` di
 
 ---
 
-## Part 5 — Reflection
-
-Answer each question in 3–5 sentences in the editor (`answer_q1` through `answer_q4`).
+## Part 5 — Conclusion
 
 **Q1 — Value of design**
 TC-05 exposed an ambiguity in the requirements. How did the decision table from Part 2 help you resolve this ambiguity *before* writing code? What would have happened without it?
