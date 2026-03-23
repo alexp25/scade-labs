@@ -139,7 +139,11 @@ A decision table lists every combination of conditions and the action the system
 
 ### Activity 2B — Traceability: Design → Requirements
 
-The REQ column in the decision table already gives you the links. Fill in the `traceability_design` dictionary in the editor — confirm you understand *why* each rule maps to its REQ.
+The **REQ column in the decision table is not decorative** — it is the first layer of traceability. Every design decision must point back to a requirement that justifies it. If a row has no REQ, it has no business being there.
+
+This gives you the **Design → Requirements** direction: *"I made this design choice because REQ-X says so."*
+
+Fill in the `traceability_design` dictionary in the editor — confirm you understand *why* each rule maps to its REQ, not just that it does.
 
 ### Activity 2C — Design decision
 
@@ -167,15 +171,17 @@ Implement `update_cruise_control()` in the editor. Each `if` branch you write co
 
 The test suite is already written in the editor. Click **▶ Run** below. All 7 tests must print `PASS`.
 
-| Test ID | state | speed | brake | activates | reactivates | Expected | REQ |
-|---------|-------|-------|-------|-----------|-------------|----------|-----|
-| TC-01 | ACTIVE | 80 | True | False | False | SUSPENDED | REQ-01 |
-| TC-02 | ACTIVE | 140 | False | False | False | SUSPENDED | REQ-02 |
-| TC-03 | OFF | 20 | False | True | False | OFF | REQ-03 |
-| TC-04 | OFF | 80 | False | True | False | ACTIVE | REQ-03 |
-| **TC-05 ⚠️** | SUSPENDED | 80 | False | True | False | **SUSPENDED** | REQ-04 |
-| TC-06 | SUSPENDED | 80 | False | False | True | ACTIVE | REQ-04 |
-| TC-07 | ACTIVE | 80 | False | False | False | ACTIVE | REQ-01, REQ-02 |
+Each test targets a specific decision table row. The REQ column here is the **Test → Requirements** direction: *"This test case verifies that REQ-X is met."*
+
+| Test ID | Decision table row | state | speed | brake | activates | reactivates | Expected | REQ |
+|---------|--------------------|-------|-------|-------|-----------|-------------|----------|-----|
+| TC-01 | Row 1 | ACTIVE | 80 | True | False | False | SUSPENDED | REQ-01 |
+| TC-02 | Row 2 | ACTIVE | 140 | False | False | False | SUSPENDED | REQ-02 |
+| TC-03 | Row 5 (speed < 30) | OFF | 20 | False | True | False | OFF | REQ-03 |
+| TC-04 | Row 5 (speed ≥ 30) | OFF | 80 | False | True | False | ACTIVE | REQ-03 |
+| **TC-05 ⚠️** | **Row 4** | SUSPENDED | 80 | False | True | False | **SUSPENDED** | REQ-04 |
+| TC-06 | Row 3 | SUSPENDED | 80 | False | False | True | ACTIVE | REQ-04 |
+| TC-07 | Row 6 (no change) | ACTIVE | 80 | False | False | False | ACTIVE | REQ-01, REQ-02 |
 
 > **⚠️ TC-05 is the key test.** A student who skipped the design or misread REQ-04 will return `ACTIVE` instead of `SUSPENDED`. This is intentional — it shows exactly why the design phase matters. If TC-05 fails, re-read REQ-04 and the ⚠️ key rule in the decision table.
 
@@ -189,16 +195,29 @@ Answer in the editor as `answer_4b_1`, `answer_4b_2`, `answer_4b_3`:
 
 ### Activity 4C — Full Traceability Matrix
 
-Fill in the `status` field in the `traceability_matrix` dictionary in the editor after all tests pass.
+You now have all the pieces:
 
-| Req. ID | Design element | Code element | Test ID(s) | Status |
-|---------|---------------|-------------|-----------|--------|
-| REQ-01 | Row 1 of decision table | `if brake_pressed and ACTIVE` | TC-01, TC-07 | |
-| REQ-02 | Row 2 of decision table | `if speed > 130 and ACTIVE` | TC-02, TC-07 | |
-| REQ-03 | Row 5 of decision table | `if speed < 30: stay OFF` | TC-03, TC-04 | |
-| REQ-04 | Rows 3 & 4 of decision table | `if driver_reactivates` | TC-05, TC-06 | |
-| REQ-05 | Single-pass function | returns immediately | All TCs | |
-| REQ-06 | Simulatable inputs | bool/int parameters | All TCs | |
+- The **decision table** (Part 2) gave you the **Requirements → Design** links (each requirement maps to one or more rows).
+- The **test table** (Activity 4A) gave you the **Requirements → Test** links (each requirement is covered by specific test cases).
+
+The traceability matrix **consolidates both into one document**, adding the code element in the middle. This gives auditors a single place to confirm that every requirement has been designed for, implemented, and tested — the full chain from REQ to PASS.
+
+```
+REQ-01 → Decision table row 1 → if brake_pressed → TC-01, TC-07
+```
+
+After all tests pass, fill in the `status` field in the `traceability_matrix` dictionary in the editor.
+
+| Req. ID | Design (decision table row) | Code element | TC-01 | TC-02 | TC-03 | TC-04 | TC-05 | TC-06 | TC-07 | Status |
+|---------|-----------------------------|-------------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|--------|
+| REQ-01 | Row 1 | `if brake_pressed and ACTIVE` | ✓ | | | | | | ✓ | |
+| REQ-02 | Row 2 | `if speed > 130 and ACTIVE` | | ✓ | | | | | ✓ | |
+| REQ-03 | Row 5 | `if speed < 30: stay OFF` | | | ✓ | ✓ | | | | |
+| REQ-04 | Rows 3 & 4 | `if driver_reactivates` | | | | | ✓ | ✓ | | |
+| REQ-05 | Single-pass function (no loops) | returns immediately | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| REQ-06 | Boolean/integer parameters | bool/int parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+
+> **Why is this not redundant with the decision table's REQ column?** The decision table shows Direction A: *"This design row was created because of REQ-X."* The traceability matrix shows Direction B: *"REQ-X is covered by this design row, this code, and these tests."* One tells you why a row exists; the other tells you whether a requirement is fully covered. Both are necessary.
 
 ---
 
