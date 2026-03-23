@@ -1,0 +1,7 @@
+title: SCADE Lab Portfolio 🤖✨
+description: My collection of SCADE laboratory assignments.
+theme: jekyll-theme-cayman # This gives you that green header!
+
+# This section creates the buttons like in your reference image
+show_downloads: false
+google_analytics:
