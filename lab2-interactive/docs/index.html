@@ -174,56 +174,22 @@
       vertical-align: middle;
     }
 
-    /* ── State machine diagram ────────────────────────────────────────────── */
-    .state-machine {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      margin: 1.25rem 0;
-      flex-wrap: wrap;
-    }
-    .state-box {
-      border: 2px solid;
-      border-radius: 6px;
-      padding: .65rem 1.1rem;
-      font-weight: 700;
-      font-size: .95rem;
-      font-family: var(--mono);
-      min-width: 110px;
-      text-align: center;
-    }
-    .state-box.off       { border-color: var(--muted); color: var(--muted); background: #F5F5F5; }
-    .state-box.active    { border-color: var(--blue);  color: var(--blue);  background: #E3F2FD; }
-    .state-box.suspended { border-color: var(--orange); color: var(--orange); background: #FFF8E1; }
-
-    .arrow-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .2rem;
-      margin: 0 .5rem;
-      min-width: 140px;
-    }
-    .arrow-line {
-      width: 100%;
-      height: 2px;
-      background: var(--gray);
-      position: relative;
-    }
-    .arrow-line::after {
-      content: "▶";
-      position: absolute;
-      right: -8px;
-      top: -9px;
-      color: var(--gray);
-      font-size: .9rem;
-    }
-    .arrow-label {
-      font-size: .75rem;
-      color: var(--gray);
-      text-align: center;
-    }
+    /* ── Decision table ───────────────────────────────────────────────────── */
+    .decision-table thead th { text-align: center; }
+    .decision-table th.dt-conditions { background: var(--teal); }
+    .decision-table th.dt-actions    { background: var(--blue); }
+    .dt-yes  { text-align: center; font-weight: 700; color: var(--green);  background: #F1F8E9; }
+    .dt-no   { text-align: center; font-weight: 700; color: var(--fail);   background: #FFEBEE; }
+    .dt-any  { text-align: center; color: var(--muted); font-size: .85em; }
+    .dt-group td { border-top: 1px solid var(--border); }
+    .dt-sep td   { padding: 0; height: 6px; background: #EEF2F7; border: none; }
+    .dt-default td { color: var(--muted); font-style: italic; background: #FAFAFA; }
+    .dt-result { font-family: var(--mono); font-size: .88em; }
+    .dt-result.active    { color: var(--blue); }
+    .dt-result.suspended { color: var(--orange); }
+    .dt-result.off       { color: var(--muted); }
+    tr.key-rule td { background: #FFF8E1; }
+    tr.key-rule td:nth-child(6) { font-weight: 700; }
 
     /* ── Live editor section ──────────────────────────────────────────────── */
     #editor-section {
@@ -453,80 +419,100 @@ result = check_system(<span class="nm">80</span>, <span class="kw">False</span>)
 
   <!-- ── Part 2 ───────────────────────────────────────────────────────────── -->
   <h2><span class="phase-badge teal">PART 2</span> System Design <span class="time-tag">⏱ 20 min</span></h2>
-  <p>Without a design you do not know: how many states the system has, what happens when brake AND high speed occur simultaneously, or where current state is stored. Design answers all of this <strong>before</strong> you write a single line of code.</p>
+  <p>Without a design you cannot answer: what happens when brake and high speed occur simultaneously? When can the driver reactivate? Design answers these <strong>before</strong> you write a single line of code.</p>
 
-  <h3>Activity 2A — State Machine</h3>
-  <p>The system has <strong>three states</strong>:</p>
-
-  <div class="state-machine">
-    <div class="state-box off">OFF</div>
-    <div class="arrow-group">
-      <div class="arrow-label">driver activates<br>(speed ≥ 30)</div>
-      <div class="arrow-line"></div>
-    </div>
-    <div class="state-box active">ACTIVE</div>
-    <div class="arrow-group">
-      <div class="arrow-label">brake OR speed &gt; 130</div>
-      <div class="arrow-line"></div>
-    </div>
-    <div class="state-box suspended">SUSPENDED</div>
-  </div>
-  <p style="text-align:center; font-size:.85rem; color:var(--muted); margin-top:-.5rem; margin-bottom:1rem;">
-    SUSPENDED → ACTIVE only via <strong>explicit driver reactivation</strong> &nbsp;|&nbsp; SUSPENDED → OFF: never (driver must reactivate)
-  </p>
+  <h3>Activity 2A — Decision Table</h3>
+  <p>A decision table lists every combination of conditions and the action the system must take. Each row is one decision rule. Read it top to bottom — the first rule that matches wins.</p>
 
   <div class="table-wrap">
-    <table>
-      <tr><th>State</th><th>Meaning</th></tr>
-      <tr><td><code>OFF</code></td><td>System is off; driver can activate if speed ≥ 30</td></tr>
-      <tr><td><code>ACTIVE</code></td><td>Cruise control is running</td></tr>
-      <tr><td><code>SUSPENDED</code></td><td>Stopped by a safety condition; driver <strong>must</strong> reactivate explicitly</td></tr>
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th colspan="5" class="dt-conditions">CONDITIONS</th>
+          <th colspan="2" class="dt-actions">ACTIONS</th>
+        </tr>
+        <tr>
+          <th>Current state</th>
+          <th>brake_pressed</th>
+          <th>speed &gt; 130</th>
+          <th>driver_activates</th>
+          <th>driver_reactivates</th>
+          <th>New state</th>
+          <th>REQ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="dt-group">
+          <td><code>ACTIVE</code></td>
+          <td class="dt-yes">True</td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td><code class="dt-result suspended">SUSPENDED</code></td>
+          <td>REQ-01, REQ-04</td>
+        </tr>
+        <tr class="dt-group">
+          <td><code>ACTIVE</code></td>
+          <td class="dt-any">—</td>
+          <td class="dt-yes">True</td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td><code class="dt-result suspended">SUSPENDED</code></td>
+          <td>REQ-02, REQ-04</td>
+        </tr>
+        <tr class="dt-sep"><td colspan="7"></td></tr>
+        <tr>
+          <td><code>SUSPENDED</code></td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td class="dt-yes">True</td>
+          <td><code class="dt-result active">ACTIVE</code></td>
+          <td>REQ-04</td>
+        </tr>
+        <tr class="key-rule">
+          <td><code>SUSPENDED</code></td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td class="dt-yes">True</td>
+          <td class="dt-no">False</td>
+          <td><code class="dt-result suspended">SUSPENDED</code> ⚠️</td>
+          <td>REQ-04</td>
+        </tr>
+        <tr class="dt-sep"><td colspan="7"></td></tr>
+        <tr>
+          <td><code>OFF</code></td>
+          <td class="dt-any">—</td>
+          <td class="dt-any">—</td>
+          <td class="dt-yes">True</td>
+          <td class="dt-any">—</td>
+          <td><code class="dt-result active">ACTIVE</code> <small>if speed ≥ 30</small><br><code class="dt-result off">OFF</code> <small>if speed &lt; 30</small></td>
+          <td>REQ-03</td>
+        </tr>
+        <tr class="dt-sep"><td colspan="7"></td></tr>
+        <tr class="dt-default">
+          <td colspan="5"><em>any other combination</em></td>
+          <td colspan="2"><em>no change — return current_state</em></td>
+        </tr>
+      </tbody>
     </table>
   </div>
 
-  <h3>Transition table</h3>
-  <div class="table-wrap">
-    <table>
-      <tr><th>From</th><th>Event</th><th>To</th><th>REQ covered</th></tr>
-      <tr><td><code>OFF</code></td><td>driver activates AND speed ≥ 30</td><td><code>ACTIVE</code></td><td>REQ-03</td></tr>
-      <tr><td><code>OFF</code></td><td>driver activates AND speed &lt; 30</td><td><code>OFF</code></td><td>REQ-03</td></tr>
-      <tr><td><code>ACTIVE</code></td><td>brake pressed</td><td><code>SUSPENDED</code></td><td>REQ-01, REQ-04</td></tr>
-      <tr><td><code>ACTIVE</code></td><td>speed &gt; 130</td><td><code>SUSPENDED</code></td><td>REQ-02, REQ-04</td></tr>
-      <tr><td><code>SUSPENDED</code></td><td>driver reactivates explicitly</td><td><code>ACTIVE</code></td><td>REQ-04</td></tr>
-      <tr><td><code>SUSPENDED</code></td><td>driver activates (no reactivation)</td><td><code>SUSPENDED</code></td><td>REQ-04</td></tr>
-    </table>
-  </div>
+  <p><strong>—</strong> means <em>don't care</em> — the condition is irrelevant for this rule.<br>
+  <strong>⚠️ Key rule:</strong> when the system is <code>SUSPENDED</code>, pressing <em>activate</em> alone is not enough — the driver must use <em>reactivate</em>. This is the most common implementation mistake.</p>
 
   <h3>Activity 2B — Traceability: Design → Requirements</h3>
-  <p>Fill in the <code>traceability_design</code> dictionary in the editor with the correct REQ IDs for each design element.</p>
-  <div class="table-wrap">
-    <table>
-      <tr><th>Design Element</th><th>REQ covered</th></tr>
-      <tr><td>State SUSPENDED (distinct from OFF)</td><td><em>fill in editor</em></td></tr>
-      <tr><td>Transition ACTIVE → SUSPENDED on brake</td><td><em>fill in editor</em></td></tr>
-      <tr><td>Block activation if speed &lt; 30</td><td><em>fill in editor</em></td></tr>
-      <tr><td>Transition ACTIVE → SUSPENDED on speed &gt; 130</td><td><em>fill in editor</em></td></tr>
-      <tr><td>Transition SUSPENDED → ACTIVE only on explicit action</td><td><em>fill in editor</em></td></tr>
-    </table>
-  </div>
+  <p>The REQ column in the decision table already gives you the links. Now fill in the <code>traceability_design</code> dictionary in the editor — confirm you understand <em>why</em> each rule maps to its REQ.</p>
 
   <h3>Activity 2C — Design decision</h3>
-  <p>The state machine resolves the REQ-02 / REQ-04 ambiguity: speed &gt; 130 → <code>SUSPENDED</code> (not <code>OFF</code>), because REQ-04 covers <em>all</em> safety-condition deactivations.</p>
+  <p>Notice that the decision table makes the REQ-02 / REQ-04 ambiguity from Part 1 explicit: row 2 sends <code>ACTIVE + speed &gt; 130</code> to <code>SUSPENDED</code> (not <code>OFF</code>), because REQ-04 covers <em>all</em> safety-condition deactivations — and speed &gt; 130 is a safety condition.</p>
   <div class="callout navy">
     <p><strong>Question:</strong> This is a design decision you made — not something the client specified. What should happen before implementing it in a real project? What could go wrong if two developers resolved it differently? Write your answer as <code>answer_2c</code> in the editor.</p>
   </div>
 
   <!-- ── Part 3 ───────────────────────────────────────────────────────────── -->
   <h2><span class="phase-badge orange">PART 3</span> Implementation <span class="time-tag">⏱ 25 min</span></h2>
-  <p>Implement <code>update_cruise_control()</code> in the editor following the transition table exactly. <strong>Do not guess</strong> — every line should trace back to a REQ ID.</p>
-
-  <h3>Recommended order inside the function</h3>
-  <ol>
-    <li><strong>Step 1 — Safety conditions</strong> (from <code>ACTIVE</code> only): brake OR speed &gt; 130 → <code>SUSPENDED</code></li>
-    <li><strong>Step 2 — SUSPENDED state</strong>: <code>driver_reactivates</code> → <code>ACTIVE</code>; <code>driver_activates</code> only → stay <code>SUSPENDED</code> <em>(REQ-04!)</em></li>
-    <li><strong>Step 3 — OFF state</strong>: activates + speed ≥ 30 → <code>ACTIVE</code>; activates + speed &lt; 30 → stay <code>OFF</code> <em>(REQ-03!)</em></li>
-    <li><strong>Step 4 — Default</strong>: return <code>current_state</code> unchanged</li>
-  </ol>
+  <p>Implement <code>update_cruise_control()</code> in the editor. Each <code>if</code> branch you write corresponds directly to one row in the decision table — use the REQ column as your reference.</p>
 
   <!-- ── Part 4 ───────────────────────────────────────────────────────────── -->
   <h2><span class="phase-badge green">PART 4</span> Verification &amp; Validation <span class="time-tag">⏱ 25 min</span></h2>
@@ -554,7 +540,7 @@ result = check_system(<span class="nm">80</span>, <span class="kw">False</span>)
     </table>
   </div>
   <div class="callout orange">
-    <p><strong>⚠️ TC-05 is the key test.</strong> A student who skipped the design or misread REQ-04 will return <code>ACTIVE</code> instead of <code>SUSPENDED</code>. This is intentional — it shows exactly why the design phase matters. If TC-05 fails, re-read REQ-04 and row 6 of the transition table.</p>
+    <p><strong>⚠️ TC-05 is the key test.</strong> A student who skipped the design or misread REQ-04 will return <code>ACTIVE</code> instead of <code>SUSPENDED</code>. This is intentional — it shows exactly why the design phase matters. If TC-05 fails, re-read REQ-04 and the ⚠️ key rule in the decision table.</p>
   </div>
 
   <h3>Activity 4B — TC-05 analysis</h3>
