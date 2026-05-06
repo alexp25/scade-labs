@@ -1,0 +1,31 @@
+-- version swan: 2025.2 graph: 2.1
+node counter (init_value: int32;
+              step : int32;)
+  returns (count: int32;)
+{
+  diagram
+    (#0 expr init_value
+    #pragma diagram {"xy":"H2725;V-10600","wh":"14000;3200"} #end)
+    (#1 expr step
+    #pragma diagram {"xy":"H21600;V-1200"} #end)
+    (#2 expr #3 + #4
+      where
+        (#3 group)
+        (#4 group)
+    #pragma diagram {"xy":"H41475;V-1200"} #end)
+    (#5 def count
+    #pragma diagram {"xy":"H58050;V-8700","wh":"10000;3200"} #end)
+    (#6 expr #7 pre #8
+      where
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H21600;V-8700"} #end)
+    
+    (#9 wire #0 => #7)
+    (#10 wire #2 => #8
+    #pragma diagram {"wp":"#2 h3500 v4500 h-34875 v-10100 #8"} #end)
+    (#11 wire #1 => #4
+    #pragma diagram {"wp":"#1 h6938 v1900 #4"} #end)
+    (#12 wire #6 => #3, #5
+    #pragma diagram {"wp":"#6 h5938[v5600 #3, #5]"} #end)
+}

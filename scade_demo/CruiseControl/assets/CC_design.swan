@@ -1,0 +1,827 @@
+-- version swan: 2025.2 graph: 2.1
+node main (brake: float32;
+           accel: float32;
+           on: bool;
+           res: bool;
+           set_point: float32;)
+  returns (speed_out:float32;
+           gear_out: int32;
+           rpm_out: float32;)
+{
+  diagram
+    (#0 expr brake
+    #pragma diagram {"xy":"H-28383;V8560","wh":"10000;3200"} #end)
+    (#1 expr pre #2
+      where
+        (#2 group)
+    #pragma diagram {"xy":"H92700;V35025"} #end)
+    (#3 block car
+    #pragma diagram {"xy":"H4435;V3160","wh":"20000;14000"} #end)
+    (#4 block cruise_control
+    #pragma diagram {"xy":"H60825;V37362","wh":"20000;28125"} #end)
+    (#6 expr brake
+    #pragma diagram {"xy":"H29650;V35068","wh":"10000;3200"} #end)
+    (#7 expr on
+    #pragma diagram {"xy":"H29650;V40225"} #end)
+    (#8 expr res
+    #pragma diagram {"xy":"H29650;V45412"} #end)
+    (#9 expr set_point
+    #pragma diagram {"xy":"H26650;V49825","wh":"14000;3200"} #end)
+    (#10 expr accel
+    #pragma diagram {"xy":"H29650;V29910","wh":"10000;3200"} #end)
+    (#19 def speed
+    #pragma diagram {"xy":"H37253;V2339","wh":"10000;3200"} #end)
+    (#20 def gear_out
+    #pragma diagram {"xy":"H38253;V6918","wh":"12000;3200"} #end)
+    (#21 def rpm_out
+    #pragma diagram {"xy":"H38253;V-2240","wh":"12000;3200"} #end)
+    (#11 expr speed
+    #pragma diagram {"xy":"H25650;V24900","wh":"10000;3200"} #end)
+    (#12 def old_throttle
+    #pragma diagram {"xy":"H117150;V35025","wh":"16000;3200"} #end)
+    (#26 expr old_throttle
+    #pragma diagram {"xy":"H-31383;V-662","wh":"16000;3200"} #end)
+    (#32 expr speed
+    #pragma diagram {"xy":"H65075;V-4325","wh":"10000;3200"} #end)
+    (#33 def speed_out
+    #pragma diagram {"xy":"H95350;V-4325","wh":"14000;3200"} #end)
+    
+    (#5 wire #0 => #3 .(brake))
+    (#25 wire #11 => #4 .(v_speed))
+    (#13 wire #1 => #12)
+    (#14 wire #6 => #4 .(brake))
+    (#15 wire #7 => #4 .(on))
+    (#16 wire #8 => #4 .(res))
+    (#17 wire #9 => #4 .(set_point))
+    (#18 wire #10 => #4 .(accel))
+    (#22 wire #3 .(speed) => #19
+    #pragma diagram {"wp":"v-821|#3 #19"} #end)
+    (#23 wire #3 .(gear) => #20
+    #pragma diagram {"wp":"v3758|#3 #20"} #end)
+    (#24 wire #3 .(rpm) => #21
+    #pragma diagram {"wp":"v-5400|#3 #21"} #end)
+    (#28 wire #26 => #3 .(throttle_percent))
+    (#36 wire #4 .(throttle) => #2
+    #pragma diagram {"wp":"v-2338|#4 #2"} #end)
+    (#34 wire #32 => #33)
+    
+    (var
+        old_throttle: float32;
+        speed: float32;)
+}
+
+node #pragma requirement reQ2 #end cruise_control (v_speed:float32;
+                                                   brake:float32;
+                                                   accel:float32;
+                                                   on:bool;
+                                                   res:bool;
+                                                   set_point : float32;)
+  returns (throttle:float32;)
+{
+  diagram
+    (automaton #0
+      initial state #4 cc_disabled
+      #pragma diagram {"xy":"h-82632;v-8550","wh":"41300;26000"} #end :
+        diagram
+          (#1 def throttle
+          #pragma diagram {"xy":"h8350;v5700","wh":"12000;3200"} #end)
+          (#2 expr accel
+          #pragma diagram {"xy":"h-11650;v5700","wh":"10000;3200"} #end)
+          
+          (#3 wire #2 => #1)
+      state #18 cc_enabled
+      #pragma diagram {"xy":"h29238;v0","wh":"147538;51100"} #end :
+        diagram
+          (automaton #5
+            initial state #13 cc_active
+            #pragma diagram {"xy":"h-25791;v0","wh":"79956;35100"} #end :
+              diagram
+                (#6 block regulator
+                #pragma diagram {"xy":"h-2291;v-2850","wh":"20000;14000"} #end)
+                (#7 def throttle
+                #pragma diagram {"xy":"h29303;v-2850","wh":"12000;3200"} #end)
+                (#8 expr v_speed
+                #pragma diagram {"xy":"h-27978;v874","wh":"12000;3200"} #end)
+                (#9 expr set_point
+                #pragma diagram {"xy":"h-28978;v-8250","wh":"14000;3200"} #end)
+                
+                (#12 wire #8 => #6 .(speed))
+                (#11 wire #9 => #6 .(set_point))
+                (#10 wire #6 => #7
+                #pragma diagram {"wp":"v0|#6 #7"} #end)
+            state #17 cc_standby
+            #pragma diagram {"xy":"h45432;v-1850","wh":"36825;12000"} #end :
+              diagram
+                (#14 def throttle
+                #pragma diagram {"xy":"h8412;v0","wh":"12000;3200"} #end)
+                (#15 expr accel
+                #pragma diagram {"xy":"h-9412;v0","wh":"10000;3200"} #end)
+                
+                (#16 wire #15 => #14)
+            :1: #13 until if (brake > 10.0 or accel > 10.0)
+            restart #17
+            #pragma diagram {"tp":"h39978;v-1850|#13 h4277 h4277 h-18412;v0|#17"} #end;
+            :1: #17 until if (res and brake<10.0)
+            restart #13
+            #pragma diagram {"tp":"h-18412;v1850|#17 h-4277 h-4277 h39978;v0|#13"} #end;
+          #pragma diagram {"xy":"h0;v0","wh":"139538;43100"} #end)
+      :1: #4 until if (on)
+      restart #18
+      #pragma diagram {"tp":"h20650;v0|#4 h5817 h5817 h-73769;v-8550|#18"} #end;
+    #pragma diagram {"xy":"H2382;V7700","wh":"214563;59100"} #end)
+}
+
+node regulator (set_point:float32;
+                speed:float32;)
+  returns (throttle:float32;)
+{
+  diagram
+    (#0 expr set_point
+    #pragma diagram {"xy":"H-56350;V-16650","wh":"14000;3200"} #end)
+    (#1 expr speed
+    #pragma diagram {"xy":"H-56350;V-12850","wh":"10000;3200"} #end)
+    (#2 def throttle
+    #pragma diagram {"xy":"H69362;V-28400","wh":"12000;3200"} #end)
+    (#3 expr #4 - #5
+      where
+        (#4 group)
+        (#5 group)
+    #pragma diagram {"xy":"H-37250;V-14750"} #end)
+    (#6 expr #7 * #8
+      where
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H-15150;V-16650"} #end)
+    (#9 expr 0.5_f32
+    #pragma diagram {"xy":"H-34950;V-25350","wh":"12000;3200"} #end)
+    (#10 expr #11 + #12
+      where
+        (#11 group)
+        (#12 group)
+    #pragma diagram {"xy":"H2825;V-9400"} #end)
+    (#13 expr #14 + #15
+      where
+        (#14 group)
+        (#15 group)
+    #pragma diagram {"xy":"H-15150;V-2025"} #end)
+    (#16 expr #17 pre #18
+      where
+        (#17 group)
+        (#18 group)
+    #pragma diagram {"xy":"H-38250;V3550"} #end)
+    (#19 expr 0.2_f32
+    #pragma diagram {"xy":"H-58338;V-1275","wh":"12000;3200"} #end)
+    (#25 block limiter
+    #pragma diagram {"xy":"H-10150;V16019","wh":"20000;11062"} #end)
+    (#29 expr 100.0_f32
+    #pragma diagram {"xy":"H-35000;V16019","wh":"14000;3200"} #end)
+    (#30 expr -100.0_f32
+    #pragma diagram {"xy":"H-35000;V19950","wh":"14000;3200"} #end)
+    (#28 block limiter
+    #pragma diagram {"xy":"H44582;V-28400","wh":"20000;14000"} #end)
+    (#35 expr 100.0_f32
+    #pragma diagram {"xy":"H21228;V-25350","wh":"14000;3200"} #end)
+    (#36 expr 0.0_f32
+    #pragma diagram {"xy":"H20228;V-20065","wh":"12000;3200"} #end)
+    
+    (#20 wire #0 => #4)
+    (#21 wire #1 => #5)
+    (#22 wire #3 => #8, #14
+    #pragma diagram {"wp":"#3 h5250[#8, v10825 #14]"} #end)
+    (#23 wire #9 => #7
+    #pragma diagram {"wp":"#9 h5900 v6800 #7"} #end)
+    (#24 wire #6 => #11
+    #pragma diagram {"wp":"#6 h5488 v5350 #11"} #end)
+    (#26 wire #13 => #12, #18
+    #pragma diagram {"wp":"#13 h5488[v-5475 #12, h26150 v27863 h-66238 v-20388 #18]"} #end)
+    (#27 wire #19 => #17
+    #pragma diagram {"wp":"#19 h5544 v2925 #17"} #end)
+    (#31 wire #16 => #25 .(input)
+    #pragma diagram {"wp":"#16 h7212 v8554 #25"} #end)
+    (#37 wire #28 => #2
+    #pragma diagram {"wp":"v0|#28 #2"} #end)
+    (#32 wire #25 => #15
+    #pragma diagram {"wp":"v0|#25 h2000 v-13469 h-24000 v-2675 #15"} #end)
+    (#33 wire #29 => #25 .(upper_limit))
+    (#34 wire #30 => #25 .(lower_limit))
+    (#38 wire #10 => #28 .(input)
+    #pragma diagram {"wp":"#10 h5201 v-21233 #28"} #end)
+    (#39 wire #35 => #28 .(upper_limit))
+    (#40 wire #36 => #28 .(lower_limit)
+    #pragma diagram {"wp":"#36 h5677 v-2467 #28"} #end)
+}
+
+node limiter (input: float32;
+              upper_limit: float32;
+              lower_limit: float32;)
+  returns (output: float32;)
+{
+  diagram
+    (#0 expr #1 >= #2
+      where
+        (#1 group)
+        (#2 group)
+    #pragma diagram {"xy":"H-10875;V-3325"} #end)
+    (#3 expr input
+    #pragma diagram {"xy":"H-36525;V-5225","wh":"10000;3200"} #end)
+    (#4 expr upper_limit
+    #pragma diagram {"xy":"H-36525;V3250","wh":"16000;3200"} #end)
+    (#5 expr if #6 then #7 else #8
+      where
+        (#6 group)
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H3750;V19025"} #end)
+    (#9 def output
+    #pragma diagram {"xy":"H46800;V44034","wh":"10000;3200"} #end)
+    (#13 expr lower_limit
+    #pragma diagram {"xy":"H-36525;V36375","wh":"16000;3200"} #end)
+    (#14 expr #15 < #16
+      where
+        (#15 group)
+        (#16 group)
+    #pragma diagram {"xy":"H-10875;V34475"} #end)
+    (#17 expr if #18 then #19 else #20
+      where
+        (#18 group)
+        (#19 group)
+        (#20 group)
+    #pragma diagram {"xy":"H24911;V44034"} #end)
+    (#25 expr 100.0_f32
+    #pragma diagram {"xy":"H5750;V46846","wh":"14000;3200"} #end)
+    
+    (#10 wire #3 => #1, #8
+    #pragma diagram {"wp":"#3 h10825[#1, v26150 #8]"} #end)
+    (#11 wire #4 => #2, #7
+    #pragma diagram {"wp":"#4 h5663[v-4675 #2, h4324 v13875 #7]"} #end)
+    (#12 wire #0 => #6
+    #pragma diagram {"wp":"#0 h11125 #6"} #end)
+    (#21 wire #17 => #9)
+    (#22 wire #13 => #16, #19
+    #pragma diagram {"wp":"#13 h7825[#16, v5759 #19]"} #end)
+    (#23 wire #5 => #15, #20
+    #pragma diagram {"wp":"#5 h3500[v8800 h-28625 v4750 #15, h6562 v26909 #20]"} #end)
+    (#24 wire #14 => #18
+    #pragma diagram {"wp":"#14 h32286 #18"} #end)
+}
+
+node car (throttle_percent: float32;
+          brake: float32;)
+  returns (speed: float32;
+           rpm:float32;
+           gear : int32;)
+{
+  diagram
+    (#129 expr #130 / #131
+      where
+        (#130 group)
+        (#131 group)
+    #pragma diagram {"xy":"H104587;V29569"} #end)
+    (#3 expr throttle_percent
+    #pragma diagram {"xy":"H-33493;V-12775","wh":"20000;3200"} #end)
+    (#12 expr #13 < #14
+      where
+        (#13 group)
+        (#14 group)
+    #pragma diagram {"xy":"H-24692;V-99675"} #end)
+    (#15 expr old_speed
+    #pragma diagram {"xy":"H-53318;V-101575","wh":"14000;3200"} #end)
+    (#16 expr 20.0_f32
+    #pragma diagram {"xy":"H-42611;V-91778","wh":"12000;3200"} #end)
+    (#17 expr #18 < #19
+      where
+        (#18 group)
+        (#19 group)
+    #pragma diagram {"xy":"H-23977;V-87878"} #end)
+    (#20 expr #21 < #22
+      where
+        (#21 group)
+        (#22 group)
+    #pragma diagram {"xy":"H-23977;V-76082"} #end)
+    (#23 expr #24 < #25
+      where
+        (#24 group)
+        (#25 group)
+    #pragma diagram {"xy":"H-23977;V-64285"} #end)
+    (#26 expr #27 < #28
+      where
+        (#27 group)
+        (#28 group)
+    #pragma diagram {"xy":"H-23977;V-52489"} #end)
+    (#29 expr 40.0_f32
+    #pragma diagram {"xy":"H-42611;V-81980","wh":"12000;3200"} #end)
+    (#30 expr 70.0_f32
+    #pragma diagram {"xy":"H-42611;V-70183","wh":"12000;3200"} #end)
+    (#31 expr 100.0_f32
+    #pragma diagram {"xy":"H-42611;V-58387","wh":"14000;3200"} #end)
+    (#32 expr 130.0_f32
+    #pragma diagram {"xy":"H-42611;V-47514","wh":"14000;3200"} #end)
+    (#0 expr #1 + #2
+      where
+        (#1 group)
+        (#2 group)
+    #pragma diagram {"xy":"H39998;V7493"} #end)
+    (#8 expr 160.0_f32
+    #pragma diagram {"xy":"H9700;V5593","wh":"14000;3200"} #end)
+    (#9 expr #10 * #11
+      where
+        (#10 group)
+        (#11 group)
+    #pragma diagram {"xy":"H14620;V-8975"} #end)
+    (#56 expr #57 / #58
+      where
+        (#57 group)
+        (#58 group)
+    #pragma diagram {"xy":"H64737;V-102107"} #end)
+    (#59 expr 60.0_f32
+    #pragma diagram {"xy":"H48187;V-104007","wh":"12000;3200"} #end)
+    (#82 expr 6.28_f32
+    #pragma diagram {"xy":"H48187;V-100207","wh":"12000;3200"} #end)
+    (#83 expr #84 / #85
+      where
+        (#84 group)
+        (#85 group)
+    #pragma diagram {"xy":"H26309;V-109407"} #end)
+    (#86 expr #87 * #88
+      where
+        (#87 group)
+        (#88 group)
+    #pragma diagram {"xy":"H84525;V-100207"} #end)
+    (#89 def rpm
+    #pragma diagram {"xy":"H99374;V-100207"} #end)
+    (#90 expr #91 / #92
+      where
+        (#91 group)
+        (#92 group)
+    #pragma diagram {"xy":"H-6724;V-111307"} #end)
+    (#93 expr 3.6_f32
+    #pragma diagram {"xy":"H-23692;V-109407","wh":"12000;3200"} #end)
+    (#94 expr 0.63_f32
+    #pragma diagram {"xy":"H10700;V15629","wh":"12000;3200"} #end)
+    (#95 expr #96 * #97
+      where
+        (#96 group)
+        (#97 group)
+    #pragma diagram {"xy":"H26225;V17529"} #end)
+    (#98 def we
+    #pragma diagram {"xy":"H99374;V-89778"} #end)
+    (#99 expr #100 + #101
+      where
+        (#100 group)
+        (#101 group)
+    #pragma diagram {"xy":"H53437;V14793"} #end)
+    (#102 expr #103 * #104
+      where
+        (#103 group)
+        (#104 group)
+    #pragma diagram {"xy":"H26225;V27975"} #end)
+    (#105 expr -0.00064_f32
+    #pragma diagram {"xy":"H6000;V26075","wh":"16000;3200"} #end)
+    (#106 expr #107 * #108
+      where
+        (#107 group)
+        (#108 group)
+    #pragma diagram {"xy":"H11700;V36932"} #end)
+    (#109 expr we
+    #pragma diagram {"xy":"H-1600;V36932"} #end)
+    (#110 def torque_nm
+    #pragma diagram {"xy":"H37998;V-8975","wh":"14000;3200"} #end)
+    (#134 expr 1.0_f32
+    #pragma diagram {"xy":"H86402;V20250","wh":"12000;3200"} #end)
+    (#135 expr #136 * #137
+      where
+        (#136 group)
+        (#137 group)
+    #pragma diagram {"xy":"H87575;V31469"} #end)
+    (#142 def wheel_radius
+    #pragma diagram {"xy":"H14895;V-148250","wh":"16000;3200"} #end)
+    (#143 expr 0.32_f32
+    #pragma diagram {"xy":"H-4512;V-148250","wh":"12000;3200"} #end)
+    (#144 expr wheel_radius
+    #pragma diagram {"xy":"H8045;V-107507","wh":"16000;3200"} #end)
+    (#145 expr #146 * #147
+      where
+        (#146 group)
+        (#147 group)
+    #pragma diagram {"xy":"H63767;V-89778"} #end)
+    (#151 expr #152 * #153
+      where
+        (#152 group)
+        (#153 group)
+    #pragma diagram {"xy":"H71549;V-15000"} #end)
+    (#154 expr #155 * #156
+      where
+        (#155 group)
+        (#156 group)
+    #pragma diagram {"xy":"H91156;V-30763"} #end)
+    (#157 expr gear_ratio
+    #pragma diagram {"xy":"H69549;V-32663","wh":"14000;3200"} #end)
+    (#158 def speed_state
+    #pragma diagram {"xy":"H184060;V-32439","wh":"16000;3200"} #end)
+    (#159 expr 0.0_f32
+    #pragma diagram {"xy":"H146037;V-34339","wh":"12000;3200"} #end)
+    (#160 expr #161 * #162
+      where
+        (#161 group)
+        (#162 group)
+    #pragma diagram {"xy":"H119008;V-16900"} #end)
+    (#163 expr sampling_time
+    #pragma diagram {"xy":"H100587;V-15000","wh":"18000;3200"} #end)
+    (#164 expr #165 -> #166
+      where
+        (#165 group)
+        (#166 group)
+    #pragma diagram {"xy":"H162110;V-32439"} #end)
+    (#173 expr 0.2_f32
+    #pragma diagram {"xy":"H-4512;V-139551","wh":"12000;3200"} #end)
+    (#179 def sampling_time
+    #pragma diagram {"xy":"H15895;V-139551","wh":"18000;3200"} #end)
+    (#168 expr #169 + #176
+      where
+        (#169 group)
+        (#176 group)
+    #pragma diagram {"xy":"H133684;V-24775"} #end)
+    (#175 expr pre #178
+      where
+        (#178 group)
+    #pragma diagram {"xy":"H111980;V-46527"} #end)
+    (#187 def old_speed
+    #pragma diagram {"xy":"H140359;V-46527","wh":"14000;3200"} #end)
+    (#111 expr #188 / #189
+      where
+        (#188 group)
+        (#189 group)
+    #pragma diagram {"xy":"H-9648;V-10875"} #end)
+    (#190 expr 100.0_f32
+    #pragma diagram {"xy":"H-30082;V-8975","wh":"14000;3200"} #end)
+    (#36 expr 10.4_f32
+    #pragma diagram {"xy":"H-4512;V-130482","wh":"12000;3200"} #end)
+    (#4 expr mass
+    #pragma diagram {"xy":"H69218;V33369"} #end)
+    (#37 def k_engine
+    #pragma diagram {"xy":"H124524;V29569","wh":"12000;3200"} #end)
+    (#38 expr 0.3_f32
+    #pragma diagram {"xy":"H44502;V72007","wh":"12000;3200"} #end)
+    (#39 expr 0.015_f32
+    #pragma diagram {"xy":"H68218;V51844","wh":"14000;3200"} #end)
+    (#40 expr #41 * #42
+      where
+        (#41 group)
+        (#42 group)
+    #pragma diagram {"xy":"H87575;V53744"} #end)
+    (#43 def k_brake
+    #pragma diagram {"xy":"H12895;V-130482","wh":"12000;3200"} #end)
+    (#44 def k_rolling
+    #pragma diagram {"xy":"H114658;V53744","wh":"14000;3200"} #end)
+    (#45 expr 9.81_f32
+    #pragma diagram {"xy":"H69218;V57052","wh":"12000;3200"} #end)
+    (#46 expr wheel_radius
+    #pragma diagram {"xy":"H69884;V29569","wh":"16000;3200"} #end)
+    (#34 expr we
+    #pragma diagram {"xy":"H10700;V20852"} #end)
+    (#5 def mass
+    #pragma diagram {"xy":"H10895;V-158458"} #end)
+    (#6 expr 1393.0_f32
+    #pragma diagram {"xy":"H-4512;V-158458","wh":"14000;3200"} #end)
+    (#241 expr 7.6_f32
+    #pragma diagram {"xy":"H25309;V-55654","wh":"12000;3200"} #end)
+    (#167 def speed
+    #pragma diagram {"xy":"H215600;V-18800","wh":"10000;3200"} #end)
+    (#194 expr if #195 then #196 else #197
+      where
+        (#195 group)
+        (#196 group)
+        (#197 group)
+    #pragma diagram {"xy":"H5413;V-47208"} #end)
+    (#198 expr if #199 then #200 else #201
+      where
+        (#199 group)
+        (#200 group)
+        (#201 group)
+    #pragma diagram {"xy":"H5413;V-35044"} #end)
+    (#202 expr if #203 then #204 else #205
+      where
+        (#203 group)
+        (#204 group)
+        (#205 group)
+    #pragma diagram {"xy":"H5413;V-71700"} #end)
+    (#206 expr if #207 then #208 else #209
+      where
+        (#207 group)
+        (#208 group)
+        (#209 group)
+    #pragma diagram {"xy":"H5413;V-22879"} #end)
+    (#210 expr if #211 then #212 else #213
+      where
+        (#211 group)
+        (#212 group)
+        (#213 group)
+    #pragma diagram {"xy":"H5413;V-59454"} #end)
+    (#214 expr 1
+    #pragma diagram {"xy":"H-8648;V-73600"} #end)
+    (#215 expr 2
+    #pragma diagram {"xy":"H-8648;V-61354"} #end)
+    (#216 expr 3
+    #pragma diagram {"xy":"H-8648;V-49108"} #end)
+    (#217 expr 4
+    #pragma diagram {"xy":"H-8648;V-36944"} #end)
+    (#218 expr 5
+    #pragma diagram {"xy":"H-8648;V-24779"} #end)
+    (#219 expr 6
+    #pragma diagram {"xy":"H-8648;V-20979"} #end)
+    (#220 def gear
+    #pragma diagram {"xy":"H23309;V-89778"} #end)
+    (#232 expr
+      (case #233 of
+        | 1 : #234
+        | 2 : #235
+        | 3 : #236
+        | 4 : #237
+        | 5 : #238
+        | _ : #239)
+      where
+        (#233 group)
+        (#234 group)
+        (#235 group)
+        (#236 group)
+        (#237 group)
+        (#238 group)
+        (#239 group)
+    #pragma diagram {"xy":"H40085;V-51854","wh":"16000;26000"} #end)
+    (#240 def gear_ratio
+    #pragma diagram {"xy":"H63767;V-59454","wh":"14000;3200"} #end)
+    (#55 expr 13.2_f32
+    #pragma diagram {"xy":"H25309;V-59454","wh":"12000;3200"} #end)
+    (#243 expr 4.2_f32
+    #pragma diagram {"xy":"H25309;V-48054","wh":"12000;3200"} #end)
+    (#242 expr 5.2_f32
+    #pragma diagram {"xy":"H25309;V-51854","wh":"12000;3200"} #end)
+    (#245 expr 2.9_f32
+    #pragma diagram {"xy":"H25309;V-40454","wh":"12000;3200"} #end)
+    (#244 expr 3.5_f32
+    #pragma diagram {"xy":"H25309;V-44254","wh":"12000;3200"} #end)
+    (#47 def k_drag
+    #pragma diagram {"xy":"H125524;V77307","wh":"10000;3200"} #end)
+    (#48 expr #49 * #50
+      where
+        (#49 group)
+        (#50 group)
+    #pragma diagram {"xy":"H60193;V73907"} #end)
+    (#51 expr 1.2_f32
+    #pragma diagram {"xy":"H44502;V75807","wh":"12000;3200"} #end)
+    (#52 expr #53 * #54
+      where
+        (#53 group)
+        (#54 group)
+    #pragma diagram {"xy":"H79550;V82557"} #end)
+    (#68 expr 1.2_f32
+    #pragma diagram {"xy":"H44502;V84457","wh":"12000;3200"} #end)
+    (#132 expr #133 < #138
+      where
+        (#133 group)
+        (#138 group)
+    #pragma diagram {"xy":"H101887;V102775"} #end)
+    (#141 expr old_speed
+    #pragma diagram {"xy":"H83975;V100875","wh":"14000;3200"} #end)
+    (#253 expr 0.0_f32
+    #pragma diagram {"xy":"H83975;V106124","wh":"12000;3200"} #end)
+    (#254 expr #255 * #256
+      where
+        (#255 group)
+        (#256 group)
+    #pragma diagram {"xy":"H187680;V96819"} #end)
+    (#257 expr #258 + #259
+      where
+        (#258 group)
+        (#259 group)
+    #pragma diagram {"xy":"H163473;V67441"} #end)
+    (#260 expr #261 * #262
+      where
+        (#261 group)
+        (#262 group)
+    #pragma diagram {"xy":"H143031;V65541"} #end)
+    (#263 expr brake
+    #pragma diagram {"xy":"H125524;V63641","wh":"10000;3200"} #end)
+    (#264 expr k_brake
+    #pragma diagram {"xy":"H124524;V67441","wh":"12000;3200"} #end)
+    (#265 expr #266 * #267
+      where
+        (#266 group)
+        (#267 group)
+    #pragma diagram {"xy":"H143000;V84457"} #end)
+    (#268 expr #269 * #270
+      where
+        (#269 group)
+        (#270 group)
+    #pragma diagram {"xy":"H127256;V91757"} #end)
+    (#271 expr old_speed
+    #pragma diagram {"xy":"H109278;V91757","wh":"14000;3200"} #end)
+    (#174 expr #281 + #282
+      where
+        (#281 group)
+        (#282 group)
+    #pragma diagram {"xy":"H181242;V79207"} #end)
+    (#283 expr k_rolling
+    #pragma diagram {"xy":"H163473;V91757","wh":"14000;3200"} #end)
+    (#284 def acceleration
+    #pragma diagram {"xy":"H129463;V202","wh":"16000;3200"} #end)
+    (#285 expr #286 - #287
+      where
+        (#286 group)
+        (#287 group)
+    #pragma diagram {"xy":"H95156;V202"} #end)
+    (#274 expr if #294 then #295 else #296
+      where
+        (#294 group)
+        (#295 group)
+        (#296 group)
+    #pragma diagram {"xy":"H150433;V116099"} #end)
+    (#297 expr -1.0_f32
+    #pragma diagram {"xy":"H131201;V114199","wh":"12000;3200"} #end)
+    (#298 expr 1.0_f32
+    #pragma diagram {"xy":"H131201;V117999","wh":"12000;3200"} #end)
+    (#75 expr #303 / #304
+      where
+        (#303 group)
+        (#304 group)
+    #pragma diagram {"xy":"H97278;V84457"} #end)
+    (#305 expr #306 * #307
+      where
+        (#306 group)
+        (#307 group)
+    #pragma diagram {"xy":"H71675;V93616"} #end)
+    (#308 expr 2.0_f32
+    #pragma diagram {"xy":"H55055;V91716","wh":"12000;3200"} #end)
+    (#309 expr mass
+    #pragma diagram {"xy":"H57055;V95516"} #end)
+    (#185 expr speed_state
+    #pragma diagram {"xy":"H94156;V-46527","wh":"16000;3200"} #end)
+    (#315 expr speed_state
+    #pragma diagram {"xy":"H184060;V-18800","wh":"16000;3200"} #end)
+    
+    (#191 wire #3 => #188)
+    (#139 wire #134 => #130
+    #pragma diagram {"wp":"#134 h5179 v7419 #130"} #end)
+    (#140 wire #135 => #131)
+    (#60 wire #15 => #13, #18, #21, #24, #27, #91
+    #pragma diagram {"wp":"#15 h6736[h6471[h2000[h306[h307[#13, v11797 #18], v23593 #21], v47186 #27], v35390 #24], v-11632 #91]"} #end)
+    (#61 wire #16 => #14
+    #pragma diagram {"wp":"#16 h4500 v-5997 #14"} #end)
+    (#62 wire #32 => #28
+    #pragma diagram {"wp":"#32 h4817 v-3075 #28"} #end)
+    (#63 wire #31 => #25
+    #pragma diagram {"wp":"#31 h5779 v-3998 #25"} #end)
+    (#64 wire #30 => #22
+    #pragma diagram {"wp":"#30 h4500 v-3999 #22"} #end)
+    (#65 wire #29 => #19
+    #pragma diagram {"wp":"#29 h4500 v-3998 #19"} #end)
+    (#66 wire #12 => #203
+    #pragma diagram {"wp":"#12 h26605 #203"} #end)
+    (#67 wire #26 => #207
+    #pragma diagram {"wp":"#26 h3829 v23569 h22061 #207"} #end)
+    (#70 wire #17 => #211
+    #pragma diagram {"wp":"#17 h6829 v22427 h19061 #211"} #end)
+    (#72 wire #23 => #199
+    #pragma diagram {"wp":"#23 h4829 v23200 h21061 #199"} #end)
+    (#73 wire #20 => #195
+    #pragma diagram {"wp":"#20 h5829 v23157 h20061 #195"} #end)
+    (#112 wire #8 => #1)
+    (#113 wire #59 => #57)
+    (#114 wire #82 => #58)
+    (#115 wire #56 => #87)
+    (#116 wire #83 => #146
+    #pragma diagram {"wp":"#83 h7439 v17729 #146"} #end)
+    (#117 wire #86 => #89)
+    (#118 wire #93 => #92)
+    (#119 wire #90 => #84)
+    (#120 wire #94 => #96)
+    (#121 wire #95 => #2
+    #pragma diagram {"wp":"#95 h3137 v-8136 #2"} #end)
+    (#122 wire #0 => #100
+    #pragma diagram {"wp":"#0 h2939 v5400 #100"} #end)
+    (#123 wire #105 => #103)
+    (#124 wire #109 => #107, #108
+    #pragma diagram {"wp":"#109 h3583[v-1900 #107, v1900 #108]"} #end)
+    (#125 wire #106 => #104
+    #pragma diagram {"wp":"#106 h3762 v-7057 #104"} #end)
+    (#126 wire #102 => #101
+    #pragma diagram {"wp":"#102 h12187 v-11282 #101"} #end)
+    (#127 wire #99 => #11
+    #pragma diagram {"wp":"#99 h3500 v-17124 h-52817 v-4744 #11"} #end)
+    (#128 wire #9 => #110, #152
+    #pragma diagram {"wp":"#9 h7189[#110, v-7925 #152]"} #end)
+    (#148 wire #143 => #142)
+    (#149 wire #144 => #85)
+    (#150 wire #145 => #98, #88
+    #pragma diagram {"wp":"#145 h7364[#98, v-8529 #88]"} #end)
+    (#170 wire #129 => #153, #37
+    #pragma diagram {"wp":"#129 h3500[v-19888 h-47038 v-22781 #153, #37]"} #end)
+    (#171 wire #151 => #156
+    #pragma diagram {"wp":"#151 h4168 v-13863 #156"} #end)
+    (#172 wire #157 => #155)
+    (#180 wire #163 => #162)
+    (#177 wire #175 => #169, #187
+    #pragma diagram {"wp":"#175 h6852[v19852 #169, #187]"} #end)
+    (#182 wire #164 => #158)
+    (#184 wire #168 => #166
+    #pragma diagram {"wp":"#168 h10713 v-5764 #166"} #end)
+    (#181 wire #173 => #179)
+    (#183 wire #160 => #176
+    #pragma diagram {"wp":"#160 h3838 v-5975 #176"} #end)
+    (#186 wire #159 => #165)
+    (#192 wire #190 => #189)
+    (#193 wire #111 => #10)
+    (#69 wire #46 => #136)
+    (#71 wire #68 => #54)
+    (#74 wire #51 => #50)
+    (#310 wire #52 => #303)
+    (#35 wire #34 => #97
+    #pragma diagram {"wp":"#34 h5762 v-1423 #97"} #end)
+    (#76 wire #45 => #42
+    #pragma diagram {"wp":"#45 h6771 v-1408 #42"} #end)
+    (#77 wire #36 => #43)
+    (#78 wire #38 => #49)
+    (#79 wire #39 => #41)
+    (#80 wire #40 => #44)
+    (#7 wire #6 => #5)
+    (#81 wire #48 => #53
+    #pragma diagram {"wp":"#48 h6178 v6750 #53"} #end)
+    (#33 wire #4 => #137)
+    (#288 wire #154 => #286
+    #pragma diagram {"wp":"#154 h3500 v9985 h-10000 v19080 #286"} #end)
+    (#316 wire #185 => #178)
+    (#221 wire #206 => #201
+    #pragma diagram {"wp":"#206 h3500 v-7124 h-14000 v-3141 #201"} #end)
+    (#222 wire #210 => #205
+    #pragma diagram {"wp":"#210 h3500 v-7163 h-14000 v-3183 #205"} #end)
+    (#223 wire #198 => #197
+    #pragma diagram {"wp":"#198 h3500 v-7123 h-14000 v-3141 #197"} #end)
+    (#224 wire #194 => #213
+    #pragma diagram {"wp":"#194 h3500 v-7070 h-14000 v-3276 #213"} #end)
+    (#225 wire #214 => #204)
+    (#226 wire #215 => #212)
+    (#227 wire #216 => #196)
+    (#228 wire #217 => #200)
+    (#229 wire #218 => #208)
+    (#230 wire #219 => #209)
+    (#231 wire #202 => #220, #233
+    #pragma diagram {"wp":"#202 h5948[v-18078 #220, h25224 #233]"} #end)
+    (#246 wire #232 => #240, #147
+    #pragma diagram {"wp":"#232 h5841[#240, v-28424 #147]"} #end)
+    (#248 wire #241 => #235)
+    (#247 wire #55 => #234)
+    (#250 wire #243 => #237)
+    (#249 wire #242 => #236)
+    (#252 wire #245 => #239)
+    (#251 wire #244 => #238)
+    (#272 wire #141 => #133)
+    (#273 wire #253 => #138
+    #pragma diagram {"wp":"#253 h4956 v-1449 #138"} #end)
+    (#299 wire #132 => #294
+    #pragma diagram {"wp":"#132 h45046 #294"} #end)
+    (#275 wire #263 => #261)
+    (#276 wire #264 => #262)
+    (#277 wire #268 => #267
+    #pragma diagram {"wp":"#268 h4372 v-5400 #267"} #end)
+    (#278 wire #271 => #269, #270
+    #pragma diagram {"wp":"#271 h3995[v-1900 #269, h1000 v1900 #270]"} #end)
+    (#279 wire #260 => #258)
+    (#280 wire #265 => #259
+    #pragma diagram {"wp":"#265 h6752 v-15116 #259"} #end)
+    (#289 wire #283 => #282
+    #pragma diagram {"wp":"#283 h4385 v-10650 #282"} #end)
+    (#290 wire #257 => #281
+    #pragma diagram {"wp":"#257 h5385 v9866 #281"} #end)
+    (#291 wire #174 => #255
+    #pragma diagram {"wp":"#174 h3500 v8806 h-7562 v6906 #255"} #end)
+    (#292 wire #285 => #161, #284
+    #pragma diagram {"wp":"#285 h13352[v-19002 #161, #284]"} #end)
+    (#293 wire #254 => #287
+    #pragma diagram {"wp":"#254 h3500 v-90458 h-106524 v-4259 #287"} #end)
+    (#300 wire #274 => #256
+    #pragma diagram {"wp":"#274 h15123 v-17380 #256"} #end)
+    (#301 wire #297 => #295)
+    (#302 wire #298 => #296)
+    (#311 wire #75 => #47, #266
+    #pragma diagram {"wp":"#75 h11430[v-7150 #47, h15861 v-1900 #266]"} #end)
+    (#312 wire #305 => #304
+    #pragma diagram {"wp":"#305 h13239 v-7259 #304"} #end)
+    (#313 wire #308 => #306)
+    (#314 wire #309 => #307)
+    (#317 wire #315 => #167)
+    
+    (var
+        gear_ratio:float32;
+        we:float32;
+        torque_nm:float32;
+        wheel_radius:float32;
+        sampling_time:float32;
+        old_speed: float32;
+        mass:float32;
+        k_engine: float32;
+        k_rolling: float32;
+        k_brake: float32;
+        k_drag: float32;
+        acceleration:float32;
+        speed_state:float32;)
+}

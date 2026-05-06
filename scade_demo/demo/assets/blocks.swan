@@ -1,0 +1,57 @@
+-- version swan: 2025.2 graph: 2.1
+function limiter (row_cmd: float64;
+                  min: float64;
+                  max : float64;)
+  returns (cmd : float64;)
+{
+  diagram
+    (#0 def cmd
+    #pragma diagram {"xy":"H40225;V15150"} #end)
+    (#1 expr row_cmd
+    #pragma diagram {"xy":"H-38725;V-750","wh":"12000;3200"} #end)
+    (#2 expr max
+    #pragma diagram {"xy":"H-40725;V8600"} #end)
+    (#3 expr #4 > #5
+      where
+        (#4 group)
+        (#5 group)
+    #pragma diagram {"xy":"H-7650;V5700"} #end)
+    (#6 expr if #7 then #8 else #9
+      where
+        (#7 group)
+        (#8 group)
+        (#9 group)
+    #pragma diagram {"xy":"H7650;V15150"} #end)
+    (#10 expr #11 < #12
+      where
+        (#11 group)
+        (#12 group)
+    #pragma diagram {"xy":"H-10200;V21788"} #end)
+    (#13 expr min
+    #pragma diagram {"xy":"H-40725;V29675"} #end)
+    (#14 expr row_cmd
+    #pragma diagram {"xy":"H-38725;V38975","wh":"12000;3200"} #end)
+    (#15 expr if #16 then #17 else #18
+      where
+        (#16 group)
+        (#17 group)
+        (#18 group)
+    #pragma diagram {"xy":"H4921;V37075"} #end)
+    
+    (#19 wire #1 => #4, #11
+    #pragma diagram {"wp":"#1 h9537[h5019 v4550 #4, v20638 #11]"} #end)
+    (#20 wire #2 => #5, #8
+    #pragma diagram {"wp":"#2 h8519[v-1000 #5, h10037 v4650 #8]"} #end)
+    (#21 wire #3 => #7
+    #pragma diagram {"wp":"#3 h11800 #7"} #end)
+    (#22 wire #13 => #12, #17
+    #pragma diagram {"wp":"#13 h7500[h9017 v-5987 #12, v5500 #17]"} #end)
+    (#23 wire #15 => #9
+    #pragma diagram {"wp":"#15 h3500 v-15613 h-11271 v-4412 #9"} #end)
+    (#24 wire #6 => #0)
+    (#25 wire #10 => #16
+    #pragma diagram {"wp":"#10 h11621 #16"} #end)
+    (#26 wire #14 => #18)
+}
+
+const init: float64 = 0;

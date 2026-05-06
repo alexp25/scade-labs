@@ -1,0 +1,161 @@
+{
+"version" : "1",
+"cg_version" : "Version 2.4.0 - Build 0955",
+"log_entries": [
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "INFO",
+  "message_kind" : "cg_options",
+  "message" : {
+    "target" : "C",
+    "files" : [ "..\\..\\assets\\CC_design.swan" ],
+    "roots" : [ "CC_design::main" ],
+    "target_dir" : "out",
+    "keep_assertions" : false,
+    "wrap_c_ops" : false,
+    "warn_error" : false,
+    "significance_length" : 31,
+    "name_length" : 200,
+    "static_locals" : false,
+    "expansion" : [ "Expand", [ ] ],
+    "probe" : [ "Probe", [ ] ],
+    "globals_prefix" : "",
+    "root_interface_as_globals" : false,
+    "basic" : false,
+    "student" : true,
+    "prototyping" : false
+  }
+},
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "NOTICE",
+  "message_kind" : "diagnostic",
+  "message" : {
+    "key" : "sls.structuralcheck.unused_local",
+    "template" : "Unused local {{ loc }}",
+    "parameters" : {
+      "loc" : [
+        "file_location",
+        {
+          "path" : "C:/WORKSPACE/proiecte/scade-labs/scade_demo/CruiseControl/assets/CC_design.swan",
+          "lc_range" : [ 825, 8, 825, 20 ],
+          "range" : [ 28760, 28772 ]
+        }
+      ]
+    },
+    "level" : "WARNING"
+  }
+},
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "NOTICE",
+  "message_kind" : "diagnostic",
+  "message" : {
+    "key" : "sls.structuralcheck.unused_local",
+    "template" : "Unused local {{ loc }}",
+    "parameters" : {
+      "loc" : [
+        "file_location",
+        {
+          "path" : "C:/WORKSPACE/proiecte/scade-labs/scade_demo/CruiseControl/assets/CC_design.swan",
+          "lc_range" : [ 824, 8, 824, 14 ],
+          "range" : [ 28735, 28741 ]
+        }
+      ]
+    },
+    "level" : "WARNING"
+  }
+},
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "NOTICE",
+  "message_kind" : "diagnostic",
+  "message" : {
+    "key" : "sls.structuralcheck.unused_local",
+    "template" : "Unused local {{ loc }}",
+    "parameters" : {
+      "loc" : [
+        "file_location",
+        {
+          "path" : "C:/WORKSPACE/proiecte/scade-labs/scade_demo/CruiseControl/assets/CC_design.swan",
+          "lc_range" : [ 821, 8, 821, 16 ],
+          "range" : [ 28654, 28662 ]
+        }
+      ]
+    },
+    "level" : "WARNING"
+  }
+},
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "NOTICE",
+  "message_kind" : "diagnostic",
+  "message" : {
+    "key" : "sls.structuralcheck.unused_local",
+    "template" : "Unused local {{ loc }}",
+    "parameters" : {
+      "loc" : [
+        "file_location",
+        {
+          "path" : "C:/WORKSPACE/proiecte/scade-labs/scade_demo/CruiseControl/assets/CC_design.swan",
+          "lc_range" : [ 816, 8, 816, 17 ],
+          "range" : [ 28516, 28525 ]
+        }
+      ]
+    },
+    "level" : "WARNING"
+  }
+},
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "NOTICE",
+  "message_kind" : "diagnostic",
+  "message" : {
+    "key" : "sls.typing.temporality_warning",
+    "template" : "Combinational operator {{ loc }} declared as node",
+    "parameters" : {
+      "loc" : [
+        "file_location",
+        {
+          "path" : "C:/WORKSPACE/proiecte/scade-labs/scade_demo/CruiseControl/assets/CC_design.swan",
+          "lc_range" : [ 214, 5, 214, 12 ],
+          "range" : [ 8012, 8019 ]
+        }
+      ]
+    },
+    "level" : "WARNING"
+  }
+},
+{
+  "timestamp" : "2026-05-06T20:23:37Z",
+  "tool" : "SWAN-CG",
+  "severity" : "NOTICE",
+  "message_kind" : "diagnostic",
+  "message" : {
+    "key" : "sls.init.inconsistent_init",
+    "template" : "Invalid use of delayed {{ grp_dsc }} {{ ini_dsc }} {{ ini_loc }}",
+    "parameters" : {
+      "grp_dsc" : [ "raw", "group" ],
+      "ini_loc" : [
+        "file_location",
+        {
+          "path" : "C:/WORKSPACE/proiecte/scade-labs/scade_demo/CruiseControl/assets/CC_design.swan",
+          "lc_range" : [ 2, 5, 2, 9 ],
+          "range" : [ 40, 44 ]
+        }
+      ],
+      "ini_dsc" : [ "raw", "for root operator output" ]
+    },
+    "level" : "ERROR"
+  }
+}],
+"warnings_count" : 5,
+"errors_count" : 1,
+"failures_count" : 0
+}

@@ -1,0 +1,12 @@
+{
+  "Version": "1.0",
+  "Name": "CruiseControl",
+  "Dependencies": [],
+  "Resources": [
+    {
+      "Kind": "SimulationData",
+      "Path": "resources\\main_inputs.sd",
+      "Key": "main_inputs"
+    }
+  ]
+}

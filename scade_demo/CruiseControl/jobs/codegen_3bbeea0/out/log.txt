@@ -1,0 +1,9 @@
+<JobStatus:Failed>5/6/2026 10:23:37 PM
+<JobCommandLine>"C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One\tools\swan_cg.exe" config.json -student
+<JobWorkingDirectory>C:\WORKSPACE\proiecte\scade-labs\scade_demo\CruiseControl\jobs\codegen_3bbeea0
+Ansys Scade One - Swan Code Generator - Version 2.4.0 - Build 0955
+Copyright © 2026 Synopsys, Inc. and ANSYS, Inc. All rights reserved.
+
+5 warnings were found
+1 error was found
+No failure occurred
