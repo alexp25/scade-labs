@@ -441,10 +441,6 @@ node car (throttle_percent: float32;
         (#169 group)
         (#176 group)
     #pragma diagram {"xy":"H133684;V-24775"} #end)
-    (#175 expr pre #178
-      where
-        (#178 group)
-    #pragma diagram {"xy":"H111980;V-46527"} #end)
     (#187 def old_speed
     #pragma diagram {"xy":"H140359;V-46527","wh":"14000;3200"} #end)
     (#111 expr #188 / #189
@@ -655,9 +651,25 @@ node car (throttle_percent: float32;
     (#309 expr mass
     #pragma diagram {"xy":"H57055;V95516"} #end)
     (#185 expr speed_state
-    #pragma diagram {"xy":"H94156;V-46527","wh":"16000;3200"} #end)
+    #pragma diagram {"xy":"H94156;V-56512","wh":"16000;3200"} #end)
     (#315 expr speed_state
     #pragma diagram {"xy":"H184060;V-18800","wh":"16000;3200"} #end)
+    (#175 expr #177 pre #178
+      where
+        (#177 group)
+        (#178 group)
+    #pragma diagram {"xy":"H120008;V-46527"} #end)
+    (#316 expr #318 pre #319
+      where
+        (#318 group)
+        (#319 group)
+    #pragma diagram {"xy":"H114912;V-58412"} #end)
+    (#320 expr 0.0_f32
+    #pragma diagram {"xy":"H94156;V-60312","wh":"12000;3200"} #end)
+    (#321 expr 0.0_f32
+    #pragma diagram {"xy":"H94156;V-48427","wh":"12000;3200"} #end)
+    (#322 expr speed_state
+    #pragma diagram {"xy":"H95162;V-43022","wh":"16000;3200"} #end)
     
     (#191 wire #3 => #188)
     (#139 wire #134 => #130
@@ -720,8 +732,6 @@ node car (throttle_percent: float32;
     #pragma diagram {"wp":"#151 h4168 v-13863 #156"} #end)
     (#172 wire #157 => #155)
     (#180 wire #163 => #162)
-    (#177 wire #175 => #169, #187
-    #pragma diagram {"wp":"#175 h6852[v19852 #169, #187]"} #end)
     (#182 wire #164 => #158)
     (#184 wire #168 => #166
     #pragma diagram {"wp":"#168 h10713 v-5764 #166"} #end)
@@ -749,7 +759,6 @@ node car (throttle_percent: float32;
     (#33 wire #4 => #137)
     (#288 wire #154 => #286
     #pragma diagram {"wp":"#154 h3500 v9985 h-10000 v19080 #286"} #end)
-    (#316 wire #185 => #178)
     (#221 wire #206 => #201
     #pragma diagram {"wp":"#206 h3500 v-7124 h-14000 v-3141 #201"} #end)
     (#222 wire #210 => #205
@@ -809,6 +818,13 @@ node car (throttle_percent: float32;
     (#313 wire #308 => #306)
     (#314 wire #309 => #307)
     (#317 wire #315 => #167)
+    (#323 wire #175 => #187, #169
+    #pragma diagram {"wp":"#175 h2176[#187, v19852 #169]"} #end)
+    (#324 wire #185 => #319)
+    (#325 wire #320 => #318)
+    (#326 wire #321 => #177)
+    (#327 wire #322 => #178
+    #pragma diagram {"wp":"#322 h7798 v-1605 #178"} #end)
     
     (var
         gear_ratio:float32;
