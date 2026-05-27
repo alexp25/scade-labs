@@ -1,0 +1,44 @@
+-- version swan: 2025.2 graph: 2.1 swant: 1.1
+use blocks;
+
+_harness harness_counter
+{
+  diagram
+    (#0 $my_counter block blocks::counter
+    #pragma swt under_test #end
+    #pragma diagram {"xy":"H-32450;V-2750","wh":"20000;14000"} #end)
+    (#1 expr 0_i32
+    #pragma diagram {"xy":"H-61312;V-4046","wh":"10000;3200"} #end)
+    (#2 expr 1_i32
+    #pragma diagram {"xy":"H-61312;V1106","wh":"10000;3200"} #end)
+    (#3 def _stop_condition
+    #pragma diagram {"xy":"H-32450;V-28425","wh":"20000;3200"} #end)
+    (#4 expr false
+    #pragma diagram {"xy":"H-61312;V-28425","wh":"10000;3200"} #end)
+    
+    (#5 wire #2 => #0 .(step))
+    (#6 wire #1 => #0 .(init_value))
+    (#7 wire #4 => #3)
+}
+
+_harness harness_limiter
+{
+  diagram
+    (#0 $my_limiter block blocks::limiter
+    #pragma diagram {"xy":"H-2550;V6450","wh":"20000;14000"} #end)
+    (#1 expr 120.0
+    #pragma diagram {"xy":"H-35400;V1050","wh":"10000;3200"} #end)
+    (#2 expr 0.0
+    #pragma diagram {"xy":"H-34400;V6450"} #end)
+    (#3 expr 100.0
+    #pragma diagram {"xy":"H-35400;V11850","wh":"10000;3200"} #end)
+    (#4 def _stop_condition
+    #pragma diagram {"xy":"H-2550;V-12633","wh":"20000;3200"} #end)
+    (#5 expr false
+    #pragma diagram {"xy":"H-28025;V-12633","wh":"10000;3200"} #end)
+    
+    (#6 wire #1 => #0 .(value_in))
+    (#7 wire #2 => #0 .(min))
+    (#8 wire #3 => #0 .(max))
+    (#9 wire #5 => #4)
+}

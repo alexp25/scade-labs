@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 4 – Cruise Control with Scade One</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0D1B3E;
+      --blue:   #1565C0;
+      --sky:    #1E88E5;
+      --ice:    #E3F2FD;
+      --white:  #FFFFFF;
+      --off:    #F5F7FA;
+      --muted:  #78909C;
+      --orange: #F57C00;
+      --green:  #2E7D32;
+      --gray:   #455A64;
+      --border: #D0D8E8;
+      --font:   'Segoe UI', system-ui, sans-serif;
+      --mono:   'Consolas', 'Fira Mono', monospace;
+      --sidebar-w: 260px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); font-size: 15px; color: var(--gray); background: var(--off); line-height: 1.65; }
+
+    /* ── Header ── */
+    .page-header {
+      background: var(--navy); color: var(--white);
+      padding: 2rem; border-bottom: 4px solid var(--sky);
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--white); }
+    .page-header .meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .5rem; font-size: .82rem; color: #90A4AE; }
+    .page-header .meta span::before { content: "● "; color: var(--sky); }
+
+    /* ── Body layout: sidebar + content ── */
+    .page-body {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      align-items: start;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem 1rem 2rem;
+      scrollbar-width: thin;
+    }
+    .toc-sidebar::-webkit-scrollbar { width: 4px; }
+    .toc-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .toc-title {
+      font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: .75rem; padding-bottom: .4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    #toc-list { list-style: none; }
+    #toc-list li a {
+      display: block;
+      font-size: .82rem;
+      color: var(--gray);
+      text-decoration: none;
+      padding: .28rem .4rem;
+      border-radius: 4px;
+      border-left: 2px solid transparent;
+      line-height: 1.4;
+      transition: color .15s, background .15s, border-color .15s;
+    }
+    #toc-list li a:hover { color: var(--blue); background: var(--ice); }
+    #toc-list li.active > a {
+      color: var(--blue); font-weight: 600;
+      background: var(--ice); border-left-color: var(--sky);
+    }
+
+    /* indent levels */
+    #toc-list .toc-h1 a { padding-left: .4rem; font-weight: 600; color: var(--navy); }
+    #toc-list .toc-h2 a { padding-left: 1rem; }
+    #toc-list .toc-h3 a { padding-left: 1.8rem; font-size: .78rem; color: var(--muted); }
+
+    /* ── Main content ── */
+    .content { max-width: 860px; padding: 2rem 2rem 4rem; }
+
+    #lab-content h1 {
+      font-size: 1.45rem; font-weight: 700; color: var(--navy);
+      margin: 2.5rem 0 .75rem; padding-bottom: .3rem;
+      border-bottom: 3px solid var(--sky);
+    }
+    #lab-content h1:first-child { margin-top: 0; }
+    #lab-content h2 {
+      font-size: 1.15rem; font-weight: 700; color: var(--navy);
+      margin: 2rem 0 .65rem; padding-bottom: .25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    #lab-content h3 { font-size: 1rem; font-weight: 600; color: var(--blue); margin: 1.5rem 0 .45rem; }
+    #lab-content p  { margin-bottom: .85rem; }
+    #lab-content ul, #lab-content ol { padding-left: 1.4rem; margin-bottom: .85rem; }
+    #lab-content li { margin-bottom: .3rem; }
+    #lab-content strong { color: var(--navy); }
+    #lab-content em { color: var(--muted); }
+
+    #lab-content code {
+      font-family: var(--mono); font-size: .88em;
+      background: #EEF2F7; padding: .1em .35em;
+      border-radius: 3px; color: var(--blue);
+    }
+    #lab-content pre {
+      background: #0D1B2A; color: #CDD3DE;
+      font-family: var(--mono); font-size: .88rem;
+      padding: 1rem 1.25rem; border-radius: 6px;
+      overflow-x: auto; margin: .75rem 0 1rem; line-height: 1.55;
+    }
+    #lab-content pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    #lab-content blockquote {
+      border-left: 4px solid var(--sky); background: var(--ice);
+      padding: .85rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0;
+    }
+    #lab-content blockquote p { margin-bottom: 0; }
+    #lab-content blockquote strong { color: var(--blue); }
+
+    #lab-content table { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 1rem 0; overflow-x: auto; display: block; }
+    #lab-content th { background: var(--navy); color: var(--white); padding: .55rem .75rem; text-align: left; font-weight: 600; }
+    #lab-content td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    #lab-content tr:nth-child(even) td { background: #F8FAFC; }
+
+    #lab-content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    #lab-content img { max-width: 100%; border-radius: 6px; margin: .5rem 0; }
+
+    .loading { color: var(--muted); font-style: italic; padding: 2rem 0; }
+
+    footer { text-align: center; padding: 2rem; font-size: .82rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 3rem; }
+
+    /* ── Responsive: hide sidebar on small screens ── */
+    @media (max-width: 768px) {
+      .page-body { grid-template-columns: 1fr; }
+      .toc-sidebar { display: none; }
+      .content { padding: 1.25rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Lab 4 — Implementing Cruise Control in Scade One</h1>
+  <div class="meta">
+    <span>Software Engineering</span>
+    <span>Scade One · Lesson 4</span>
+    <span>2–3 hours</span>
+  </div>
+</header>
+
+<div class="page-body">
+  <nav class="toc-sidebar" aria-label="Table of contents">
+    <p class="toc-title">Contents</p>
+    <ul id="toc-list"></ul>
+  </nav>
+
+  <main class="content">
+    <div id="lab-content"><p class="loading">Loading lab content…</p></div>
+  </main>
+</div>
+
+<footer>Lab 4 · Software Engineering · Scade One Lesson</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>
+fetch('lab.md')
+  .then(r => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.text();
+  })
+  .then(md => {
+    document.getElementById('lab-content').innerHTML = marked.parse(md);
+    buildTOC();
+    initScrollSpy();
+  })
+  .catch(err => {
+    document.getElementById('lab-content').innerHTML =
+      `<p style="color:#B71C1C;padding:1rem 0">
+        ⚠ Could not load <code>lab.md</code>: ${err.message}.<br><br>
+        Serve the folder locally instead of opening the file directly:<br>
+        <code>python -m http.server 8080</code> → then open <code>http://localhost:8080</code>
+      </p>`;
+  });
+
+function slugify(text) {
+  return text.toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function buildTOC() {
+  const headings = document.querySelectorAll('#lab-content h1, #lab-content h2, #lab-content h3');
+  const tocList  = document.getElementById('toc-list');
+  const slugCount = {};
+
+  headings.forEach(h => {
+    const base = slugify(h.textContent);
+    slugCount[base] = (slugCount[base] || 0) + 1;
+    const slug = slugCount[base] > 1 ? `${base}-${slugCount[base]}` : base;
+    h.id = slug;
+
+    const li  = document.createElement('li');
+    li.className = `toc-${h.tagName.toLowerCase()}`;
+    li.dataset.id = slug;
+
+    const a = document.createElement('a');
+    a.href = `#${slug}`;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+}
+
+function initScrollSpy() {
+  const items = Array.from(document.querySelectorAll('#toc-list li'));
+  if (!items.length) return;
+
+  const headingEls = items.map(li => document.getElementById(li.dataset.id)).filter(Boolean);
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        items.forEach(li => li.classList.remove('active'));
+        const active = items.find(li => li.dataset.id === entry.target.id);
+        if (active) {
+          active.classList.add('active');
+          active.scrollIntoView({ block: 'nearest' });
+        }
+      }
+    });
+  }, { rootMargin: '0px 0px -70% 0px', threshold: 0 });
+
+  headingEls.forEach(el => observer.observe(el));
+}
+</script>
+
+</body>
+</html>
