@@ -81,7 +81,7 @@ node #pragma requirement reQ2 #end cruise_control (v_speed:float32;
   diagram
     (automaton #0
       initial state #4 cc_disabled
-      #pragma diagram {"xy":"h-82632;v-8550","wh":"41300;26000"} #end :
+      #pragma diagram {"xy":"h-92732;v-8550","wh":"41300;26000"} #end :
         diagram
           (#1 def throttle
           #pragma diagram {"xy":"h8350;v5700","wh":"12000;3200"} #end)
@@ -90,11 +90,11 @@ node #pragma requirement reQ2 #end cruise_control (v_speed:float32;
           
           (#3 wire #2 => #1)
       state #18 cc_enabled
-      #pragma diagram {"xy":"h29238;v0","wh":"147538;51100"} #end :
+      #pragma diagram {"xy":"h29375;v0","wh":"168014;51100"} #end :
         diagram
           (automaton #5
             initial state #13 cc_active
-            #pragma diagram {"xy":"h-25791;v0","wh":"79956;35100"} #end :
+            #pragma diagram {"xy":"h-36029;v0","wh":"79956;35100"} #end :
               diagram
                 (#6 block regulator
                 #pragma diagram {"xy":"h-2291;v-2850","wh":"20000;14000"} #end)
@@ -110,7 +110,7 @@ node #pragma requirement reQ2 #end cruise_control (v_speed:float32;
                 (#10 wire #6 => #7
                 #pragma diagram {"wp":"v0|#6 #7"} #end)
             state #17 cc_standby
-            #pragma diagram {"xy":"h45432;v-1850","wh":"36825;12000"} #end :
+            #pragma diagram {"xy":"h57594;v-1850","wh":"36825;12000"} #end :
               diagram
                 (#14 def throttle
                 #pragma diagram {"xy":"h8412;v0","wh":"12000;3200"} #end)
@@ -120,15 +120,15 @@ node #pragma requirement reQ2 #end cruise_control (v_speed:float32;
                 (#16 wire #15 => #14)
             :1: #13 until if (brake > 10.0 or accel > 10.0)
             restart #17
-            #pragma diagram {"tp":"h39978;v-1850|#13 h4277 h4277 h-18412;v0|#17"} #end;
+            #pragma diagram {"tp":"h39978;v-1850|#13 h11744 h11744 h-18412;v0|#17"} #end;
             :1: #17 until if (res and brake<10.0)
             restart #13
-            #pragma diagram {"tp":"h-18412;v1850|#17 h-4277 h-4277 h39978;v0|#13"} #end;
-          #pragma diagram {"xy":"h0;v0","wh":"139538;43100"} #end)
+            #pragma diagram {"tp":"h-18412;v1850|#17 h-11744 h-11744 h39978;v0|#13"} #end;
+          #pragma diagram {"xy":"h0;v0","wh":"160014;43100"} #end)
       :1: #4 until if (on)
       restart #18
-      #pragma diagram {"tp":"h20650;v0|#4 h5817 h5817 h-73769;v-8550|#18"} #end;
-    #pragma diagram {"xy":"H2382;V7700","wh":"214563;59100"} #end)
+      #pragma diagram {"tp":"h20650;v0|#4 h5817 h5817 h-84007;v-8550|#18"} #end;
+    #pragma diagram {"xy":"H12482;V7700","wh":"234764;59100"} #end)
 }
 
 node regulator (set_point:float32;
@@ -840,4 +840,55 @@ node car (throttle_percent: float32;
         k_drag: float32;
         acceleration:float32;
         speed_state:float32;)
+}
+
+node manual_control (accel : float32;)
+  returns (throttle: float32;)
+{
+  diagram
+    (#0 def throttle
+    #pragma diagram {"xy":"H-24750;V-5950","wh":"12000;3200"} #end)
+    (#1 expr accel
+    #pragma diagram {"xy":"H-44750;V-5950","wh":"10000;3200"} #end)
+    
+    (#2 wire #1 => #0)
+}
+
+node main_manual (brake : float32;
+                  accel : float32;)
+  returns (rpm_out: float32;
+           speed : float32;
+           gear_out : int32;)
+{
+  diagram
+    (#0 block car
+    #pragma diagram {"xy":"H-27598;V-5307","wh":"20000;14000"} #end)
+    (#1 def speed
+    #pragma diagram {"xy":"H5219;V-6128","wh":"10000;3200"} #end)
+    (#2 expr brake
+    #pragma diagram {"xy":"H-60416;V92","wh":"10000;3200"} #end)
+    (#3 def rpm_out
+    #pragma diagram {"xy":"H6219;V-10707","wh":"12000;3200"} #end)
+    (#4 def gear_out
+    #pragma diagram {"xy":"H6219;V-1549","wh":"12000;3200"} #end)
+    (#6 expr #11 * #12
+      where
+        (#11 group)
+        (#12 group)
+    #pragma diagram {"xy":"H-60416;V-8967"} #end)
+    (#5 expr accel
+    #pragma diagram {"xy":"H-80379;V-10867","wh":"10000;3200"} #end)
+    (#13 expr 100.0
+    #pragma diagram {"xy":"H-80379;V-7067","wh":"10000;3200"} #end)
+    
+    (#14 wire #6 => #0 .(throttle_percent))
+    (#7 wire #0 .(gear) => #4
+    #pragma diagram {"wp":"v3758|#0 #4"} #end)
+    (#8 wire #0 .(rpm) => #3
+    #pragma diagram {"wp":"v-5400|#0 #3"} #end)
+    (#9 wire #2 => #0 .(brake))
+    (#10 wire #0 .(speed) => #1
+    #pragma diagram {"wp":"v-821|#0 #1"} #end)
+    (#15 wire #5 => #11)
+    (#16 wire #13 => #12)
 }

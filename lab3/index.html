@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 3 – Cruise Control with Scade One</title>
+  <title>Lab 3 – Introduction to Scade One: Modeling Combinatorial and Sequential Logic</title>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,6 +37,14 @@
     .page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--white); }
     .page-header .meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .5rem; font-size: .82rem; color: #90A4AE; }
     .page-header .meta span::before { content: "● "; color: var(--sky); }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .8rem; font-weight: 600; color: #90A4AE;
+      border: 1px solid #2A4A7F; border-radius: 5px;
+      padding: .3rem .75rem; text-decoration: none;
+      margin-bottom: .75rem; transition: color .15s, border-color .15s;
+    }
+    .back-btn:hover { color: var(--white); border-color: var(--sky); }
 
     /* ── Body layout: sidebar + content ── */
     .page-body {
@@ -115,12 +124,17 @@
       border-radius: 3px; color: var(--blue);
     }
     #lab-content pre {
-      background: #0D1B2A; color: #CDD3DE;
       font-family: var(--mono); font-size: .88rem;
-      padding: 1rem 1.25rem; border-radius: 6px;
-      overflow-x: auto; margin: .75rem 0 1rem; line-height: 1.55;
+      border-radius: 6px; overflow-x: auto;
+      margin: .75rem 0 1rem; line-height: 1.55;
+      padding: 0; background: transparent;
     }
-    #lab-content pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    #lab-content pre code { padding: 0; font-size: inherit; background: none; }
+    #lab-content pre code.hljs {
+      border-radius: 6px; padding: 1rem 1.25rem;
+      font-size: .88rem; line-height: 1.55;
+      display: block; overflow-x: auto;
+    }
 
     #lab-content blockquote {
       border-left: 4px solid var(--sky); background: var(--ice);
@@ -152,6 +166,7 @@
 <body>
 
 <header class="page-header">
+  <a class="back-btn" href="../">&#8592; All Labs</a>
   <h1>Lab 3 — Introduction to Scade One: Modeling Combinatorial and Sequential Logic</h1>
   <div class="meta">
     <span>Software Engineering</span>
@@ -173,6 +188,7 @@
 
 <footer>Lab 3 · Software Engineering · Scade One Lesson</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script>
 fetch('lab.md')
@@ -182,8 +198,10 @@ fetch('lab.md')
   })
   .then(md => {
     document.getElementById('lab-content').innerHTML = marked.parse(md);
+    document.querySelectorAll('#lab-content pre code').forEach(el => hljs.highlightElement(el));
     buildTOC();
     initScrollSpy();
+    initQuiz();
   })
   .catch(err => {
     document.getElementById('lab-content').innerHTML =
@@ -193,6 +211,62 @@ fetch('lab.md')
         <code>python -m http.server 8080</code> → then open <code>http://localhost:8080</code>
       </p>`;
   });
+
+function initQuiz() {
+  const submitBtn = document.getElementById('quiz-submit');
+  const resetBtn  = document.getElementById('quiz-reset');
+  if (!submitBtn) return;
+
+  submitBtn.addEventListener('click', function () {
+    const questions = document.querySelectorAll('#reflection-quiz .quiz-q');
+    let score = 0;
+    let unanswered = 0;
+
+    questions.forEach((q, i) => {
+      const correct  = q.dataset.correct;
+      const selected = q.querySelector(`input[name="q${i + 1}"]:checked`);
+      if (!selected) { unanswered++; return; }
+
+      q.querySelectorAll('.quiz-option').forEach(opt => {
+        const val = opt.querySelector('input').value;
+        if (val === correct && val === selected.value) {
+          opt.classList.add('correct'); score++;
+        } else if (val === selected.value) {
+          opt.classList.add('wrong');
+        } else if (val === correct) {
+          opt.classList.add('reveal');
+        }
+        opt.style.pointerEvents = 'none';
+      });
+    });
+
+    const scoreEl = document.getElementById('quiz-score');
+    if (unanswered) {
+      scoreEl.textContent = `Please answer all ${unanswered} remaining question${unanswered > 1 ? 's' : ''}.`;
+      scoreEl.style.color = 'var(--orange)';
+      return;
+    }
+
+    const total = questions.length;
+    scoreEl.textContent = `${score} / ${total} correct`;
+    scoreEl.style.color = score === total ? 'var(--green)' : score >= Math.ceil(total / 2) ? 'var(--orange)' : '#B71C1C';
+    submitBtn.disabled = true;
+    resetBtn.style.display = 'inline-block';
+  });
+
+  resetBtn.addEventListener('click', function () {
+    document.querySelectorAll('#reflection-quiz .quiz-q').forEach(q => {
+      q.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.classList.remove('correct', 'wrong', 'reveal');
+        opt.style.pointerEvents = '';
+        opt.querySelector('input').checked = false;
+      });
+    });
+    document.getElementById('quiz-score').textContent = '';
+    submitBtn.disabled = false;
+    resetBtn.style.display = 'none';
+  });
+}
 
 function slugify(text) {
   return text.toLowerCase()

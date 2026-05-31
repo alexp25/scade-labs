@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lab 2 – SDLC: Cruise Control Safety System</title>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <!-- CodeMirror CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
@@ -40,6 +41,14 @@
     .page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--white); }
     .page-header .meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .5rem; font-size: .82rem; color: #90A4AE; }
     .page-header .meta span::before { content: "● "; color: var(--sky); }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .8rem; font-weight: 600; color: #90A4AE;
+      border: 1px solid #2A4A7F; border-radius: 5px;
+      padding: .3rem .75rem; text-decoration: none;
+      margin-bottom: .75rem; transition: color .15s, border-color .15s;
+    }
+    .back-btn:hover { color: var(--white); border-color: var(--sky); }
 
     /* ── Body layout: sidebar + content ── */
     .page-body {
@@ -120,12 +129,17 @@
       border-radius: 3px; color: var(--blue);
     }
     #lab-content pre {
-      background: #0D1B2A; color: #CDD3DE;
       font-family: var(--mono); font-size: .88rem;
-      padding: 1rem 1.25rem; border-radius: 6px;
-      overflow-x: auto; margin: .75rem 0 1rem; line-height: 1.55;
+      border-radius: 6px; overflow-x: auto;
+      margin: .75rem 0 1rem; line-height: 1.55;
+      padding: 0; background: transparent;
     }
-    #lab-content pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    #lab-content pre code { padding: 0; font-size: inherit; background: none; }
+    #lab-content pre code.hljs {
+      border-radius: 6px; padding: 1rem 1.25rem;
+      font-size: .88rem; line-height: 1.55;
+      display: block; overflow-x: auto;
+    }
 
     /* blockquotes → callout boxes */
     #lab-content blockquote {
@@ -209,6 +223,7 @@
 <body>
 
 <header class="page-header">
+  <a class="back-btn" href="../">&#8592; All Labs</a>
   <h1>Lab 2 — Applying the SDLC: Cruise Control Safety System</h1>
   <div class="meta">
     <span>Software Engineering</span>
@@ -253,6 +268,7 @@
 <footer>Lab 2 · Software Engineering · SDLC Lesson · Presented by Nirvana Popescu</footer>
 
 <!-- All JS at end of body -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -266,6 +282,7 @@ fetch('lab.md')
   })
   .then(md => {
     document.getElementById('lab-content').innerHTML = marked.parse(md);
+    document.querySelectorAll('#lab-content pre code').forEach(el => hljs.highlightElement(el));
     buildTOC();
     initScrollSpy();
   })

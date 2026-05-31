@@ -207,5 +207,33 @@ marimo/_lsp/
 __marimo__/
 
 
-jobs/
+# Claude Code local state
+.claude/
+
+# Jekyll build output and cache
 _site/
+.jekyll-cache/
+.bundle/
+.sass-cache/
+
+# SCADE generated code and build artifacts
+jobs/
+**/counter_wrapper/*.c
+**/counter_wrapper/*.def
+**/counter_wrapper/*.dll
+**/counter_wrapper/*.h
+**/counter_wrapper/py_wrapper_files.txt
+**/counter_wrapper/swan_cg_files.txt
+**/limiter_wrapper/*.c
+**/limiter_wrapper/*.def
+**/limiter_wrapper/*.dll
+**/limiter_wrapper/*.h
+**/limiter_wrapper/*.txt
+**/limiter_wrapper/build/
+
+# SCADE user-specific project state
+*.sproj.user
+*.sproj.editor
+
+# SCADE logs
+pyscadeone.log

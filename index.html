@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCADE Lab Portfolio — Software Engineering</title>
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #0D1B3E;
+      --blue: #1565C0;
+      --sky: #1E88E5;
+      --ice: #E3F2FD;
+      --white: #FFFFFF;
+      --off: #F5F7FA;
+      --muted: #78909C;
+      --gray: #455A64;
+      --border: #D0D8E8;
+      --green: #2E7D32;
+      --font: 'Segoe UI', system-ui, sans-serif;
+      --mono: 'Consolas', 'Fira Mono', monospace;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 15px;
+      color: var(--gray);
+      background: var(--off);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 3rem 2rem 2.5rem;
+      border-bottom: 4px solid var(--sky);
+      text-align: center;
+    }
+
+    .page-header .course-tag {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      margin-bottom: .75rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: .6rem;
+      line-height: 1.2;
+    }
+
+    .page-header p {
+      font-size: .95rem;
+      color: #90A4AE;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Main layout ── */
+    .page-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Lab cards ── */
+    .lab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .lab-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow .2s, border-color .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lab-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--sky);
+      border-radius: 10px 0 0 10px;
+    }
+
+    .lab-card.disabled::before {
+      background: var(--border);
+    }
+
+    .lab-card:not(.disabled):hover {
+      box-shadow: 0 4px 20px rgba(30, 136, 229, .12);
+      border-color: #B3D4F5;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: .85rem;
+    }
+
+    .lab-num {
+      flex-shrink: 0;
+      width: 2.4rem;
+      height: 2.4rem;
+      background: var(--ice);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .lab-card.disabled .lab-num {
+      background: #ECEFF1;
+      color: var(--muted);
+    }
+
+    .card-titles {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-titles h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.3;
+      margin-bottom: .2rem;
+    }
+
+    .lab-card.disabled .card-titles h2 {
+      color: var(--muted);
+    }
+
+    .card-desc {
+      font-size: .87rem;
+      color: var(--gray);
+      margin-bottom: 1rem;
+      flex: 1;
+    }
+
+    .lab-card.disabled .card-desc {
+      color: var(--muted);
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .tags {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: .7rem;
+      font-weight: 600;
+      padding: .15rem .55rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--off);
+    }
+
+    .tag.python {
+      color: #1565C0;
+      background: #E3F2FD;
+      border-color: #BBDEFB;
+    }
+
+    .tag.scade {
+      color: #6A1B9A;
+      background: #F3E5F5;
+      border-color: #E1BEE7;
+    }
+
+    .tag.sdlc {
+      color: #E65100;
+      background: #FFF3E0;
+      border-color: #FFE0B2;
+    }
+
+    .tag.intro {
+      color: #2E7D32;
+      background: #E8F5E9;
+      border-color: #C8E6C9;
+    }
+
+    .open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--blue);
+      border: none;
+      border-radius: 6px;
+      padding: .4rem .9rem;
+      text-decoration: none;
+      transition: background .15s;
+    }
+
+    .open-btn:hover {
+      background: var(--sky);
+    }
+
+    .coming-soon {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: #ECEFF1;
+      border-radius: 6px;
+      padding: .35rem .8rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .lab-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="page-header">
+    <div class="course-tag">Software Engineering · Ansys SCADE</div>
+    <h1>Lab Portfolio</h1>
+    <p>Model-based design, safety-critical systems, and formal verification using Scade One.</p>
+  </header>
+
+  <main class="page-content">
+    <p class="section-label">Laboratories</p>
+
+    <div class="lab-grid">
+
+      <div class="lab-card disabled">
+        <div class="card-top">
+          <div class="lab-num">1</div>
+          <div class="card-titles">
+            <h2>Introduction to SCADE</h2>
+          </div>
+        </div>
+        <p class="card-desc">Overview of the SCADE toolset, the model-based design workflow, and the basics of
+          synchronous dataflow programming.</p>
+        <div class="card-footer">
+          <div class="tags">
+            <span class="tag intro">Intro</span>
+            <span class="tag scade">SCADE</span>
+          </div>
+          <span class="coming-soon">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="lab-card">
+        <div class="card-top">
+          <div class="lab-num">2</div>
+          <div class="card-titles">
+            <h2>Applying the SDLC: Cruise Control Safety System</h2>
+          </div>
+        </div>
+        <p class="card-desc">Walk through all SDLC phases — requirements, decision table, implementation, V&amp;V, and
+          traceability — for a cruise control state machine in Python.</p>
+        <div class="card-footer">
+          <div class="tags">
+            <span class="tag python">Python</span>
+            <span class="tag sdlc">SDLC</span>
+          </div>
+          <a class="open-btn" href="./lab2/">Open Lab &#8594;</a>
+        </div>
+      </div>
+
+      <div class="lab-card">
+        <div class="card-top">
+          <div class="lab-num">3</div>
+          <div class="card-titles">
+            <h2>Scade One: Combinatorial &amp; Sequential Logic</h2>
+          </div>
+        </div>
+        <p class="card-desc">Model a Limiter (combinatorial) and a Counter (sequential) in Scade One. Build test
+          harnesses and run automated simulations.</p>
+        <div class="card-footer">
+          <div class="tags">
+            <span class="tag scade">Scade One</span>
+            <span class="tag python">Python</span>
+          </div>
+          <a class="open-btn" href="./lab3/">Open Lab &#8594;</a>
+        </div>
+      </div>
+
+      <div class="lab-card">
+        <div class="card-top">
+          <div class="lab-num">4</div>
+          <div class="card-titles">
+            <h2>Scade One: Cruise Control Model &amp; Car Simulation</h2>
+          </div>
+        </div>
+        <p class="card-desc">Implement the full cruise control system from Lab 2 in Scade One — state machine, typed
+          interface, simulation, and Python test harness.</p>
+        <div class="card-footer">
+          <div class="tags">
+            <span class="tag scade">Scade One</span>
+            <span class="tag python">Python</span>
+          </div>
+          <a class="open-btn" href="./lab4/">Open Lab &#8594;</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>Software Engineering · SCADE Lab Portfolio</footer>
+
+</body>
+
+</html>

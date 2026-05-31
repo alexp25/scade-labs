@@ -25,9 +25,10 @@ _harness harness_limiter
 {
   diagram
     (#0 $my_limiter block blocks::limiter
+    #pragma swt under_test #end
     #pragma diagram {"xy":"H-2550;V6450","wh":"20000;14000"} #end)
-    (#1 expr 120.0
-    #pragma diagram {"xy":"H-35400;V1050","wh":"10000;3200"} #end)
+    (#1 expr 120.0_f64
+    #pragma diagram {"xy":"H-37400;V1050","wh":"14000;3200"} #end)
     (#2 expr 0.0
     #pragma diagram {"xy":"H-34400;V6450"} #end)
     (#3 expr 100.0

@@ -5,3 +5,13 @@ theme: jekyll-theme-cayman # This gives you that green header!
 # This section creates the buttons like in your reference image
 show_downloads: false
 google_analytics:
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false

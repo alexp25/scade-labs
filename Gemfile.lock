@@ -83,6 +83,7 @@ PLATFORMS
 DEPENDENCIES
   jekyll
   jekyll-theme-cayman
+  rouge
   webrick
 
 CHECKSUMS
