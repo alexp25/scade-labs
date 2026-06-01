@@ -1,9 +1,0 @@
-{
-  "JobsOrder": [
-    "jobs\\codegen_3bbeea0\\.sjob"
-  ],
-  "ModulesOrder": [
-    "assets\\CC_design.swan",
-    "assets\\Test_main.swant"
-  ]
-}

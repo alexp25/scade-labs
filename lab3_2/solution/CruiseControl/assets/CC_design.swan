@@ -1,0 +1,195 @@
+-- version swan: 2025.2 graph: 2.1
+node #pragma requirement reQ2 #end cruise_control (v_speed:float32;
+                                                   brake:float32;
+                                                   accel:float32;
+                                                   on:bool;
+                                                   res:bool;
+                                                   set_point : float32;)
+  returns (throttle:float32;)
+{
+  diagram
+    (automaton #0
+      initial state #4 cc_disabled
+      #pragma diagram {"xy":"h-92732;v-8550","wh":"41300;26000"} #end :
+        diagram
+          (#1 def throttle
+          #pragma diagram {"xy":"h8350;v5700","wh":"12000;3200"} #end)
+          (#2 expr accel
+          #pragma diagram {"xy":"h-11650;v5700","wh":"10000;3200"} #end)
+          
+          (#3 wire #2 => #1)
+      state #18 cc_enabled
+      #pragma diagram {"xy":"h29375;v0","wh":"168014;51100"} #end :
+        diagram
+          (automaton #5
+            initial state #13 cc_active
+            #pragma diagram {"xy":"h-36029;v0","wh":"79956;35100"} #end :
+              diagram
+                (#6 block regulator
+                #pragma diagram {"xy":"h-2291;v-2850","wh":"20000;14000"} #end)
+                (#7 def throttle
+                #pragma diagram {"xy":"h29303;v-2850","wh":"12000;3200"} #end)
+                (#8 expr v_speed
+                #pragma diagram {"xy":"h-27978;v874","wh":"12000;3200"} #end)
+                (#9 expr set_point
+                #pragma diagram {"xy":"h-28978;v-8250","wh":"14000;3200"} #end)
+                
+                (#12 wire #8 => #6 .(speed))
+                (#11 wire #9 => #6 .(set_point))
+                (#10 wire #6 => #7
+                #pragma diagram {"wp":"v0|#6 #7"} #end)
+            state #17 cc_standby
+            #pragma diagram {"xy":"h57594;v-1850","wh":"36825;12000"} #end :
+              diagram
+                (#14 def throttle
+                #pragma diagram {"xy":"h8412;v0","wh":"12000;3200"} #end)
+                (#15 expr accel
+                #pragma diagram {"xy":"h-9412;v0","wh":"10000;3200"} #end)
+                
+                (#16 wire #15 => #14)
+            :1: #13 until if (brake > 10.0 or accel > 10.0)
+            restart #17
+            #pragma diagram {"tp":"h39978;v-1850|#13 h11744 h11744 h-18412;v0|#17"} #end;
+            :1: #17 until if (res and brake<10.0)
+            restart #13
+            #pragma diagram {"tp":"h-18412;v1850|#17 h-11744 h-11744 h39978;v0|#13"} #end;
+          #pragma diagram {"xy":"h0;v0","wh":"160014;43100"} #end)
+      :1: #4 until if (on)
+      restart #18
+      #pragma diagram {"tp":"h20650;v0|#4 h5817 h5817 h-84007;v-8550|#18"} #end;
+    #pragma diagram {"xy":"H12482;V7700","wh":"234764;59100"} #end)
+}
+
+node regulator (set_point:float32;
+                speed:float32;)
+  returns (throttle:float32;)
+{
+  diagram
+    (#0 expr set_point
+    #pragma diagram {"xy":"H-56350;V-16650","wh":"14000;3200"} #end)
+    (#1 expr speed
+    #pragma diagram {"xy":"H-56350;V-12850","wh":"10000;3200"} #end)
+    (#2 def throttle
+    #pragma diagram {"xy":"H69362;V-28400","wh":"12000;3200"} #end)
+    (#3 expr #4 - #5
+      where
+        (#4 group)
+        (#5 group)
+    #pragma diagram {"xy":"H-37250;V-14750"} #end)
+    (#6 expr #7 * #8
+      where
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H-15150;V-16650"} #end)
+    (#9 expr 0.5_f32
+    #pragma diagram {"xy":"H-34950;V-25350","wh":"12000;3200"} #end)
+    (#10 expr #11 + #12
+      where
+        (#11 group)
+        (#12 group)
+    #pragma diagram {"xy":"H2825;V-9400"} #end)
+    (#13 expr #14 + #15
+      where
+        (#14 group)
+        (#15 group)
+    #pragma diagram {"xy":"H-15150;V-2025"} #end)
+    (#16 expr #17 pre #18
+      where
+        (#17 group)
+        (#18 group)
+    #pragma diagram {"xy":"H-38250;V3550"} #end)
+    (#19 expr 0.2_f32
+    #pragma diagram {"xy":"H-58338;V-1275","wh":"12000;3200"} #end)
+    (#25 block limiter
+    #pragma diagram {"xy":"H-10150;V16019","wh":"20000;11062"} #end)
+    (#29 expr 100.0_f32
+    #pragma diagram {"xy":"H-35000;V16019","wh":"14000;3200"} #end)
+    (#30 expr -100.0_f32
+    #pragma diagram {"xy":"H-35000;V19950","wh":"14000;3200"} #end)
+    (#28 block limiter
+    #pragma diagram {"xy":"H44582;V-28400","wh":"20000;14000"} #end)
+    (#35 expr 100.0_f32
+    #pragma diagram {"xy":"H21228;V-25350","wh":"14000;3200"} #end)
+    (#36 expr 0.0_f32
+    #pragma diagram {"xy":"H20228;V-20065","wh":"12000;3200"} #end)
+    
+    (#20 wire #0 => #4)
+    (#21 wire #1 => #5)
+    (#22 wire #3 => #8, #14
+    #pragma diagram {"wp":"#3 h5250[#8, v10825 #14]"} #end)
+    (#23 wire #9 => #7
+    #pragma diagram {"wp":"#9 h5900 v6800 #7"} #end)
+    (#24 wire #6 => #11
+    #pragma diagram {"wp":"#6 h5488 v5350 #11"} #end)
+    (#26 wire #13 => #12, #18
+    #pragma diagram {"wp":"#13 h5488[v-5475 #12, h26150 v27863 h-66238 v-20388 #18]"} #end)
+    (#27 wire #19 => #17
+    #pragma diagram {"wp":"#19 h5544 v2925 #17"} #end)
+    (#31 wire #16 => #25 .(input)
+    #pragma diagram {"wp":"#16 h7212 v8554 #25"} #end)
+    (#37 wire #28 => #2
+    #pragma diagram {"wp":"v0|#28 #2"} #end)
+    (#32 wire #25 => #15
+    #pragma diagram {"wp":"v0|#25 h2000 v-13469 h-24000 v-2675 #15"} #end)
+    (#33 wire #29 => #25 .(upper_limit))
+    (#34 wire #30 => #25 .(lower_limit))
+    (#38 wire #10 => #28 .(input)
+    #pragma diagram {"wp":"#10 h5201 v-21233 #28"} #end)
+    (#39 wire #35 => #28 .(upper_limit))
+    (#40 wire #36 => #28 .(lower_limit)
+    #pragma diagram {"wp":"#36 h5677 v-2467 #28"} #end)
+}
+
+node limiter (input: float32;
+              upper_limit: float32;
+              lower_limit: float32;)
+  returns (output: float32;)
+{
+  diagram
+    (#0 expr #1 >= #2
+      where
+        (#1 group)
+        (#2 group)
+    #pragma diagram {"xy":"H-10875;V-3325"} #end)
+    (#3 expr input
+    #pragma diagram {"xy":"H-36525;V-5225","wh":"10000;3200"} #end)
+    (#4 expr upper_limit
+    #pragma diagram {"xy":"H-36525;V3250","wh":"16000;3200"} #end)
+    (#5 expr if #6 then #7 else #8
+      where
+        (#6 group)
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H3750;V19025"} #end)
+    (#9 def output
+    #pragma diagram {"xy":"H46800;V44034","wh":"10000;3200"} #end)
+    (#13 expr lower_limit
+    #pragma diagram {"xy":"H-36525;V36375","wh":"16000;3200"} #end)
+    (#14 expr #15 < #16
+      where
+        (#15 group)
+        (#16 group)
+    #pragma diagram {"xy":"H-10875;V34475"} #end)
+    (#17 expr if #18 then #19 else #20
+      where
+        (#18 group)
+        (#19 group)
+        (#20 group)
+    #pragma diagram {"xy":"H24911;V44034"} #end)
+    (#25 expr 100.0_f32
+    #pragma diagram {"xy":"H5750;V46846","wh":"14000;3200"} #end)
+    
+    (#10 wire #3 => #1, #8
+    #pragma diagram {"wp":"#3 h10825[#1, v26150 #8]"} #end)
+    (#11 wire #4 => #2, #7
+    #pragma diagram {"wp":"#4 h5663[v-4675 #2, h4324 v13875 #7]"} #end)
+    (#12 wire #0 => #6
+    #pragma diagram {"wp":"#0 h11125 #6"} #end)
+    (#21 wire #17 => #9)
+    (#22 wire #13 => #16, #19
+    #pragma diagram {"wp":"#13 h7825[#16, v5759 #19]"} #end)
+    (#23 wire #5 => #15, #20
+    #pragma diagram {"wp":"#5 h3500[v8800 h-28625 v4750 #15, h6562 v26909 #20]"} #end)
+    (#24 wire #14 => #18
+    #pragma diagram {"wp":"#14 h32286 #18"} #end)
+}

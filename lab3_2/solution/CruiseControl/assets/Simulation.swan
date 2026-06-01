@@ -1,0 +1,114 @@
+-- version swan: 2025.2 graph: 2.1
+use Car_design;
+
+use CC_design;
+
+node main (brake: float32;
+           accel: float32;
+           on: bool;
+           res: bool;
+           set_point: float32;)
+  returns (speed_out:float32;
+           gear_out: int32;
+           rpm_out: float32;)
+{
+  diagram
+    (#0 expr brake
+    #pragma diagram {"xy":"H-28383;V8560","wh":"10000;3200"} #end)
+    (#1 expr pre #2
+      where
+        (#2 group)
+    #pragma diagram {"xy":"H92700;V35025"} #end)
+    (#3 block Car_design::car
+    #pragma diagram {"xy":"H4435;V3160","wh":"20000;14000"} #end)
+    (#6 expr brake
+    #pragma diagram {"xy":"H29650;V35068","wh":"10000;3200"} #end)
+    (#7 expr on
+    #pragma diagram {"xy":"H29650;V40225"} #end)
+    (#8 expr res
+    #pragma diagram {"xy":"H29650;V45412"} #end)
+    (#9 expr set_point
+    #pragma diagram {"xy":"H26650;V49825","wh":"14000;3200"} #end)
+    (#10 expr accel
+    #pragma diagram {"xy":"H29650;V29910","wh":"10000;3200"} #end)
+    (#19 def speed
+    #pragma diagram {"xy":"H37253;V2339","wh":"10000;3200"} #end)
+    (#20 def gear_out
+    #pragma diagram {"xy":"H38253;V6918","wh":"12000;3200"} #end)
+    (#21 def rpm_out
+    #pragma diagram {"xy":"H38253;V-2240","wh":"12000;3200"} #end)
+    (#11 expr speed
+    #pragma diagram {"xy":"H25650;V24900","wh":"10000;3200"} #end)
+    (#12 def old_throttle
+    #pragma diagram {"xy":"H117150;V35025","wh":"16000;3200"} #end)
+    (#26 expr old_throttle
+    #pragma diagram {"xy":"H-31383;V-662","wh":"16000;3200"} #end)
+    (#32 expr speed
+    #pragma diagram {"xy":"H65075;V-4325","wh":"10000;3200"} #end)
+    (#33 def speed_out
+    #pragma diagram {"xy":"H95350;V-4325","wh":"14000;3200"} #end)
+    (#4 block CC_design::cruise_control
+    #pragma diagram {"xy":"H60675;V36402","wh":"20000;32203"} #end)
+    
+    (#5 wire #0 => #3 .(brake))
+    (#13 wire #1 => #12)
+    (#22 wire #3 .(speed) => #19
+    #pragma diagram {"wp":"v-821|#3 #19"} #end)
+    (#23 wire #3 .(gear) => #20
+    #pragma diagram {"wp":"v3758|#3 #20"} #end)
+    (#24 wire #3 .(rpm) => #21
+    #pragma diagram {"wp":"v-5400|#3 #21"} #end)
+    (#28 wire #26 => #3 .(throttle_percent))
+    (#34 wire #32 => #33)
+    (#14 wire #11 => #4 .(v_speed))
+    (#15 wire #6 => #4 .(brake))
+    (#16 wire #7 => #4 .(on))
+    (#17 wire #8 => #4 .(res))
+    (#18 wire #9 => #4 .(set_point))
+    (#25 wire #10 => #4 .(accel))
+    (#27 wire #4 .(throttle) => #2
+    #pragma diagram {"wp":"v-1376|#4 #2"} #end)
+    
+    (var
+        old_throttle: float32;
+        speed: float32;)
+}
+
+node main_manual (brake : float32;
+                  accel : float32;)
+  returns (rpm_out: float32;
+           speed : float32;
+           gear_out : int32;)
+{
+  diagram
+    (#0 block Car_design::car
+    #pragma diagram {"xy":"H-27598;V-5307","wh":"20000;14000"} #end)
+    (#1 def speed
+    #pragma diagram {"xy":"H5219;V-6128","wh":"10000;3200"} #end)
+    (#2 expr brake
+    #pragma diagram {"xy":"H-60416;V92","wh":"10000;3200"} #end)
+    (#3 def rpm_out
+    #pragma diagram {"xy":"H6219;V-10707","wh":"12000;3200"} #end)
+    (#4 def gear_out
+    #pragma diagram {"xy":"H6219;V-1549","wh":"12000;3200"} #end)
+    (#6 expr #11 * #12
+      where
+        (#11 group)
+        (#12 group)
+    #pragma diagram {"xy":"H-60416;V-8967"} #end)
+    (#5 expr accel
+    #pragma diagram {"xy":"H-80379;V-10867","wh":"10000;3200"} #end)
+    (#13 expr 100.0
+    #pragma diagram {"xy":"H-80379;V-7067","wh":"10000;3200"} #end)
+    
+    (#14 wire #6 => #0 .(throttle_percent))
+    (#7 wire #0 .(gear) => #4
+    #pragma diagram {"wp":"v3758|#0 #4"} #end)
+    (#8 wire #0 .(rpm) => #3
+    #pragma diagram {"wp":"v-5400|#0 #3"} #end)
+    (#9 wire #2 => #0 .(brake))
+    (#10 wire #0 .(speed) => #1
+    #pragma diagram {"wp":"v-821|#0 #1"} #end)
+    (#15 wire #5 => #11)
+    (#16 wire #13 => #12)
+}

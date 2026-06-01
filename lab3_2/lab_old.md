@@ -16,7 +16,7 @@ In this lab you implement the **same system** in **Scade One** — the industria
 |-------------------------------|------------------------|
 | Decision table on paper | Graphical state machine editor |
 | Python function with comments | Operator with typed interface |
-| `run_tests()` by hand | Simulation and Python test harness |
+| `run_tests()` by hand | Simulation and Python test script |
 | Traceability matrix as comments | Built-in requirement tracing |
 | `pass` → implement | Code generation (certified C) |
 
@@ -53,7 +53,7 @@ By the end of this lab you will be able to:
 - Create a Scade One project with a correctly typed operator interface
 - Model the cruise control decision table as a graphical state machine
 - Run the built-in Scade One simulator to verify behaviour
-- Write a Python test harness that calls the generated C code to reproduce the 7 test cases from Lab 2
+- Write a Python test script that calls the generated C code to reproduce the 7 test cases from Lab 2
 - Explain how model-based design replaces the manual traceability you maintained in Lab 2
 
 ---
@@ -66,7 +66,7 @@ By the end of this lab you will be able to:
 | 1 | Project setup & operator interface | 20 min |
 | 2 | State machine design | 30 min |
 | 3 | Simulation & manual verification | 20 min |
-| 4 | Python test harness | 30 min |
+| 4 | Python test script | 30 min |
 | 5 | Traceability & reflection | 15 min |
 
 ---
@@ -223,7 +223,7 @@ Write 2–3 sentences in your lab notes: what did Scade One catch for you during
 
 ---
 
-## Part 4 — Python Test Harness
+## Part 4 — Python Test Script
 
 Scade One can generate C code from your model and expose it via a Python wrapper. This lets you reproduce the exact test suite from Lab 2 automatically.
 
@@ -234,7 +234,7 @@ Scade One can generate C code from your model and expose it via a Python wrapper
 1. In Scade One: **Generate → KCG C Code** for the `CC_main` operator
 2. Note the output folder — it contains `CC_main.c`, `CC_main.h`, and supporting files
 
-### Activity 4B — Python test harness
+### Activity 4B — Python test script
 
 Create a file `test_cc_main.py` in the generated code folder. The structure mirrors `run_tests()` from Lab 2, but calls the generated C function via the Scade One Python bridge instead of your Python implementation:
 
@@ -356,7 +356,7 @@ Submit a zip containing:
 | # | File | What it contains |
 |---|------|-----------------|
 | 1 | `CruiseControl/` | Full Scade One project folder |
-| 2 | `test_cc_main.py` | Python test harness with output |
+| 2 | `test_cc_main.py` | Python test script with output |
 | 3 | `lab3_notes.md` or `.txt` | Answers to 1C, 3C, 4C, Q1–Q4 |
 
 ---
@@ -372,6 +372,6 @@ This lab covers a simplified version of the full cruise control case study from 
 | Lab 6 — Regulation operator | Optional extension: PI regulator |
 | Lab 8 — CruiseControl state machine | Part 2: OFF / SUSPENDED / ACTIVE states |
 | Lab 9 — Requirements traceability | Part 5A: linking REQ IDs to model elements |
-| Lab 11 — Closed-loop simulation | Part 3–4: simulation and Python test harness |
+| Lab 11 — Closed-loop simulation | Part 3–4: simulation and Python test script |
 
 > **Key takeaway:** The full SCADE Suite training takes 13 labs across several days. Scade One modernises and integrates all of these into a single tool. What you built in this lab in 2–3 hours is the core of what safety engineers spend weeks on in industrial projects — the difference is scale, not concept.

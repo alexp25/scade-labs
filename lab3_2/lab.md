@@ -1,8 +1,8 @@
-# Lab 4 — Implementing a Cruise Control System with Scade One
+# Lab 3.2 — Implementing a Cruise Control System with Scade One
 
 **Course:** Software Engineering &nbsp;·&nbsp; **Lesson:** Model-Based Design with Scade One  
 **Duration:** 2–3 hours &nbsp;·&nbsp; **Tool:** Ansys Scade One (Student Edition) &nbsp;·&nbsp; **Work mode:** Individual  
-**Prerequisites:** [Lab 2 — Applying the SDLC (Python)](../lab2-interactive/docs/) &nbsp;·&nbsp; [Lab 3 — Introduction to Scade One](../lab3/)
+**Prerequisites:** [Lab 2 — Applying the SDLC (Python)](../lab2/) &nbsp;·&nbsp; [Lab 3.1 — Introduction to Scade One](../lab3_1/)
 
 ---
 
@@ -16,11 +16,11 @@ In this lab you implement the **same system** in **Scade One** — the industria
 |-------------------------------|------------------------|
 | Decision table on paper | Graphical state machine editor |
 | Python function with comments | Operator with typed interface |
-| `run_tests()` by hand | Simulation and Python test harness |
+| `run_tests()` by hand | Simulation and Python test scripts |
 | Traceability matrix as comments | Built-in requirement tracing |
 | `pass` → implement | Code generation (certified C) |
 
-> **Lab 3 connection:** Lab 3 introduced Scade One from scratch — combinatorial vs sequential logic, typed operator declarations, the simulator, and Python test harnesses. This lab applies those same skills to a realistic safety-critical system. Refer back to [Lab 3](../lab3/) if any tool concept is unfamiliar.
+> **Lab 3 connection:** Lab 3 introduced Scade One from scratch — combinatorial vs sequential logic, typed operator declarations, the simulator, and Python test scripts. This lab applies those same skills to a realistic safety-critical system. Refer back to [Lab 3](../lab3/) if any tool concept is unfamiliar.
 
 ---
 
@@ -42,7 +42,7 @@ Download and install the free student version:
 
 ### 2 — Complete Lab 3 first
 
-Lab 3 covers everything you need to use Scade One in this lab: creating a project, declaring typed inputs/outputs, drawing block diagrams, running the simulator, and building Python test harnesses. Work through it before starting here.
+Lab 3 covers everything you need to use Scade One in this lab: creating a project, declaring typed inputs/outputs, drawing block diagrams, running the simulator, and building Python test scripts. Work through it before starting here.
 
 **→ [Lab 3 — Introduction to Scade One](../lab3/)**
 
@@ -59,7 +59,7 @@ By the end of this lab you will be able to:
 - Create a Scade One project with a correctly typed operator interface
 - Model the cruise control decision table as a graphical state machine
 - Run the built-in Scade One simulator to verify behaviour
-- Write a Python test harness that calls the generated C code to reproduce the 7 test cases from Lab 2
+- Write a Python test script that calls the generated C code to reproduce the 7 test cases from Lab 2
 - Explain how model-based design replaces the manual traceability you maintained in Lab 2
 
 ---
@@ -73,7 +73,7 @@ By the end of this lab you will be able to:
 | 3 | Project setup & operator interface | 20 min |
 | 4 | State machine design | 30 min |
 | 5 | Simulation & manual verification | 20 min |
-| 6 | Python test harness | 30 min |
+| 6 | Python test script | 30 min |
 | 7 | Traceability & reflection | 15 min |
 
 ---
@@ -257,6 +257,9 @@ Add a **local variable** `set_point` of type `float32` to store the target cruis
 
 In the `cruise_control` body, insert a **State Machine** block. Create the four states matching the model:
 
+
+<img src="img/scade_cc_model.png" width="100%">
+
 | State | Level | Meaning |
 |-------|-------|---------|
 | `cc_disabled` | top-level | System off — throttle follows `accel` directly |
@@ -433,11 +436,11 @@ Before running full scenarios, spend 5 minutes stepping through the state machin
 
 ---
 
-## Part 6 — Python Test Harness
+## Part 6 — Python Test Script
 
 Scade One can generate C code from your model and expose it via a Python wrapper. This lets you reproduce the exact test suite from Lab 2 automatically.
 
-> **Lab 3 connection:** In Lab 3 you built Python test harnesses for the `Counter` and `Limiter` operators using this exact API — the same `PythonWrapper`, the same `.cycle()` method, the same attribute-based input/output access. The only difference here is that `cruise_control` is stateful (state machine), so the *sequence* of `run_step()` calls matters for multi-cycle scenarios. Refer to Lab 3 Part 4 if the wrapper setup is unfamiliar.
+> **Lab 3 connection:** In Lab 3 you built Python test scripts for the `Counter` and `Limiter` operators using this exact API — the same `PythonWrapper`, the same `.cycle()` method, the same attribute-based input/output access. The only difference here is that `cruise_control` is stateful (state machine), so the *sequence* of `run_step()` calls matters for multi-cycle scenarios. Refer to Lab 3 Part 4 if the wrapper setup is unfamiliar.
 
 **Reference:** [Testing Scade One models with Python](https://innovationspace.ansys.com/knowledge/forums/topic/testing-scade-one-models-with-python/)
 
@@ -501,7 +504,7 @@ py -3.12 setup_wrapper.py
 
 This produces a class for `cruise_control`. The class name follows the pattern `<operator>_<wrapper>` — check the generated file to confirm the exact name before writing the tests.
 
-### Activity 6C — Python Test Harness
+### Activity 6C — Python Test Script
 
 Inputs and outputs are **direct attributes** on the generated object. The cycle method is `.cycle()`.
 
@@ -680,6 +683,6 @@ This lab covers a simplified version of the full cruise control case study from 
 | Lab 6 — Regulation operator | Optional extension: PI regulator |
 | Lab 8 — CruiseControl state machine | Part 4: cc_disabled / cc_enabled / cc_standby states |
 | Lab 9 — Requirements traceability | Activity 7A: linking REQ IDs to model elements |
-| Lab 11 — Closed-loop simulation | Parts 5–6: simulation and Python test harness |
+| Lab 11 — Closed-loop simulation | Parts 5–6: simulation and Python test script |
 
 > **Key takeaway:** The full SCADE Suite training takes 13 labs across several days. Scade One modernises and integrates all of these into a single tool. What you built in this lab in 2–3 hours is the core of what safety engineers spend weeks on in industrial projects — the difference is scale, not concept.

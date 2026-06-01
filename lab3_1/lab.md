@@ -1,4 +1,4 @@
-# Lab 3 — Introduction to Scade One: Modeling Combinatorial and Sequential Logic
+# Lab 3.1 — Introduction to Scade One: Modeling Combinatorial and Sequential Logic
 
 **Course:** Software Engineering  
 **Lesson:** Model-Based Design with Scade One  
@@ -221,7 +221,7 @@ Think: ```"Store or expose a result"```
 
 ---
 
-## Activity 2D — Simulate the Mddel
+## Activity 2D — Simulate the Model
 
 
 Switch to simulation mode: Start debug session (F5), or clicking on the button in the bottom right corner.
@@ -485,7 +485,7 @@ Observe:
 
 ---
 
-# Part 7 — Python Test Harness
+# Part 7 — Python Test Script
 
 ---
 
