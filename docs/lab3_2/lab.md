@@ -20,7 +20,7 @@ In this lab you implement the **same system** in **Scade One** — the industria
 | Traceability matrix as comments | Built-in requirement tracing |
 | `pass` → implement | Code generation (certified C) |
 
-> **Lab 3 connection:** Lab 3 introduced Scade One from scratch — combinatorial vs sequential logic, typed operator declarations, the simulator, and Python test scripts. This lab applies those same skills to a realistic safety-critical system. Refer back to [Lab 3](../lab3/) if any tool concept is unfamiliar.
+> **Lab 3.1 connection:** Lab 3.1 introduced Scade One from scratch — combinatorial vs sequential logic, typed operator declarations, the simulator, and Python test scripts. This lab applies those same skills to a realistic safety-critical system. Refer back to [Lab 3.1](../lab3_1/) if any tool concept is unfamiliar.
 
 ---
 
@@ -40,13 +40,13 @@ Download and install the free student version:
 
 > The student edition does not require any registration or license activation — it is ready to use once installed.
 
-### 2 — Complete Lab 3 first
+### 2 — Complete Lab 3.1 first
 
-Lab 3 covers everything you need to use Scade One in this lab: creating a project, declaring typed inputs/outputs, drawing block diagrams, running the simulator, and building Python test scripts. Work through it before starting here.
+Lab 3.1 covers everything you need to use Scade One in this lab: creating a project, declaring typed inputs/outputs, drawing block diagrams, running the simulator, and building Python test scripts. Work through it before starting here.
 
-**→ [Lab 3 — Introduction to Scade One](../lab3/)**
+**→ [Lab 3.1 — Introduction to Scade One](../lab3_1/)**
 
-If you have not done Lab 3 yet, start with the official quickstart instead:
+If you have not done Lab 3.1 yet, start with the official quickstart instead:
 
 **→ [Scade One Student — Quick Getting Started (YouTube)](https://www.youtube.com/watch?v=ww5-sx8U0lc)**
 
@@ -118,14 +118,14 @@ You are modelling the `cruise_control` operator — the top-level cruise control
 
 ## Part 1 — Scade One Orientation
 
-> **If you completed Lab 3**, you already know this environment. Confirm you can locate the four elements below, then go straight to Part 3.
+> **If you completed Lab 3.1**, you already know this environment. Confirm you can locate the four elements below, then go straight to Part 3.
 
 - **Model Explorer** (left panel) — project tree: packages, operators, types
 - **Workspace / Block Diagram** (centre) — graphical design canvas
 - **Inputs / Outputs / Local Variables** panel — operator interface declarations
 - **Design / Simulation** toggle (bottom toolbar) — switch between edit and run mode
 
-> If any of these are unfamiliar, revisit **[Lab 3 — Part 0](../lab3/#part-0--scade-one-orientation)** before continuing. The concepts you practised there (typed operators, block diagrams, simulation, test harnesses) are used directly in Parts 3–6 below.
+> If any of these are unfamiliar, revisit **[Lab 3.1](../lab3_1/)** before continuing. The concepts you practised there (typed operators, block diagrams, simulation, test harnesses) are used directly in Parts 3–6 below.
 
 ---
 
@@ -153,7 +153,7 @@ The `car` operator is a discrete-time model of vehicle longitudinal dynamics. It
 
 
 
-3. Look at the block diagram inside — you will see the physics approximation: speed change per cycle depends on the throttle force minus aerodynamic drag. Find the `pre` operator — this is the memory element that carries speed from one cycle to the next (same concept as the `Counter` in Lab 3)
+3. Look at the block diagram inside — you will see the physics approximation: speed change per cycle depends on the throttle force minus aerodynamic drag. Find the `pre` operator — this is the memory element that carries speed from one cycle to the next (same concept as the `Counter` in Lab 3.1)
 
 ### Activity 2-2 — Wire the car operator to a simulation context
 
@@ -341,7 +341,7 @@ We shall use the following constants:
 
 4. **Proportional term** — add a **Multiply** block and a constant `0.08`: `p_term = 0.08 * error`
 
-5. **Integral accumulator** — this is the sequential part (uses `pre`, just like `Counter` in Lab 3):
+5. **Integral accumulator** — this is the sequential part (uses `pre`, just like `Counter` in Lab 3.1):
    - Add an **Add** block: `i_acc = pre(i_acc) + error * 0.20`
    - The `pre(i_acc)` carries the accumulated error from the previous cycle
    - Set the initial value of `pre(i_acc)` to `0.0`
@@ -366,7 +366,7 @@ We shall use the following constants:
    - `v_speed` → `regulator.speed`
    - `regulator.throttle` → `throttle` output
 
-> **Lab 3 connection:** The `pre(i_acc)` loop in step 5 is the same pattern as the `Counter` operator from Lab 3 — a feedback wire through `pre` creates the sequential memory. The only difference is that here the feedback is inside a sub-operator rather than the top-level node.
+> **Lab 3.1 connection:** The `pre(i_acc)` loop in step 5 is the same pattern as the `Counter` operator from Lab 3.1 — a feedback wire through `pre` creates the sequential memory. The only difference is that here the feedback is inside a sub-operator rather than the top-level node.
 
 ### Activity 4E — Handle `set_point`
 
@@ -440,7 +440,7 @@ Before running full scenarios, spend 5 minutes stepping through the state machin
 
 Scade One can generate C code from your model and expose it via a Python wrapper. This lets you reproduce the exact test suite from Lab 2 automatically.
 
-> **Lab 3 connection:** In Lab 3 you built Python test scripts for the `Counter` and `Limiter` operators using this exact API — the same `PythonWrapper`, the same `.cycle()` method, the same attribute-based input/output access. The only difference here is that `cruise_control` is stateful (state machine), so the *sequence* of `run_step()` calls matters for multi-cycle scenarios. Refer to Lab 3 Part 4 if the wrapper setup is unfamiliar.
+> **Lab 3.1 connection:** In Lab 3.1 you built Python test scripts for the `Counter` and `Limiter` operators using this exact API — the same `PythonWrapper`, the same `.cycle()` method, the same attribute-based input/output access. The only difference here is that `cruise_control` is stateful (state machine), so the *sequence* of `run_step()` calls matters for multi-cycle scenarios. Refer to Lab 3.1 Part 4 if the wrapper setup is unfamiliar.
 
 **Reference:** [Testing Scade One models with Python](https://innovationspace.ansys.com/knowledge/forums/topic/testing-scade-one-models-with-python/)
 
