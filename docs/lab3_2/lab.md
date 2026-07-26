@@ -38,7 +38,7 @@ Download and install the free student version:
   <img src="img/scade_install.png" width="400">
 </p> -->
 
-> After installing, register for a free student licence on the same page. The licence is required to save and simulate models.
+> The student edition does not require any registration or license activation — it is ready to use once installed.
 
 ### 2 — Complete Lab 3 first
 

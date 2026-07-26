@@ -60,7 +60,7 @@ Download and install the free student version:
   <img src="img/scade_install.png" width="400">
 </p> -->
 
-> After installing, register for a free student licence on the same page. The licence is required to save and simulate models.
+> The student edition does not require any registration or license activation — it is ready to use once installed.
 
 ### 2 — Complete the QuickStart tutorial
 
@@ -190,16 +190,24 @@ These are the two most important modeling elements.
 ### Use **Expression** when you want:
 
 - constants (defined by value and data type)
-- arithmetic
-- comparisons
-- delays (`pre`)
-- intermediate computations
+- intermediate computations that don't need a name
 
 Examples:
 
 ```text
 0_i32
 0.0_f64
+```
+
+Think: ```"A value"```
+
+---
+
+### Instance blocks
+
+Operators like arithmetic, comparisons, and delays are **instance blocks**, not expressions — an instance block instantiates an operator that processes flows.
+
+```text
 +
 -
 >
@@ -207,7 +215,7 @@ Examples:
 pre
 ```
 
-Think: ```"Compute something"```
+Think: ```"Process a flow"```
 
 ---
 
@@ -298,24 +306,17 @@ Connect constants:
 
 ---
 
-
 Select the operator instance.
 
 Enable: ```Operator under test```
 
 <img src="img/scade_test_harness_limiter_set_operator_under_test.png" width="100%">
 
----
-
-## Activity 3F — Configure Stop Condition
-
-Connect: ```false``` to: ```_stop_condition```
-
-Configure the block as ```Operator under test```
+> `_stop_condition` is implicitly `false` by default — you don't need to connect anything to it.
 
 ---
 
-## Activity 3G — Run the Harness
+## Activity 3E — Run the Harness
 
 Run simulation:
 - Start debug session (F5)
@@ -347,8 +348,10 @@ Sequential systems require:
 - state variables
 
 Scade One uses:
-- `pre`
-- initialized delays (`->`)
+- `pre` — the delay operator
+- `->` — the **initial value** operator, giving the value used on the first cycle only
+
+for stateful behavior. Combined as the binary `pre` (e.g. `0 pre x`), this is the **initialized delay**: it outputs the initial value on the first cycle, then the previous value of `x` afterwards.
 
 for stateful behavior.
 
@@ -452,15 +455,11 @@ Connect:
 
 Enable: ```Operator under test``` for the counter instance.
 
----
-
-## Activity 5C — Configure Stop Condition
-
-Connect: ```false``` to ```_stop_condition```
+> `_stop_condition` is implicitly `false` by default — you don't need to connect anything to it.
 
 ---
 
-## Activity 5D — Run Sequential Simulation
+## Activity 5C — Run Sequential Simulation
 
 Execute multiple cycles.
 
