@@ -1,10 +1,16 @@
 # System overview
 
-This repository is a static educational content portfolio. It is **not** a
-web application, service, or backend system — there is no database, API,
-authentication layer, deployment pipeline, or package to publish. The
-"system" is: a Jekyll-built static site (`docs/`), a parallel non-published
-source tree (`src/`), and legacy archives (`old/`, root `scade_demo/`).
+This repository is a static educational content portfolio; there is no build
+pipeline, package to publish, or deployment mechanism beyond GitHub Pages'
+own branch-folder serving. The "system" is: a Jekyll-built static site
+(`docs/`), a parallel non-published source tree (`src/`), and legacy
+archives (`old/`, root `scade_demo/`). As of ADR 0002
+(`.agents/decisions/0002-firebase-backend-for-auth-and-progress.md`), `docs/`
+additionally makes client-side calls to a Firebase project (Authentication +
+Firestore) for optional login, progress tracking, and an admin panel — see
+[`firebase-backend.md`](firebase-backend.md). This is loaded entirely from
+the browser (CDN `<script type="module">` imports, no bundler); lab content
+itself remains fully public and requires no login.
 
 ## Top-level layout (verified, current as of this documentation pass)
 
@@ -20,7 +26,11 @@ scade-labs/
 │   ├── assets/css/syntax.css
 │   ├── lab2/{index.html, lab.md}
 │   ├── lab3_1/{index.html, lab.md, img/}
-│   └── lab3_2/{index.html, lab.md, lab_old.md, img/}
+│   ├── lab3_2/{index.html, lab.md, lab_old.md, img/}
+│   ├── assets/js/{firebase-config.js, firebase-client.js, auth-header.js}
+│   ├── account/index.html  login/register + "my progress"
+│   └── admin/index.html    admin-only progress view (ADR 0002)
+├── firestore.rules         Firestore Security Rules source of truth (ADR 0002)
 ├── src/                    lab source code, NOT published
 │   ├── lab2/{starter, solution, README.md, .gitignore}
 │   ├── lab3_1/solution/
@@ -63,10 +73,14 @@ See [`site-and-publishing.md`](site-and-publishing.md).
 
 ## What this repository deliberately does not have
 
-No database, no backend service, no authentication, no REST/GraphQL API, no
-package published to a registry, no CI/CD pipeline, no automated deployment
-beyond GitHub Pages' own branch-folder serving, no requirements-management
-tool, no code-coverage tool, and no safety-certification claim of any kind
+No custom server, no REST/GraphQL API of its own, no package published to a
+registry, no CI/CD pipeline, no automated deployment beyond GitHub Pages'
+own branch-folder serving, no requirements-management tool, no
+code-coverage tool, and no safety-certification claim of any kind
 (DO-178C/ISO 26262 appear only as educational/reflection context — see
 [`../verification/requirements-and-traceability.md`](../verification/requirements-and-traceability.md)).
-Do not introduce documentation implying any of these exist.
+The one exception to "no backend" is the client-side-only Firebase
+integration described above (ADR 0002) — it is a managed third-party
+service called directly from the browser, not a service this repo runs or
+deploys. Do not introduce documentation implying any further backend,
+server, or certification claim exists.

@@ -231,6 +231,7 @@
     <span>2 hours · Python 3</span>
     <span>Presented by Nirvana Popescu</span>
   </div>
+  <div id="auth-slot" data-base="../" style="margin-top:.75rem"></div>
 </header>
 
 <div class="page-body">
@@ -272,6 +273,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>window.CURRENT_LAB_ID = 'lab2';</script>
+<script type="module" src="../assets/js/auth-header.js"></script>
 
 <script>
 // ── Fetch and render lab.md ──────────────────────────────────────────────────
@@ -531,6 +534,13 @@ function runCode() {
       bannerEl.className = 'fail';
     }
     bannerEl.style.display = 'block';
+
+    const lines = outputText.split('\n');
+    const passCount = lines.filter(l => l.includes('| PASS')).length;
+    const failCount = lines.filter(l => l.includes('| FAIL')).length;
+    if (window.recordQuizAttempt && (passCount + failCount) > 0) {
+      window.recordQuizAttempt('lab2', 'code-run', passCount, passCount + failCount);
+    }
   }).catch(err => {
     outputEl.textContent = '⚠ Error:\n' + String(err);
   });

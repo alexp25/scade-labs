@@ -42,6 +42,15 @@ requires a local Scade One install at
 **Project manifest** — plain JSON, declares one `SimulationData` resource
 (`resources/main_inputs.sd`).
 
+**Conceptual split** (documented for students in `docs/lab3_2/lab.md`'s
+"Project Structure" section, added this session): the project has three
+packages with three distinct roles — `CC_design` is the actual deliverable
+(the only node targeted for code generation in Part 6); `Car_design` is a
+plant-model stand-in for a real vehicle, provided only as a simulation aid;
+`Simulation` (`main`/`main_manual`) wires the two together purely for
+interactive/manual simulation and is never a code-generation target. Only
+`CC_design` would exist in a shipped/deployed system.
+
 **Model sources**, all hand-authored Swan `2025.2`/graph `2.1`:
 - `assets/CC_design.swan`:
   - `node cruise_control(v_speed, brake, accel, on, res, set_point: ...)

@@ -58,7 +58,8 @@
 
 - `src/lab3_2/solution/CruiseControl/requirements.txt`: `ansys-scadeone-core`
   (**unpinned** — inconsistent with Lab 3.1's pinned version; document, don't
-  silently "fix" by inventing a pin).
+  silently "fix" by inventing a pin) plus `matplotlib` (added this session
+  for the Part 6 evaluation-script rewrite, see below).
 - `src/lab3_2/solution/CruiseControl/generate_python_wrapper.bat` — hand
   script invoking `py -3.12 -m ansys.scadeone.core.cli pycodewrap --install-dir
   "...v261..." --job "CodeGenerationJob0" --out "cc_wrapper" "...CruiseControl.sproj"`.
@@ -70,15 +71,23 @@
 - `src/lab3_2/solution/CruiseControl/tester.py` — a **live console demo, not
   an automated test**: 1000-cycle loop toggling `accel`/`on`/`res`/`set_point`
   with `time.sleep(0.05)` between prints; no assertions, no PASS/FAIL output.
-- `docs/lab3_2/lab.md` (~"Activity 6C") shows an **instructional-only** Python
-  snippet named `test_cc_main.py` — **no such file exists in the repo**
-  (verified via glob). It illustrates a hypothetical wrapper API
-  (`cc.on`, `cc.brake`, `cc.cycle()`) that differs from the real generated
-  `cc_wrapper.py`'s `.inputs.<name>`/`.outputs.<name>` pattern; lab.md itself
-  flags this with "the exact class name and instantiation method depend on
-  your Scade One version — check the generated wrapper file."
-- **Local run:** requires Scade One installed + `cc_wrapper` generated first;
-  then `python tester.py` (prints a live trace, does not assert correctness).
+  Kept as-is; no longer part of the lab.md lesson flow.
+- `docs/lab3_2/lab.md` Part 6 (rewritten this session) teaches
+  `evaluate_cc.py` — **and this one does exist in the repo**, at
+  `src/lab3_2/solution/CruiseControl/evaluate_cc.py`, alongside six example
+  scenario files under `src/lab3_2/solution/CruiseControl/scenarios/`
+  (`tc01`…`tc06`, one CSV per test case, one row per simulation cycle, an
+  optional `expected_throttle`/`req`/`note` checkpoint). It illustrates the
+  same hypothetical wrapper API as the snippet it replaces (`cc.on`,
+  `cc.brake`, `cc.cycle()`, `cc.throttle`), which still differs from the real
+  generated `cc_wrapper.py`'s `.inputs.<name>`/`.outputs.<name>` pattern —
+  both lab.md and `evaluate_cc.py` carry the same "check the generated
+  wrapper file" caveat as before; this session did not resolve that gap, only
+  replaced the un-backed instructional snippet with a real, committed script.
+- **Local run:** requires Scade One installed + `cc_wrapper` generated first,
+  plus `matplotlib`; then `python evaluate_cc.py` (writes `results/*.csv` +
+  `results/plots/*.png`, prints a PASS/FAIL banner) or `python tester.py`
+  (prints a live trace, does not assert correctness).
 
 ## Correspondence between the Python reference and the Scade models
 
@@ -98,6 +107,7 @@ Explicitly stated by the repo itself, not inferred:
 |---|---|---|
 | `ansys-scadeone-core` | 3.1 | `==0.8.2` |
 | `ansys-scadeone-core` | 3.2 | unpinned |
+| `matplotlib` | 3.2 | unpinned (added this session, for `evaluate_cc.py`'s charts) |
 
 Lab 2 has **zero** import statements in either `.py` file (stdlib only, and
 that's exactly why it also runs under Skulpt in-browser).

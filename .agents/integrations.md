@@ -1,11 +1,17 @@
 # External integrations / dependencies
 
-No secrets, APIs, environment variables, or hosted backend services exist in
-this repo. Only the following real external dependencies were found.
+As of ADR 0002
+(`.agents/decisions/0002-firebase-backend-for-auth-and-progress.md`), this
+repo has one hosted backend service — Firebase — used client-side only for
+optional login, progress tracking, and the admin panel; lab content itself
+requires no account and no secrets to view. All other dependencies below are
+unchanged.
 
 | Dependency | Purpose | Referenced in | Local or remote | When needed | Version | Notes |
 |---|---|---|---|---|---|---|
 | GitHub Pages | Hosts the published site | (no repo-visible config — `docs/` folder convention only) | remote | publish-time | — | Classic branch/`docs`-folder deploy inferred from absence of `.github/workflows/`; not confirmed against actual repo Settings |
+| Firebase Web SDK | Client-side auth (email/password) + Firestore access | `docs/assets/js/firebase-client.js`, `auth-header.js`, `docs/account/index.html`, `docs/admin/index.html` (gstatic.com CDN, ES modules) | remote (CDN) | runtime, whenever a visitor logs in / views progress / views `/admin/` | `10.14.1` pinned in each `import` URL | Lab content itself does not depend on this — only the login widget, `/account/`, and `/admin/` do |
+| Firebase project (Authentication + Firestore) | Stores user accounts and progress data (`profiles`, `labOpens`, `quizAttempts`) | `docs/assets/js/firebase-config.js` (project identifiers, not secret) | remote, proprietary Google-managed service | runtime + auth-time | — | Access is controlled by `firestore.rules` (repo root), not by the config values, which are intentionally public; only a maintainer with Firebase console access can promote an account to `isAdmin: true`. See `project_docs/integrations/firebase.md` for setup |
 | Jekyll 4.4.1 + `jekyll-theme-cayman` 0.2.0 + `webrick` 1.9.2 + `rouge` 4.7.0 | Static site build/serve | `docs/Gemfile`, `docs/Gemfile.lock`, `docs/_config.yml` | local (via Bundler) | build/preview-time | pinned in `Gemfile.lock` | Theme is configured but not applied to any page — see `.agents/publishing.md` |
 | `marked.js` 9.1.6 | Renders `lab.md` to HTML in-browser | `docs/lab2/index.html`, `docs/lab3_1/index.html`, `docs/lab3_2/index.html` (cdnjs) | remote (CDN) | runtime, in every visitor's browser | pinned in the `<script src>` URL | If cdnjs is unreachable, lab pages fail to render their content (visible fallback error message in `docs/lab2/index.html`) |
 | `highlight.js` 11.9.0 | Syntax highlighting of code blocks | same 3 lab pages (cdnjs) | remote (CDN) | runtime | pinned in URL | Same offline-availability caveat |

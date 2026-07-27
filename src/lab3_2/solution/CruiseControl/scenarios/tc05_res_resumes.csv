@@ -1,0 +1,5 @@
+cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
+1,True,False,0.0,0.0,0.300,False,,,activate
+2,True,False,80.0,0.0,0.300,False,,,cc_active
+3,True,False,80.0,15.0,0.300,False,,,brake -> cc_standby
+4,True,False,80.0,0.0,0.300,True,,,res=true and brake<10.0 -> cc_active resumes - see chart

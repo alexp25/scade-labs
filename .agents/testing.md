@@ -62,24 +62,28 @@ text from.
 - **What WAS verified this session instead:** `python -m py_compile` on every
   `.py` file in `src/lab3_1/solution/` and
   `src/lab3_2/solution/CruiseControl/` (including the generated
-  `counter_wrapper.py`/`limiter_wrapper.py`/`cc_wrapper.py`) — all parse with
-  no syntax errors. This only proves the files are syntactically valid
-  Python; it does **not** prove they execute correctly (that requires the
-  sibling `.dll`, which in turn requires Scade One's code generator to have
-  produced it).
+  `counter_wrapper.py`/`limiter_wrapper.py`/`cc_wrapper.py`, and this
+  session's new `evaluate_cc.py`) — all parse with no syntax errors. This
+  only proves the files are syntactically valid Python; it does **not**
+  prove they execute correctly (that requires the sibling `.dll`, which in
+  turn requires Scade One's code generator to have produced it — and, for
+  `evaluate_cc.py`, also `matplotlib`, not verified installed here).
 - **Remaining manual validation procedure** (from the repo's own
   `readme.txt`/`generate_python_wrapper.bat`, not executed here):
   1. Install Scade One Student Edition.
   2. `pip install -r requirements.txt` inside `src/lab3_1/solution/` or
-     `src/lab3_2/solution/CruiseControl/`.
+     `src/lab3_2/solution/CruiseControl/` (Lab 3.2's now also installs
+     `matplotlib`).
   3. Run `setup_wrapper.py` (Lab 3.1) or `generate_python_wrapper.bat`
      (Lab 3.2) to regenerate the wrapper + `.dll`.
   4. `python test_counter.py` / `python test_limiter.py` (Lab 3.1) — expect
      printed PASS for all cases (hardcoded expected values documented in
      `.agents/python.md`).
-  5. `python tester.py` (Lab 3.2) — prints a live 1000-cycle trace; there is
-     no pass/fail signal to check, only visual inspection of the printed
-     speed/gear/rpm/state trace.
+  5. `python evaluate_cc.py` (Lab 3.2) — reads `scenarios/*.csv`, expects a
+     `"VALIDATION: ALL REQUIREMENTS MET."` banner over the checkpoint rows,
+     `results/summary.csv`, and `results/plots/*.png`. `python tester.py`
+     still exists separately — prints a live 1000-cycle trace with no
+     pass/fail signal, visual inspection only.
 
 ## Scade One model simulation itself
 

@@ -24,8 +24,9 @@ Scade One's requirement-traceability mechanism (`#pragma requirement`).
 - Create a Scade One project with a correctly typed operator interface
 - Model the cruise control decision table as a graphical state machine
 - Run the built-in Scade One simulator to verify behaviour
-- Write a Python test script that calls the generated C code to reproduce
-  the 7 test cases from Lab 2
+- Write a Python evaluation script, driven by scenario files, that calls the
+  generated C code to reproduce the test cases from Lab 2 and reports
+  results as CSV files and charts
 - Explain how model-based design replaces the manual traceability
   maintained in Lab 2
 
@@ -33,16 +34,18 @@ Scade One's requirement-traceability mechanism (`#pragma requirement`).
 
 | File | Role |
 |---|---|
-| `docs/lab3_2/lab.md` | Published lesson (Parts 1–7: orientation, car simulation, project setup, state machine, simulation/verification, Python test script, traceability & reflection) |
+| `docs/lab3_2/lab.md` | Published lesson (Parts 1–7: orientation, car simulation, project setup, state machine, simulation/verification, Python evaluation script, traceability & reflection). Part 6 rewritten this session to replace Scade One test-harness building with a scenario-file-driven Python script (CSV output, traceability report, charts) |
 | `docs/lab3_2/lab_old.md` | **Orphaned** — an earlier draft, not fetched by `index.html`, do not edit expecting effect |
 | `docs/lab3_2/img/` | 15 screenshots — 4 unreferenced anywhere, 2 more referenced only inside HTML comments (never rendered) |
 | `src/lab3_2/solution/CruiseControl/CruiseControl.sproj` | Project manifest (plain JSON) |
 | `src/lab3_2/solution/CruiseControl/assets/CC_design.swan` | `node cruise_control` (nested automaton) + `node regulator` + `node limiter` |
 | `src/lab3_2/solution/CruiseControl/assets/Car_design.swan` | Vehicle plant model |
 | `src/lab3_2/solution/CruiseControl/assets/Simulation.swan` | Closed-loop (`main`) and open-loop (`main_manual`) wiring |
-| `src/lab3_2/solution/CruiseControl/assets/Main_test.swant` | **Empty** — version header only, no committed harness |
-| `src/lab3_2/solution/CruiseControl/{generate_python_wrapper.bat, readme.txt, requirements.txt}` | Wrapper-generation driver docs (requires local Scade One) |
-| `src/lab3_2/solution/CruiseControl/tester.py` | Live console demo (no assertions) |
+| `src/lab3_2/solution/CruiseControl/assets/Main_test.swant` | **Empty** — version header only, no committed harness. lab.md no longer asks students to build this out (Part 6 now teaches a Python evaluation script instead); still present, still unrelated to the new flow |
+| `src/lab3_2/solution/CruiseControl/{generate_python_wrapper.bat, readme.txt, requirements.txt}` | Wrapper-generation driver docs (requires local Scade One). `requirements.txt` now also lists `matplotlib` (added this session for the chart step) |
+| `src/lab3_2/solution/CruiseControl/tester.py` | Live console demo (no assertions) — unchanged, kept alongside the new evaluation script |
+| `src/lab3_2/solution/CruiseControl/evaluate_cc.py` | **New this session** — instructor reference implementing lab.md's Part 6 Activities 6C–6F: reads `scenarios/*.csv`, drives the wrapper cycle-by-cycle, writes `results/<tid>_trace.csv` + `results/summary.csv` + `results/plots/<tid>.png` |
+| `src/lab3_2/solution/CruiseControl/scenarios/*.csv` | **New this session** — 6 example scenario files (`tc01`…`tc06`) covering REQ-01/02/04, mirroring Lab 2's test cases as short multi-cycle sequences |
 | `src/lab3_2/solution/CruiseControl/cc_wrapper/` | **Generated** ctypes wrapper + compiled `.dll` — do not hand-edit |
 
 No `src/lab3_2/starter/` — GUI-modeling, like Lab 3.1.
@@ -58,8 +61,10 @@ No `src/lab3_2/starter/` — GUI-modeling, like Lab 3.1.
 5. Implement `regulator` (PI controller + limiter clamps) and wire
    `set_point` handling.
 6. Simulate manually and trace the state hierarchy by hand.
-7. Generate a Python wrapper and write/run a test script mirroring Lab 2's
-   7 test cases; compare output to Lab 2's verification report.
+7. Generate a Python wrapper; define test scenarios as CSV files under
+   `scenarios/`; run `evaluate_cc.py` to produce per-scenario trace CSVs, a
+   `results/summary.csv` traceability report, and `results/plots/*.png`
+   charts; compare the summary to Lab 2's verification report.
 8. **Activity 7A — Traceability in Scade One**: use the Requirements panel to
    link each state-machine transition to its REQ ID via `#pragma
    requirement`.
@@ -88,15 +93,17 @@ REQ-01/02/04 (reused from Lab 2's numbering, not redefined).
   `accel` (`0.5`) in the disabled/manual state.
 - **Python wrapper test** (requires local Scade One + unpinned
   `ansys-scadeone-core` + regenerated `cc_wrapper` — **not runnable in this
-  documentation-pass environment**): `tester.py` was syntax-checked
-  (`python -m py_compile`, passed) but not executed; it is a live printout
-  with no pass/fail signal, not an assertion-based test. The lab.md's own
-  `test_cc_main.py` instructional snippet illustrates a hypothetical API that
-  differs from the real generated `cc_wrapper.py` — see
+  documentation-pass environment**): `tester.py` and the new `evaluate_cc.py`
+  were syntax-checked (`python -m py_compile`, passed) but not executed.
+  `tester.py` is a live printout with no pass/fail signal. `evaluate_cc.py`
+  illustrates the same hypothetical wrapper API as before (`cc.on`,
+  `cc.brake`, `cc.cycle()`, `cc.throttle`), which still differs from the real
+  generated `cc_wrapper.py` — see
   `project_docs/architecture/python-and-simulation.md`.
 - **Harness**: `Main_test.swant` is an empty scaffold — no committed test
-  vectors exist for this model, despite lab.md describing harness-building
-  activities.
+  vectors exist for this model. lab.md's Part 6 no longer asks students to
+  build one out (Part 5 now only briefly mentions test harnesses as an
+  in-tool alternative, redirecting to the Python evaluation script).
 
 ## Traceability
 
@@ -114,7 +121,11 @@ decision (and a Scade One install to actually add them).
 
 - `ansys-scadeone-core` unpinned in `requirements.txt` (Lab 3.1 pins
   `==0.8.2`) — version-drift risk against the shipped `cc_wrapper.*`.
-- Empty `Main_test.swant` harness scaffold.
+- Empty `Main_test.swant` harness scaffold (no longer part of the lesson
+  flow, but still an unused, present file).
+- `evaluate_cc.py`'s wrapper API is illustrative, not verified against the
+  real generated `cc_wrapper.py` (same pre-existing gap as the snippet it
+  replaces — see `project_docs/architecture/python-and-simulation.md`).
 - 4 orphaned + 2 comment-only images in `docs/lab3_2/img/`.
 - Orphaned `docs/lab3_2/lab_old.md`.
 - Activity 7A traceability only 25% (1/4) demonstrated in the shipped model.

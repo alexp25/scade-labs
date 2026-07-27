@@ -16,7 +16,7 @@ In this lab you implement the **same system** in **Scade One** — the industria
 |-------------------------------|------------------------|
 | Decision table on paper | Graphical state machine editor |
 | Python function with comments | Operator with typed interface |
-| `run_tests()` by hand | Simulation and Python test scripts |
+| `run_tests()` by hand | Simulation and a Python evaluation script (scenario CSVs + result CSVs + charts) |
 | Traceability matrix as comments | Built-in requirement tracing |
 | `pass` → implement | Code generation (certified C) |
 
@@ -59,7 +59,7 @@ By the end of this lab you will be able to:
 - Create a Scade One project with a correctly typed operator interface
 - Model the cruise control decision table as a graphical state machine
 - Run the built-in Scade One simulator to verify behaviour
-- Write a Python test script that calls the generated C code to reproduce the 7 test cases from Lab 2
+- Write a Python evaluation script, driven by scenario files, that calls the generated C code to reproduce the test cases from Lab 2 and reports results as CSV files and charts
 - Explain how model-based design replaces the manual traceability you maintained in Lab 2
 
 ---
@@ -73,8 +73,22 @@ By the end of this lab you will be able to:
 | 3 | Project setup & operator interface | 20 min |
 | 4 | State machine design | 30 min |
 | 5 | Simulation & manual verification | 20 min |
-| 6 | Python test script | 30 min |
+| 6 | Python evaluation script (scenarios, CSV, charts) | 45 min |
 | 7 | Traceability & reflection | 15 min |
+
+---
+
+## Project Structure
+
+Open the **Model Explorer** and you will see the `CruiseControl` project split into three packages. Only one of them is what you actually design in this lab — the other two exist purely to let you exercise and observe it.
+
+| Package | Contains | Role | Part of the deliverable? |
+|---------|----------|------|---------------------------|
+| **`Car_design`** | `car` — a vehicle plant model (throttle/brake in, speed/rpm/gear out) | A **stand-in for a real vehicle**, provided so you have something to drive your controller against in simulation. In a real project this would be the actual car (or a certified hardware-in-the-loop test bench) — never a Scade model. You inspect it in Part 2 but do not modify it. | **No** — simulation aid only |
+| **`CC_design`** | `cruise_control` (the state machine), `regulator` (PI controller), `limiter` | **This is the model you build in this lab.** It is the cruise control system itself — the only part with real-world scope, and the only part that would actually run on a vehicle's ECU. Parts 3–4 have you design it; Part 6 generates code from it. | **Yes — this is what you hand in** |
+| **`Simulation`** | `main` (closed-loop), `main_manual` (open-loop, Part 2) | Top-level wiring nodes that connect `cruise_control` to `car` purely so both can be driven together inside the Scade One simulator. They exist for **simulation and learning only**. | **No** — never code-generated for a target; a shipped system would not contain them |
+
+> **Why this matters:** when you generate code in Part 6 (Activity 6A), you target **`cruise_control`** itself, not `main` — because `cruise_control` is the only node that represents real, deployable behaviour. `car` and the `Simulation` wiring nodes are scaffolding that helps you *see* your controller work; they are not something you would ship, certify, or compile into the final target code. Keep this distinction in mind for the Activity 7B reflection question on what "the model" means for certification purposes.
 
 ---
 
@@ -384,7 +398,9 @@ set_point = if (on and not pre(on))
 
 ## Part 5 — Simulation & Manual Verification
 
-Scade One has two complementary ways to verify a model: the interactive **Simulator** (drive inputs by hand, watch outputs and state highlights in real time) and **Test Harnesses** (automate sequences of inputs and expected outputs). You will use both in this part.
+Scade One's interactive **Simulator** lets you drive inputs by hand and watch outputs and state highlights in real time — use it in this part to build intuition about the state machine before automating anything.
+
+> Scade One also supports in-tool **Test Harnesses** (`.swant` files, the same mechanism you used for `counter`/`limiter` in Lab 3.1) for automated sequence checking. This lab uses a **Python evaluation script** instead (Part 6): test scenarios live in plain CSV files, the script drives the generated model cycle-by-cycle, writes CSV results, and plots the dynamic behaviour over time — giving you the same automation with reporting and traceability closer to what you built in Lab 2.
 
 ### Activity 5A — Build and validate the model
 
@@ -436,11 +452,11 @@ Before running full scenarios, spend 5 minutes stepping through the state machin
 
 ---
 
-## Part 6 — Python Test Script
+## Part 6 — Python Evaluation Script
 
-Scade One can generate C code from your model and expose it via a Python wrapper. This lets you reproduce the exact test suite from Lab 2 automatically.
+Scade One can generate C code from your model and expose it via a Python wrapper. Instead of building a Scade One test harness for it, this lab **evaluates the generated model with a Python script**: test scenarios live in CSV files (just like Lab 2's test cases lived as data, only now in files instead of inline tuples), the script drives the wrapper cycle-by-cycle, writes a CSV of results, prints a traceability report, and plots the dynamic input/output behaviour over time.
 
-> **Lab 3.1 connection:** In Lab 3.1 you built Python test scripts for the `Counter` and `Limiter` operators using this exact API — the same `PythonWrapper`, the same `.cycle()` method, the same attribute-based input/output access. The only difference here is that `cruise_control` is stateful (state machine), so the *sequence* of `run_step()` calls matters for multi-cycle scenarios. Refer to Lab 3.1 Part 4 if the wrapper setup is unfamiliar.
+> **Lab 3.1 connection:** In Lab 3.1 you built Python test scripts for the `Counter` and `Limiter` operators using this exact API — the same `PythonWrapper`, the same `.cycle()` method, the same attribute-based input/output access. The only difference here is that `cruise_control` is stateful (state machine), so the *sequence* of cycles matters for multi-cycle scenarios — which is exactly why scenarios are stored as short cycle-by-cycle sequences rather than single input/output pairs. Refer to Lab 3.1 Part 4 if the wrapper setup is unfamiliar.
 
 **Reference:** [Testing Scade One models with Python](https://innovationspace.ansys.com/knowledge/forums/topic/testing-scade-one-models-with-python/)
 
@@ -471,6 +487,7 @@ Or with a `requirements.txt`:
 ```text
 # requirements.txt
 ansys-scadeone-core==0.8.2
+matplotlib
 ```
 
 ```text
@@ -504,16 +521,55 @@ py -3.12 setup_wrapper.py
 
 This produces a class for `cruise_control`. The class name follows the pattern `<operator>_<wrapper>` — check the generated file to confirm the exact name before writing the tests.
 
-### Activity 6C — Python Test Script
+### Activity 6C — Define Test Scenarios in Files
 
-Inputs and outputs are **direct attributes** on the generated object. The cycle method is `.cycle()`.
+In Lab 2, each test case was a tuple hardcoded inline in the test script. Here, each scenario is instead a small **CSV file** under a `scenarios/` folder — one file per test case, one row per simulation cycle. Storing scenarios as data (not code) means you can add or edit a test without touching the evaluation script, and — because `cruise_control` is stateful — a scenario can describe a short *sequence* of cycles (e.g. "activate, then brake, then try to resume without `res`") instead of a single input/output pair.
 
-Create `test_cc_main.py`:
+Each row sets the operator's inputs for that cycle. The optional `expected_throttle` / `req` / `note` columns mark **checkpoint rows** — cycles where the throttle value is fully predictable (e.g. `cc_disabled`/`cc_standby` always mirror `accel`) and therefore worth asserting. Cycles where `cc_active`'s regulator is converging are left unchecked here — you evaluate those visually from the chart in Activity 6E instead.
+
+Project layout:
+
+```text
+CruiseControl/
+├── scenarios/
+│   ├── tc01_cc_disabled_passthrough.csv
+│   ├── tc02_cc_active_regulates.csv
+│   ├── tc03_brake_suspends.csv
+│   ├── tc04_set_without_res_stays_suspended.csv
+│   ├── tc05_res_resumes.csv
+│   └── tc06_cc_off.csv
+├── results/              <- created by evaluate_cc.py: trace CSVs, summary.csv, plots/
+└── evaluate_cc.py
+```
+
+Example — `tc04_set_without_res_stays_suspended.csv`, the graphical equivalent of TC-05's trap in Lab 2 (REQ-04: `set` alone must not resume regulation, only explicit `res`):
+
+```text
+cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
+1,True,False,0.0,0.0,0.300,False,,,activate
+2,True,False,80.0,0.0,0.300,False,,,cc_active
+3,True,False,80.0,15.0,0.300,False,,,brake -> cc_standby
+4,True,True,80.0,0.0,0.300,False,0.300,REQ-04,set alone (no res) must NOT resume regulation
+```
+
+Create the remaining five scenario files the same way, one per row of the transition table in Activity 4B plus the `cc_disabled`/`cc_off` cases — reuse the REQ tags from that table so the `req` column stays traceable back to Part 4.
+
+### Activity 6D — Write the Python Evaluation Script
+
+Inputs and outputs are **direct attributes** on the generated object, and the cycle method is `.cycle()` — same API as Lab 3.1's wrapper tests.
+
+Create `evaluate_cc.py`:
 
 ```python
-# test_cc_main.py
-# Tests the generated cruise_control operator via the Scade One Python wrapper.
-# Mirrors the test cases from Lab 2.
+# evaluate_cc.py
+# Runs every scenario in scenarios/*.csv against the generated cruise_control
+# wrapper, logs the per-cycle trace to results/<tid>_trace.csv, checks any
+# expected_throttle checkpoints, and writes a traceability summary to
+# results/summary.csv. Plotting is added in Activity 6E.
+
+import csv
+import glob
+import os
 
 from ansys.scadeone.core import ScadeOne
 from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
@@ -531,56 +587,119 @@ gen.generate()
 # Instantiate generated operator class — check generated file for exact name.
 cc = gen.get_operator_instance()
 
-def run_step(on, set_spd, brake, accel, res, v_speed):
+SCENARIOS_DIR, RESULTS_DIR, TOLERANCE = "scenarios", "results", 1e-3
+
+
+def run_cycle(on, set_flag, v_speed, brake, accel, res):
     """Set inputs, run one cycle, return throttle output."""
-    cc.on      = on       # inputs are direct attributes
-    cc.set     = set_spd
-    cc.brake   = brake
-    cc.accel   = accel
-    cc.res     = res
-    cc.v_speed = v_speed
-    cc.cycle()            # advance one clock cycle
-    return cc.throttle    # output is a direct attribute
+    cc.on, cc.set, cc.v_speed = on, set_flag, v_speed
+    cc.brake, cc.accel, cc.res = brake, accel, res
+    cc.cycle()
+    return cc.throttle
 
-def reset():
+
+def run_scenario(path):
+    tid = os.path.splitext(os.path.basename(path))[0]
     cc.reset()
-    run_step(False, False, 0.0, 0.0, False, 0.0)  # one idle cycle after reset
+    trace, checks = [], []
 
-print("=" * 60)
-print("  VERIFICATION REPORT -- cruise_control (Scade One)")
-print("=" * 60)
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            throttle = run_cycle(
+                row["on"] == "True", row["set"] == "True", float(row["v_speed"]),
+                float(row["brake"]), float(row["accel"]), row["res"] == "True",
+            )
+            trace.append({**row, "throttle": f"{throttle:.3f}"})
+            if row["expected_throttle"]:
+                expected = float(row["expected_throttle"])
+                passed = abs(throttle - expected) <= TOLERANCE
+                checks.append({
+                    "tid": tid, "cycle": row["cycle"], "req": row["req"],
+                    "note": row["note"], "expected": expected,
+                    "actual": throttle, "status": "PASS" if passed else "FAIL",
+                })
 
-test_cases = [
-    # (on,   set,   brake,  accel,  res,   v_speed, description,              req)
-    (True,  False,  0.0,   0.5,  False,  80.0, "CC active, no brake",    "REQ-01"),
-    (True,  False,  15.0,  0.5,  False,  80.0, "Brake -> not_regulating","REQ-02,REQ-04"),
-    (True,  True,   0.0,   0.5,  False,  80.0, "Set only, no res",       "REQ-04 ***"),
-    (True,  False,  0.0,   0.5,  True,   80.0, "Res -> regulating again","REQ-04"),
-    (False, False,  0.0,   0.5,  False,  80.0, "CC off -> OFF_st",       "REQ-01"),
-]
+    with open(os.path.join(RESULTS_DIR, f"{tid}_trace.csv"), "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=trace[0].keys())
+        writer.writeheader()
+        writer.writerows(trace)
 
-for on, set_spd, brake, accel, res, v_speed, desc, req in test_cases:
-    reset()
-    if on:
-        run_step(True, False, 0.0, 0.0, False, v_speed)  # turn on first
-    throttle = run_step(on, set_spd, brake, accel, res, v_speed)
-    print(f"  [{req:18s}] {desc:35s} | throttle={throttle:.3f}")
+    return tid, trace, checks
 
-print("=" * 60)
-print("Compare S-03 (set only from not_regulating) — throttle must not increase.")
+
+if __name__ == "__main__":
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    all_checks = []
+
+    for path in sorted(glob.glob(os.path.join(SCENARIOS_DIR, "*.csv"))):
+        tid, trace, checks = run_scenario(path)
+        all_checks.extend(checks)
+
+    with open(os.path.join(RESULTS_DIR, "summary.csv"), "w", newline="") as f:
+        fields = ["tid", "cycle", "req", "note", "expected", "actual", "status"]
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(all_checks)
+
+    print("=" * 70)
+    print("  VERIFICATION REPORT -- cruise_control (Scade One, scenario files)")
+    print("=" * 70)
+    for c in all_checks:
+        print(f"  [{c['req']:8s}] {c['tid']:38s} | expected={c['expected']:.3f} "
+              f"actual={c['actual']:.3f} | {c['status']}")
+    n_fail = sum(1 for c in all_checks if c["status"] == "FAIL")
+    print("=" * 70)
+    print("VALIDATION: ALL REQUIREMENTS MET." if n_fail == 0
+          else f"VALIDATION: ISSUES FOUND ({n_fail} failing).")
 ```
 
 > **API note:** The exact class name and instantiation method depend on your Scade One version — check the generated wrapper file. The pattern above follows the `ansys.scadeone.core` API from the [reference documentation](https://innovationspace.ansys.com/knowledge/forums/topic/testing-scade-one-models-with-python/).
 
-### Activity 6D — Run and Compare
+`results/summary.csv` is your traceability artifact for this lab — the direct equivalent of Lab 2's traceability matrix (Part 4, Activity 4C), except generated automatically from the `req` column in each scenario file instead of typed by hand.
+
+### Activity 6E — Visualize Runtime Behaviour
+
+The checkpoint rows in Activity 6D only assert the deterministic cases (`cc_disabled`/`cc_standby`, where `throttle == accel`). To evaluate the regulator while `cc_active` — where `throttle` changes gradually cycle by cycle as the PI controller converges — add a plotting step that turns each scenario's trace into a chart.
+
+Add to `evaluate_cc.py`:
+
+```python
+import matplotlib.pyplot as plt
+
+PLOTS_DIR = os.path.join(RESULTS_DIR, "plots")
+
+
+def plot_scenario(tid, trace):
+    cycles = [int(r["cycle"]) for r in trace]
+    throttle = [float(r["throttle"]) for r in trace]
+    v_speed = [float(r["v_speed"]) for r in trace]
+
+    fig, ax1 = plt.subplots()
+    ax1.plot(cycles, throttle, color="tab:blue", label="throttle")
+    ax1.set_xlabel("cycle")
+    ax1.set_ylabel("throttle", color="tab:blue")
+
+    ax2 = ax1.twinx()
+    ax2.plot(cycles, v_speed, color="tab:orange", label="v_speed")
+    ax2.set_ylabel("v_speed", color="tab:orange")
+
+    plt.title(tid)
+    fig.tight_layout()
+    fig.savefig(os.path.join(PLOTS_DIR, f"{tid}.png"))
+    plt.close(fig)
+```
+
+Call `plot_scenario(tid, trace)` at the end of `run_scenario()`, and create `PLOTS_DIR` alongside `RESULTS_DIR` in `__main__`. Each PNG shows `throttle` and `v_speed` over the scenario's cycles on twin axes — this is what lets you *see* dynamic behaviour (e.g. the regulator's gradual convergence in `tc02_cc_active_regulates.png`) that a single expected-value assertion cannot capture.
+
+### Activity 6F — Run and Compare
 
 Run:
 
 ```text
-python test_cc_main.py
+python evaluate_cc.py
 ```
 
-Compare the output to Lab 2's verification report. Write 2–3 sentences: what is the same, and what is different about testing via generated C vs. testing your Python implementation directly?
+Inspect `results/summary.csv` (the PASS/FAIL traceability report) and the charts in `results/plots/`. Compare the summary to Lab 2's verification report. Write 2–3 sentences: what is the same, and what is different about testing via generated C plus scenario files vs. testing your Python implementation directly?
 
 ---
 
@@ -660,6 +779,8 @@ In Lab 2 you maintained a traceability matrix as a Python comment. In Scade One,
 ## Optional Extension — Closed-Loop Car Simulation
 
 If you finish early, connect your completed `cruise_control` operator to the `car` plant model to observe closed-loop behaviour.
+
+> As in **Project Structure** above: the `main` node you build here lives in the `Simulation` package, purely to let you watch `cruise_control` and `car` run together in the simulator. It is not part of the deliverable model and is not what Part 6 generates code from.
 
 1. Open (or create) a `main` top-level node that instantiates both `cruise_control` and `car`
 2. Wire the outputs of `cruise_control` into `car`:

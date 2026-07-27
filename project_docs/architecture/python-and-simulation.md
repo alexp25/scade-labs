@@ -75,14 +75,27 @@ C code; a `PythonWrapper` (from `ansys.scadeone.core.svc.pywrapper
   test** — a 1000-cycle loop toggling `accel`/`on`/`res`/`set_point`
   (cruise control engages at cycle 200, `set_point=50.0`), printing
   speed/gear/rpm/state each cycle with `time.sleep(0.05)`. There are no
-  assertions and no PASS/FAIL output; a human reads the trace.
-- `docs/lab3_2/lab.md`'s "Activity 6C" shows an **instructional-only**
-  `test_cc_main.py` code block — **no such file exists in the repository**
-  (confirmed by glob). It illustrates a different, simplified hypothetical
-  wrapper API (`cc.on`, `cc.brake`, `cc.cycle()`) than the real generated
-  `cc_wrapper.py` (`.inputs.<name>`/`.outputs.<name>`); the lab.md text
-  itself flags this gap ("the exact class name and instantiation method
-  depend on your Scade One version — check the generated wrapper file").
+  assertions and no PASS/FAIL output; a human reads the trace. Kept as-is —
+  not part of the Part 6 lesson flow.
+- `docs/lab3_2/lab.md` Part 6 (Activities 6C–6F, rewritten in this session to
+  replace Scade One test-harness building with a Python-driven evaluation
+  workflow) now teaches `evaluate_cc.py`: test scenarios are stored as CSV
+  files under `scenarios/` (one row per simulation cycle, optional
+  `expected_throttle`/`req`/`note` checkpoint columns), the script drives the
+  generated wrapper cycle-by-cycle, writes a per-scenario trace CSV plus a
+  `results/summary.csv` traceability report, and plots
+  `results/plots/<tid>.png` (throttle + `v_speed` vs. cycle on twin axes) via
+  `matplotlib`. A matching reference copy —
+  `src/lab3_2/solution/CruiseControl/evaluate_cc.py` plus six scenario CSVs
+  under `src/lab3_2/solution/CruiseControl/scenarios/` — **does exist in the
+  repository** (unlike the lab.md's prior `test_cc_main.py` snippet, which
+  had no backing file). It still illustrates the same simplified hypothetical
+  wrapper API (`cc.on`, `cc.brake`, `cc.cycle()`, `cc.throttle`) as before —
+  not the real generated `cc_wrapper.py`'s `.inputs.<name>`/`.outputs.<name>`
+  pattern (that wrapper is generated for the closed-loop `main` node, not a
+  standalone `cruise_control` operator) — both `evaluate_cc.py` and lab.md
+  carry the same "check the generated wrapper file" caveat as before; this
+  session did not change which operator the wrapper is generated for.
 
 **Verified this session:** `ansys.scadeone.core` is not installed in this
 environment (`ModuleNotFoundError`), so none of these scripts could be

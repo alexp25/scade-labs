@@ -572,7 +572,7 @@ print("Wrappers generated.")
 Run it once:
 
 ```text
-py -3.12 setup_wrapper.py
+python setup_wrapper.py
 ```
 
 This produces:

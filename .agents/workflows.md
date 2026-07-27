@@ -36,9 +36,27 @@ partially documents a step, that's stated explicitly.
    `regulator`/`car` for 3.2).
 3. Run the built-in simulator and compare against the expected values stated
    per activity in `lab.md`.
-4. Build a test harness (`.swant`) for automated in-tool checking (Lab 3.1
-   ships a populated one; Lab 3.2's is an empty scaffold — building it out is
-   left to the student/instructor).
+4. Lab 3.1: build a test harness (`.swant`) for automated in-tool checking —
+   `test.swant` ships populated. Lab 3.2: `lab.md` Part 5 only briefly
+   mentions Scade One test harnesses (`Main_test.swant` remains an empty,
+   unused scaffold); automated evaluation is instead a Python script (Part
+   6) — see the next workflow.
+
+## Learner: Lab 3.2 — Python evaluation script (Part 6)
+
+1. Generate the code-generation job + Python wrapper (Activities 6A/6B —
+   requires local Scade One, same prerequisite as the modeling workflow).
+2. Define each test scenario as a CSV file under `scenarios/` (one row per
+   simulation cycle; optional `expected_throttle`/`req`/`note` columns mark
+   checkpoint rows). Six examples ship in
+   `src/lab3_2/solution/CruiseControl/scenarios/` (`tc01`…`tc06`).
+3. Run `evaluate_cc.py` — it drives the wrapper cycle-by-cycle per scenario,
+   writes `results/<tid>_trace.csv`, checks checkpoint rows, and writes
+   `results/summary.csv` (the traceability report, REQ-tagged, PASS/FAIL,
+   same banner style as Lab 2) plus `results/plots/<tid>.png` (throttle +
+   `v_speed` vs. cycle).
+4. Compare `results/summary.csv` and the charts to Lab 2's verification
+   report (Activity 6F).
 
 ## Maintainer: comparing student work against reference
 
@@ -57,9 +75,11 @@ environment (see `.agents/testing.md`).**
 2. Lab 3.1: `py -3.12 setup_wrapper.py` (regenerates `counter_wrapper/`,
    `limiter_wrapper/`). Lab 3.2: run `generate_python_wrapper.bat`
    (regenerates `cc_wrapper/`).
-3. Run the corresponding test script (`test_counter.py`/`test_limiter.py`
-   locally-runnable once wrappers exist; `tester.py` is a live demo printout,
-   not an assertion-based check).
+3. Run the corresponding test script: `test_counter.py`/`test_limiter.py`
+   for Lab 3.1 (locally-runnable once wrappers exist); for Lab 3.2,
+   `evaluate_cc.py` (scenario-CSV-driven, writes `results/summary.csv` +
+   charts) or `tester.py` (still present, a live demo printout, not an
+   assertion-based check).
 
 ## Maintainer: publishing a changed lab
 

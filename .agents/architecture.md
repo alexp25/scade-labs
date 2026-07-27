@@ -1,9 +1,14 @@
 # Architecture
 
-This is a static-content educational repository — **not** a web application,
-backend, or service. There is no database, API, authentication, or deployment
-service; "the architecture" is: a Jekyll-built static site + a parallel source
-tree + legacy archives.
+This is a static-content educational repository — the lab content itself is
+served with **no** backend or deployment service beyond GitHub Pages; "the
+architecture" is: a Jekyll-built static site + a parallel source tree +
+legacy archives. As of ADR 0002
+(`.agents/decisions/0002-firebase-backend-for-auth-and-progress.md`), the
+site additionally has one external backend, added client-side only:
+**Firebase** (Authentication + Firestore), used solely for optional login,
+progress tracking, and the admin panel — see "Backend (Firebase)" below. Lab
+content itself remains fully public and does not require login.
 
 ## Real repository structure
 
@@ -17,7 +22,11 @@ scade-labs/
 │   ├── assets/css/syntax.css                         Rouge syntax-highlight CSS (unreferenced by any page — see publishing.md)
 │   ├── lab2/{index.html, lab.md}                     Lab 2 page (no img/)
 │   ├── lab3_1/{index.html, lab.md, img/}              Lab 3.1 page
-│   └── lab3_2/{index.html, lab.md, lab_old.md, img/}  Lab 3.2 page (lab_old.md is unused/orphaned)
+│   ├── lab3_2/{index.html, lab.md, lab_old.md, img/}  Lab 3.2 page (lab_old.md is unused/orphaned)
+│   ├── assets/js/{firebase-config.js, firebase-client.js, auth-header.js}  Firebase bootstrap + shared auth/tracking widget (ADR 0002)
+│   ├── account/index.html                            login/register + "my progress" page
+│   └── admin/index.html                               admin-only progress view (protected by Firestore rules, not by hiding this URL)
+├── firestore.rules       Firestore Security Rules source of truth — hand-pasted into the Firebase console, no deploy pipeline (ADR 0002)
 ├── src/                  lab source code — NOT published, not linked from docs/
 │   ├── lab2/{starter, solution, README.md, .gitignore}
 │   ├── lab3_1/solution/  (Swan model + Python wrapper, no starter/)
@@ -25,6 +34,29 @@ scade-labs/
 ├── old/                  tracked legacy archive (old/lab2_old/, old/scade_demo/) — superseded, not linked from any published page
 └── scade_demo/           untracked local Scade One codegen job output at repo root — not part of the curriculum, left as-is
 ```
+
+## Backend (Firebase)
+
+Per ADR 0002, `docs/` now optionally talks to a Firebase project client-side
+(Firebase Web SDK loaded from `gstatic.com` as ES modules — no bundler, no
+Firebase CLI, no build step). This does not change the Jekyll/static-hosting
+model above; it is an additional runtime dependency loaded by the browser.
+
+- **Auth**: Firebase Authentication, email/password only.
+- **Data** (Firestore): three collections — `profiles/{uid}` (email,
+  `isAdmin` flag), `labOpens/{uid}_{labId}` (per-user, per-lab open counts),
+  `quizAttempts/{autoId}` (append-only score log for quizzes and Lab 2's
+  code-run "test" results).
+- **Admin model**: `isAdmin` can only be set to `true` via a maintainer
+  manually editing the document in the Firebase console — no application
+  code path can set it, so a client can never self-promote. Every read of
+  another user's data is gated by `firestore.rules`' `isAdmin()` function,
+  which re-derives admin status from the caller's own `profiles` document on
+  the server side. `docs/admin/index.html`'s client-side redirect/checks are
+  a UX convenience, not the actual security boundary.
+- **Lab content stays public**: login is required only to record progress
+  and to view `/admin/`; no lab page redirects anonymous visitors.
+- Full setup/operational detail: `project_docs/integrations/firebase.md`.
 
 ## Publishing architecture
 

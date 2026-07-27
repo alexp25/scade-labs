@@ -1,0 +1,5 @@
+cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
+1,True,False,0.0,0.0,0.300,False,,,activate
+2,True,False,80.0,0.0,0.300,False,,,cc_active
+3,True,False,80.0,15.0,0.300,False,,,brake -> cc_standby
+4,True,True,80.0,0.0,0.300,False,0.300,REQ-04,set alone (no res) must NOT resume regulation - the key trap from TC-05 in Lab 2

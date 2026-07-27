@@ -20,6 +20,19 @@
 
 ## Lab 3.2 — `src/lab3_2/solution/CruiseControl/`
 
+Three packages, three different roles — `docs/lab3_2/lab.md` now has a
+"Project Structure" section spelling this out for students:
+- `CC_design` (`cruise_control`/`regulator`/`limiter`) — **the deliverable**:
+  the only node with real-world scope, the only one Part 6 generates code
+  from.
+- `Car_design` (`car`) — a plant-model stand-in for a real vehicle, provided
+  only so students have something to drive the controller against; not
+  modified by students, not a code-generation target.
+- `Simulation` (`main`/`main_manual`) — wiring nodes that connect
+  `cruise_control` to `car` purely for interactive/manual simulation; never
+  targeted by the Part 6 code-generation job, would not appear in a shipped
+  system.
+
 - `CruiseControl.sproj` — plain JSON manifest, declares one Resource:
   `{"Kind": "SimulationData", "Path": "resources\\main_inputs.sd", "Key":
   "main_inputs"}`.
@@ -49,8 +62,11 @@
   control) and `node main_manual(...)` (open-loop, `throttle_percent =
   accel*100.0`, no cruise control — for plant-only exploration).
 - `assets/Main_test.swant` — **present but empty**: only the version header
-  line, no `_harness` body. Despite lab.md describing test-harness activities
-  for this lab, no test vectors are actually committed in this file.
+  line, no `_harness` body. `docs/lab3_2/lab.md` no longer describes
+  test-harness-building activities for this lab (Part 5 only briefly
+  mentions Scade One test harnesses before redirecting to the Python
+  evaluation script in Part 6) — this file is simply unused, not a gap
+  against a documented activity anymore.
 - `cc_wrapper/cc_wrapper.py`, `cc_wrapper.c`, `cc_wrapper.def` — **generated**
   (banner line 1 of each). `cc_wrapper.dll` — **compiled binary, not
   inspectable**; verified only: 94,820 bytes, PE32+ DLL (x86-64, Windows).

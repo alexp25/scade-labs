@@ -48,10 +48,13 @@ requirements engineering — do not invent a traceability angle for it.
   demonstrates the mechanism it teaches.**
 - "Activity 7B" is a pure reflection quiz (DO-178C/ISO 26262 discussion
   questions) — comprehension, not a trace artifact.
-- The Python test script's REQ tags (in lab.md's instructional
-  `test_cc_main.py` snippet) are **naming-based**: a label field in the test
-  tuple, with no "this verifies REQ-X" sentence and no link to the in-tool
-  Requirements panel.
+- The Python evaluation script's REQ tags (a `req` column in each
+  `scenarios/*.csv` file, read by `evaluate_cc.py` and written into
+  `results/summary.csv`) are **naming-based**: a label field, with no "this
+  verifies REQ-X" sentence and no link to the in-tool Requirements panel.
+  This replaced the prior file-less `test_cc_main.py` instructional snippet
+  in this session — `evaluate_cc.py` and its `scenarios/*.csv` are real,
+  committed files under `src/lab3_2/solution/CruiseControl/`.
 
 ## Test → requirement classification table
 
@@ -59,7 +62,7 @@ requirements engineering — do not invent a traceability angle for it.
 |---|---|---|---|---|
 | TC-01..TC-07 (Lab 2) | full cruise-control state machine | REQ-01..04 | **EXPLICIT** | lab.md prose + `req`/`tid` fields in test tuples |
 | limiter/counter tests (Lab 3.1) | clamp / increment behavior | none | **N/A** | no REQ IDs exist in Lab 3.1 |
-| `test_cc_main.py` cases (Lab 3.2, instructional only) | cruise-control scenarios | REQ-01/02/04 | **NAMING-BASED** | label field only, no "verifies" statement, not file-backed |
+| `evaluate_cc.py` scenario checkpoints (Lab 3.2) | cruise-control scenarios | REQ-01/02/04 | **NAMING-BASED** | `req` column in each `scenarios/*.csv`, written to `results/summary.csv`; no "verifies" statement, but file-backed (unlike the prior instructional-only snippet) |
 | Activity 7A model-element links (Lab 3.2) | 4 transitions | REQ-01/02/04 | **EXPLICIT instruction, PARTIALLY REALIZED** (1 of 4 present) | `lab.md` Activity 7A vs. `CC_design.swan:2` |
 | Scenario "S-03" (Lab 3.2 reflection quiz) | reactivation requires explicit `res` | REQ-04 (by analogy) | **INFERRED** — quiz answer describes behavior, never states the REQ ID | reflection quiz text only |
 
@@ -70,9 +73,11 @@ requirements engineering — do not invent a traceability angle for it.
 - **Lab 3.1:** no single "done" banner; per-activity expected values (e.g.
   simulation tables) plus the generated test scripts' own
   `"ALL PASS"`/`"SOME TESTS FAILED"` print.
-- **Lab 3.2:** no aggregate banner; completion is activity-based ("A
-  successful build shows 0 errors...", "Confirm throttle equals accel
-  (0.5)") and ends with a manual compare-and-discuss step, not a pass count.
+- **Lab 3.2:** completion is activity-based through Part 5 ("A successful
+  build shows 0 errors...", "Confirm throttle equals accel (0.5)"); Part 6
+  now ends with `evaluate_cc.py`'s own "VALIDATION: ALL REQUIREMENTS MET." /
+  "...ISSUES FOUND" banner over the checkpoint scenarios, followed by a
+  manual compare-and-discuss step against Lab 2's report.
 
 ## Safety-standard mentions — never a compliance claim
 
@@ -94,9 +99,10 @@ such a claim.
   + a dict the student fills into the editor, not a repo artifact.
 - No code-coverage tool anywhere.
 - No CI pipeline (no `.github/workflows/`).
-- Lab 3.2's `Main_test.swant` harness scaffold is empty — described
-  test-harness activities exist in lab.md but no committed `.swant` test
-  vectors back them.
+- Lab 3.2's `Main_test.swant` harness scaffold is empty and unused — lab.md
+  no longer describes test-harness-building activities for it (Part 5 now
+  only briefly mentions Scade One test harnesses before redirecting to the
+  Python evaluation script in Part 6).
 - Lab 3.1's Python tests are plain scripts (manual PASS/FAIL string
   comparison), not an assertion framework, and carry no requirement
   linkage (Lab 3.1 has no REQ IDs to link to).

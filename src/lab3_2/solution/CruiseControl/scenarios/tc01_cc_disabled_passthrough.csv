@@ -1,0 +1,2 @@
+cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
+1,False,False,0.0,0.0,0.400,False,0.400,REQ-01,cc_disabled: throttle must mirror accel

@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// Firestore Security Rules for the SCADE Labs progress-tracking backend.
+//
+// How to apply: paste this whole file into the Firebase console →
+// Firestore Database → Rules tab → Publish. There is no CLI/build step in
+// this repo, so the console is the canonical place these rules are deployed
+// from; this file is kept in the repo only as the source of truth to copy
+// from and diff against.
+//
+// Security model: `isAdmin()` re-derives admin status from the caller's own
+// `profiles` document on every request, using `request.auth.uid` (verified
+// server-side by Firebase, never a client-supplied value). The `isAdmin`
+// field itself can only ever be set to `true` by someone editing Firestore
+// directly in the console (the instructor) — no rule below ever allows a
+// client to write `isAdmin: true`, so a student account can never
+// self-promote.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // profiles/{uid} — one document per registered user, doc ID == auth UID.
+    match /profiles/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+
+      // Users may create only their own profile, and only as a non-admin.
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.isAdmin == false;
+
+      // Users may update their own profile but can never change isAdmin.
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.isAdmin == resource.data.isAdmin;
+    }
+
+    // labOpens/{uid}_{labId} — one document per (user, lab), upserted.
+    match /labOpens/{docId} {
+      allow read: if request.auth != null
+        && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create, update: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // quizAttempts/{autoId} — append-only, one document per submission.
+    match /quizAttempts/{docId} {
+      allow read: if request.auth != null
+        && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      // No update/delete: attempts are an immutable log.
+    }
+  }
+}

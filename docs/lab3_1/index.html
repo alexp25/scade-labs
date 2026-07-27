@@ -173,6 +173,7 @@
     <span>Scade One · Lesson 3</span>
     <span>2 hours</span>
   </div>
+  <div id="auth-slot" data-base="../" style="margin-top:.75rem"></div>
 </header>
 
 <div class="page-body">
@@ -190,6 +191,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>window.CURRENT_LAB_ID = 'lab3_1';</script>
+<script type="module" src="../assets/js/auth-header.js"></script>
 <script>
 fetch('lab.md')
   .then(r => {
@@ -252,6 +255,10 @@ function initQuiz() {
     scoreEl.style.color = score === total ? 'var(--green)' : score >= Math.ceil(total / 2) ? 'var(--orange)' : '#B71C1C';
     submitBtn.disabled = true;
     resetBtn.style.display = 'inline-block';
+
+    if (window.recordQuizAttempt) {
+      window.recordQuizAttempt('lab3_1', 'reflection-quiz', score, total);
+    }
   });
 
   resetBtn.addEventListener('click', function () {
