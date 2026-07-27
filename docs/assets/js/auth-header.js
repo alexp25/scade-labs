@@ -11,6 +11,7 @@
 // open to everyone and tracking is purely additive.
 
 import { auth, db } from "./firebase-client.js";
+import { ensureProfile } from "./firebase-profile.js";
 import {
   onAuthStateChanged,
   signOut,
@@ -56,24 +57,20 @@ function render() {
   if (logoutBtn) logoutBtn.addEventListener("click", () => signOut(auth));
 }
 
-async function ensureProfile(user) {
-  const ref = doc(db, "profiles", user.uid);
-  const snap = await getDoc(ref);
-  if (snap.exists()) return snap.data();
-
-  const profile = {
-    email: user.email || "",
-    displayName: user.displayName || "",
-    isAdmin: false,
-    createdAt: serverTimestamp(),
-  };
-  await setDoc(ref, profile);
-  return profile;
-}
-
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
-  currentProfile = user ? await ensureProfile(user) : null;
+  if (user) {
+    try {
+      currentProfile = await ensureProfile(user);
+    } catch (err) {
+      // Most likely cause: firestore.rules hasn't been pasted into the
+      // Firebase console yet, so the default rules deny all reads/writes.
+      console.error("Failed to load/create Firestore profile for", user.uid, err);
+      currentProfile = { email: user.email || "", isAdmin: false };
+    }
+  } else {
+    currentProfile = null;
+  }
   render();
   // Pages set window.CURRENT_LAB_ID before loading this module so the
   // "lab opened" event can be recorded automatically once a session is

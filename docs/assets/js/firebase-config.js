@@ -8,11 +8,13 @@
 //
 // See project_docs/integrations/firebase.md for full setup instructions.
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 export const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
+  apiKey: "AIzaSyBIB2-vu_IG9B9lzP8e1kA7I1FOOoVZjI4",
+  authDomain: "scade-project.firebaseapp.com",
+  projectId: "scade-project",
+  storageBucket: "scade-project.firebasestorage.app",
+  messagingSenderId: "575883131850",
+  appId: "1:575883131850:web:0863748537315a93976d33",
+  measurementId: "G-EG956S8R7M"
 };

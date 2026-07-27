@@ -138,6 +138,7 @@
 
 <script type="module">
 import { auth, db } from "../assets/js/firebase-client.js";
+import { ensureProfile } from "../assets/js/firebase-profile.js";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -145,7 +146,7 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  collection, query, where, getDocs, orderBy,
+  collection, query, where, getDocs,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const LAB_TITLES = {
@@ -176,26 +177,35 @@ async function loadProgress(user) {
     opensEl.innerHTML = `<table><thead><tr><th>Lab</th><th>Opens</th><th>Last opened</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
 
+  // No orderBy here on purpose: a where() + orderBy() on different fields
+  // needs a Firestore composite index that doesn't exist by default. Sort
+  // client-side instead — attempt volume per student is small.
   const attemptsSnap = await getDocs(
-    query(collection(db, "quizAttempts"), where("userId", "==", user.uid), orderBy("submittedAt", "desc"))
+    query(collection(db, "quizAttempts"), where("userId", "==", user.uid))
   );
   const attemptsEl = document.getElementById("quiz-attempts-table");
   if (attemptsSnap.empty) {
     attemptsEl.innerHTML = '<p class="muted">No quiz attempts yet.</p>';
   } else {
-    const rows = attemptsSnap.docs.map(d => {
-      const a = d.data();
-      return `<tr><td>${escapeHtml(LAB_TITLES[a.labId] || a.labId)}</td><td>${escapeHtml(a.quizId)}</td><td>${a.score} / ${a.total}</td><td>${fmt(a.submittedAt)}</td></tr>`;
-    }).join("");
+    const attempts = attemptsSnap.docs.map(d => d.data())
+      .sort((a, b) => (b.submittedAt?.toMillis() || 0) - (a.submittedAt?.toMillis() || 0));
+    const rows = attempts.map(a =>
+      `<tr><td>${escapeHtml(LAB_TITLES[a.labId] || a.labId)}</td><td>${escapeHtml(a.quizId)}</td><td>${a.score} / ${a.total}</td><td>${fmt(a.submittedAt)}</td></tr>`
+    ).join("");
     attemptsEl.innerHTML = `<table><thead><tr><th>Lab</th><th>Quiz</th><th>Score</th><th>Submitted</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
 }
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   document.getElementById("logged-out-view").style.display = user ? "none" : "block";
   document.getElementById("logged-in-view").style.display = user ? "block" : "none";
   if (user) {
     document.getElementById("account-email").textContent = user.email;
+    try {
+      await ensureProfile(user);
+    } catch (err) {
+      console.error("Failed to load/create Firestore profile for", user.uid, err);
+    }
     loadProgress(user);
   }
 });
