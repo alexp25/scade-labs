@@ -111,7 +111,7 @@ this out is left to the student/instructor, not shipped as a reference.
   `C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One` — implies
   Scade One **v261**; no separate semantic product version string was found
   anywhere in the repo.
-- Python `3.12` required for wrapper generation/testing (`py -3.12 ...`, used
+- Python `3.12` required for wrapper generation/testing (`py -3 ...`, used
   consistently across both labs' scripts and `lab.md` files).
 - `ansys-scadeone-core==0.8.2` pinned for Lab 3.1;
   **unpinned `ansys-scadeone-core`** for Lab 3.2 — a real inconsistency

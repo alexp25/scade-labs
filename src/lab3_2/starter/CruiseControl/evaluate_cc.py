@@ -6,12 +6,21 @@
 # results/summary.csv, and plots each scenario's dynamic behaviour to
 # results/plots/<tid>.png.
 #
-# NOTE: this mirrors the hypothetical single-operator wrapper API taught in
-# docs/lab3_2/lab.md (cc.on, cc.brake, cc.cycle(), cc.throttle, root
-# declarations = the cruise_control operator). The exact attribute names
-# depend on your Scade One version and the operator you target for code
-# generation - check the generated wrapper file and adjust run_cycle()
-# accordingly, same caveat as lab.md's Activity 6D.
+# NOTE: the generated wrapper (cc_wrapper/cc_wrapper.py) exposes the
+# cruise_control operator as a class named after the root operator and the
+# design file it was generated from (cruise_control_CC_design here), with
+# inputs/outputs grouped under .inputs / .outputs rather than as direct
+# attributes. The exact class name and grouping depend on your Scade One
+# version and the operator you target for code generation - check the
+# generated wrapper file and adjust the import/instantiation below and
+# run_cycle() accordingly, same caveat as lab.md's Activity 6D.
+#
+# The cruise_control node takes set_point as a plain input rather than
+# computing it internally (see assets/CC_design.swan), so this script
+# reproduces Activity 4E's "rising edge of on locks set_point = v_speed"
+# rule in Python and feeds the held value in every cycle. The scenario
+# CSVs' "set" column is not part of this model's interface (only "on" and
+# "res" affect set_point/state) and is kept only for traceability/logging.
 #
 # Requires a local Scade One install + a regenerated wrapper; cannot be run
 # in an environment without Scade One (see .agents/testing.md).
@@ -19,35 +28,56 @@
 import csv
 import glob
 import os
+import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
 from ansys.scadeone.core import ScadeOne
 from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 
-SCADE_INSTALL = r"C:\Program Files\ANSYS Inc\v251\SCADE"
-PROJECT_DIR = r"path\to\your\CruiseControl.sproj"
+SCADE_INSTALL = r"C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One"
+PROJECT_DIR = r"CruiseControl.sproj"
+WRAPPER_NAME = "cc_wrapper"
 
 app = ScadeOne(install_dir=SCADE_INSTALL)
 prj = app.load_project(PROJECT_DIR)
 prj.load_jobs()
-job = prj.get_job("CodeGenerationJob_CC")
-gen = PythonWrapper(prj, job)
+JOB_NAME = "CodeGenerationJob_CC"
+gen = PythonWrapper(prj, JOB_NAME, output=WRAPPER_NAME)
 gen.generate()
 
-# Instantiate generated operator class - check generated file for exact name.
-cc = gen.get_operator_instance()
+# Instantiate generated operator class - check cc_wrapper/cc_wrapper.py if
+# the class name differs for your Scade One version/project (pattern is
+# <operator>_<design>, same convention as Lab 3.1's wrapper classes).
+sys.path.insert(0, str(Path(__file__).parent / WRAPPER_NAME))
+from cc_wrapper import cruise_control_CC_design  # noqa: E402
+
+cc = cruise_control_CC_design()
 
 SCENARIOS_DIR, RESULTS_DIR, TOLERANCE = "scenarios", "results", 1e-3
 PLOTS_DIR = os.path.join(RESULTS_DIR, "plots")
 
+_prev_on, _held_set_point = False, 0.0
 
-def run_cycle(on, set_flag, v_speed, brake, accel, res):
-    """Set inputs, run one cycle, return throttle output."""
-    cc.on, cc.set, cc.v_speed = on, set_flag, v_speed
-    cc.brake, cc.accel, cc.res = brake, accel, res
+
+def run_cycle(on, _set_flag, v_speed, brake, accel, res):
+    """Set inputs, run one cycle, return throttle output.
+
+    _set_flag (the scenario CSV's "set" column) is not part of this model's
+    interface - see the NOTE at the top of this file - and is accepted only
+    to keep the call site in run_scenario() self-documenting.
+    """
+    global _prev_on, _held_set_point
+    if on and not _prev_on:
+        _held_set_point = v_speed
+    _prev_on = on
+
+    cc.inputs.on, cc.inputs.v_speed = on, v_speed
+    cc.inputs.brake, cc.inputs.accel, cc.inputs.res = brake, accel, res
+    cc.inputs.set_point = _held_set_point
     cc.cycle()
-    return cc.throttle
+    return cc.outputs.throttle
 
 
 def plot_scenario(tid, trace):
@@ -71,8 +101,10 @@ def plot_scenario(tid, trace):
 
 
 def run_scenario(path):
+    global _prev_on, _held_set_point
     tid = os.path.splitext(os.path.basename(path))[0]
     cc.reset()
+    _prev_on, _held_set_point = False, 0.0
     trace, checks = [], []
 
     with open(path, newline="") as f:

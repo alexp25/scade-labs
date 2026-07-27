@@ -72,7 +72,7 @@ environment (see `.agents/testing.md`).**
 1. `pip install -r requirements.txt` (`ansys-scadeone-core`, pinned `==0.8.2`
    for Lab 3.1, unpinned for Lab 3.2 — document this inconsistency, don't
    silently pin it without maintainer confirmation).
-2. Lab 3.1: `py -3.12 setup_wrapper.py` (regenerates `counter_wrapper/`,
+2. Lab 3.1: `py -3 setup_wrapper.py` (regenerates `counter_wrapper/`,
    `limiter_wrapper/`). Lab 3.2: run `generate_python_wrapper.bat`
    (regenerates `cc_wrapper/`).
 3. Run the corresponding test script: `test_counter.py`/`test_limiter.py`

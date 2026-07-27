@@ -5,6 +5,47 @@ maintainer documentation. One entry per work session. Newest first.
 
 ---
 
+## 2026-07-27 — Lab 3.2: fixed generation/wrapper scripts and evaluate_cc.py against the real PyScadeOne 0.8.2 API
+
+### Summary for reporting
+
+The Lab 3.2 Python tooling added in the previous session (`generate_python_wrapper.bat`,
+`evaluate_cc.py`, and the `tc02` scenario file) had never actually been run against a
+live Scade One install; doing so this session surfaced several real bugs, now fixed in
+both `src/lab3_2/starter/CruiseControl/` and `src/lab3_2/solution/CruiseControl/`, and
+mirrored into `docs/lab3_2/lab.md` Activity 6D:
+
+1. **`generate_python_wrapper.bat`** hardcoded an absolute `.sproj` path from an old
+   repo location. Now resolves the project path relative to the script itself
+   (`%~dp0`), so it works regardless of checkout location.
+2. **`PythonWrapper` job argument.** `PythonWrapper(prj, job)` requires the job *name
+   string*, not the `Job` object returned by `prj.get_job(...)` — passing the object
+   crashed deep inside the library (`AttributeError` on `Job.__eq__`). Fixed to pass
+   the job name string directly (matches the convention already used in
+   `src/lab3_1/*/setup_wrapper.py` and `docs/lab3_1/lab.md`).
+3. **No `PythonWrapper.get_operator_instance()` method exists** in PyScadeOne 0.8.2.
+   The generated wrapper must be imported directly from
+   `<output_dir>/<output_dir>.py` and its operator class instantiated (class name
+   pattern `<operator>_<design>`), with inputs/outputs grouped under
+   `.inputs.<name>` / `.outputs.<name>` rather than flat attributes — same API shape
+   Lab 3.1's wrapper tests already use. `evaluate_cc.py` and `lab.md` updated
+   accordingly.
+4. **`set_point` is a plain input on the generated `cruise_control` node**, not
+   something the node computes internally from a `set` trigger. `evaluate_cc.py` (and
+   the `lab.md` listing) now reproduce Activity 4E's "rising edge of `on` locks
+   `set_point = v_speed`" rule in Python and hold that value across cycles; the
+   scenario CSVs' `set` column is accepted by `run_cycle()` but not fed to the model
+   (it isn't part of this node's interface).
+5. **`tc02_cc_active_regulates.csv`** had an unquoted comma inside its `note` field,
+   which made `csv.DictReader` parse an 11th field and later crash
+   `csv.DictWriter.writerows` (`dict contains fields not in fieldnames: None`). The
+   field is now properly quoted.
+
+No requirements, model files, or test expectations changed — this was a bugfix pass
+on the Python glue code and its lab documentation, informed by actually exercising it.
+
+---
+
 ## 2026-07-27 — Lab 3.2: Python-driven evaluation replaces Scade One test harness; Project Structure section added
 
 ### Summary for reporting

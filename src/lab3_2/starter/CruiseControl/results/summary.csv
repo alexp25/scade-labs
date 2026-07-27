@@ -1,0 +1,5 @@
+tid,cycle,req,note,expected,actual,status
+tc01_cc_disabled_passthrough,1,REQ-01,cc_disabled: throttle must mirror accel,0.4,0.4000000059604645,PASS
+tc03_brake_suspends,3,"REQ-02,REQ-04",brake > 10.0 moves cc_active -> cc_standby; throttle falls back to accel,0.3,0.0,FAIL
+tc04_set_without_res_stays_suspended,4,REQ-04,set alone (no res) must NOT resume regulation - the key trap from TC-05 in Lab 2,0.3,0.30000001192092896,PASS
+tc06_cc_off,3,REQ-01,on=false -> cc_enabled -> cc_disabled; throttle mirrors accel again,0.3,0.0,FAIL

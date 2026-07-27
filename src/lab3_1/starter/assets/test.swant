@@ -15,10 +15,17 @@ _harness harness_counter
     #pragma diagram {"xy":"H-32450;V-28425","wh":"20000;3200"} #end)
     (#4 expr false
     #pragma diagram {"xy":"H-61312;V-28425","wh":"10000;3200"} #end)
+    (#8 def count
+    #pragma diagram {"xy":"H-6112;V-4062","wh":"10000;3200"} #end)
     
     (#5 wire #2 => #0 .(step))
     (#6 wire #1 => #0 .(init_value))
     (#7 wire #4 => #3)
+    (#9 wire #0 .(count) => #8
+    #pragma diagram {"wp":"v-1312|#0 #8"} #end)
+    
+    (var
+        count;)
 }
 
 _harness harness_limiter
@@ -37,9 +44,16 @@ _harness harness_limiter
     #pragma diagram {"xy":"H-2550;V-12633","wh":"20000;3200"} #end)
     (#5 expr false
     #pragma diagram {"xy":"H-28025;V-12633","wh":"10000;3200"} #end)
+    (#10 def value_out
+    #pragma diagram {"xy":"H24790;V6450","wh":"14000;3200"} #end)
     
     (#6 wire #1 => #0 .(value_in))
     (#7 wire #2 => #0 .(min))
     (#8 wire #3 => #0 .(max))
     (#9 wire #5 => #4)
+    (#11 wire #0 .(value_out) => #10
+    #pragma diagram {"wp":"v0|#0 #10"} #end)
+    
+    (var
+        value_out;)
 }

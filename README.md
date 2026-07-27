@@ -8,4 +8,4 @@ Welcome to SCADE laboratory project page.
 
 ### Sources
 
-* [**Src**](./src/)
+* [**Sources**](./src/)

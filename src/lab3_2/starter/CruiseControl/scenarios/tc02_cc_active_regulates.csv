@@ -1,3 +1,3 @@
 cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
 1,True,False,0.0,0.0,0.400,False,,,activate: rising edge of on locks set_point = v_speed
-2,True,False,80.0,0.0,0.400,False,,,cc_active: throttle now driven by the regulator - see chart, no fixed expected value
+2,True,False,80.0,0.0,0.400,False,,,"cc_active: throttle now driven by the regulator - see chart, no fixed expected value"

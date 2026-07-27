@@ -1,0 +1,4 @@
+cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note,throttle
+1,True,False,0.0,0.0,0.300,False,,,activate,0.300
+2,True,False,80.0,0.0,0.300,False,,,cc_active,0.000
+3,False,False,80.0,0.0,0.300,False,0.300,REQ-01,on=false -> cc_enabled -> cc_disabled; throttle mirrors accel again,0.000

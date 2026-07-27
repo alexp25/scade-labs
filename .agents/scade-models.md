@@ -92,7 +92,7 @@ Three packages, three different roles — `docs/lab3_2/lab.md` now has a
 - Scade One install path used by both labs' scripts:
   `C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One` (implies
   Scade One **v261**; no separate product version string found anywhere).
-- Python: `py -3.12` required (used consistently in `setup_wrapper.py`,
+- Python: `py -3` required (used consistently in `setup_wrapper.py`,
   `generate_python_wrapper.bat`, and both labs' `lab.md`).
 - Wrapper generator self-identifies as `PyScadeOne Wrapper 1.0`.
 - `docs/lab3_1/lab.md` itself warns: "The exact class name and instantiation

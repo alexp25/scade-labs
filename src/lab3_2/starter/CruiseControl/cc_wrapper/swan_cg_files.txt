@@ -1,7 +1,3 @@
-main_CC_design.c
-main_CC_design.h
-car_CC_design.c
-car_CC_design.h
 cruise_control_CC_design.c
 cruise_control_CC_design.h
 regulator_CC_design.c

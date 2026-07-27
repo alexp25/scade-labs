@@ -251,6 +251,32 @@
       background: var(--sky);
     }
 
+    .src-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--blue);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .4rem .9rem;
+      text-decoration: none;
+      transition: border-color .15s, color .15s;
+    }
+
+    .src-link:hover {
+      border-color: var(--sky);
+      color: var(--sky);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
     .coming-soon {
       font-size: .78rem;
       font-weight: 600;
@@ -326,7 +352,10 @@
             <span class="tag python">Python</span>
             <span class="tag sdlc">SDLC</span>
           </div>
-          <a class="open-btn" href="./lab2/">Open Lab &#8594;</a>
+          <div class="card-actions">
+            <a class="src-link" href="https://github.com/alexp25/scade-labs/tree/main/src/lab2/starter" target="_blank" rel="noopener">Starter Code</a>
+            <a class="open-btn" href="./lab2/">Open Lab &#8594;</a>
+          </div>
         </div>
       </div>
 
@@ -344,7 +373,10 @@
             <span class="tag scade">Scade One</span>
             <span class="tag python">Python</span>
           </div>
-          <a class="open-btn" href="./lab3_1/">Open Lab &#8594;</a>
+          <div class="card-actions">
+            <a class="src-link" href="https://github.com/alexp25/scade-labs/tree/main/src/lab3_1/starter" target="_blank" rel="noopener">Starter Code</a>
+            <a class="open-btn" href="./lab3_1/">Open Lab &#8594;</a>
+          </div>
         </div>
       </div>
 
@@ -362,7 +394,10 @@
             <span class="tag scade">Scade One</span>
             <span class="tag python">Python</span>
           </div>
-          <a class="open-btn" href="./lab3_2/">Open Lab &#8594;</a>
+          <div class="card-actions">
+            <a class="src-link" href="https://github.com/alexp25/scade-labs/tree/main/src/lab3_2/starter" target="_blank" rel="noopener">Starter Code</a>
+            <a class="open-btn" href="./lab3_2/">Open Lab &#8594;</a>
+          </div>
         </div>
       </div>
 

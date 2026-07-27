@@ -61,7 +61,7 @@
   silently "fix" by inventing a pin) plus `matplotlib` (added this session
   for the Part 6 evaluation-script rewrite, see below).
 - `src/lab3_2/solution/CruiseControl/generate_python_wrapper.bat` — hand
-  script invoking `py -3.12 -m ansys.scadeone.core.cli pycodewrap --install-dir
+  script invoking `py -3 -m ansys.scadeone.core.cli pycodewrap --install-dir
   "...v261..." --job "CodeGenerationJob0" --out "cc_wrapper" "...CruiseControl.sproj"`.
 - `cc_wrapper/cc_wrapper.py`, `cc_wrapper.c`, `cc_wrapper.def` — **generated**
   (banner on line 1 of each). `cc_wrapper.py` defines `main_CC_design_Inputs`

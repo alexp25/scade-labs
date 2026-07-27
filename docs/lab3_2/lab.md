@@ -470,6 +470,9 @@ Code generation in Scade One is job-based, not a menu command.
 4. In the **Code Generation Properties** panel, set **Root declarations** to your `cruise_control` operator
 5. Click **Run** (▶) and wait for status **Completed**
 
+
+<img src="img/scade_code_generation.png" width="100%">
+
 The generated code appears in the job's output folder (click the **Generated code** node in the job graph).
 
 ### Activity 6B — Generate the Python Wrapper
@@ -492,6 +495,7 @@ matplotlib
 
 ```text
 pip install -r requirements.txt
+py -3 -m pip install -r requirements.txt --user
 ```
 
 Then create `setup_wrapper.py` in your project folder and run it once:
@@ -516,7 +520,7 @@ print("Wrapper generated.")
 ```
 
 ```text
-py -3.12 setup_wrapper.py
+py -3 setup_wrapper.py
 ```
 
 This produces a class for `cruise_control`. The class name follows the pattern `<operator>_<wrapper>` — check the generated file to confirm the exact name before writing the tests.
@@ -556,7 +560,9 @@ Create the remaining five scenario files the same way, one per row of the transi
 
 ### Activity 6D — Write the Python Evaluation Script
 
-Inputs and outputs are **direct attributes** on the generated object, and the cycle method is `.cycle()` — same API as Lab 3.1's wrapper tests.
+Inputs and outputs are grouped under `.inputs.<name>` / `.outputs.<name>` on the generated object, and the cycle method is `.cycle()` — same API as Lab 3.1's wrapper tests. As in Activity 6B, the job name passed to `PythonWrapper` is a string, not `prj.get_job(...)`.
+
+The `cruise_control` node takes `set_point` as a plain input (see Activity 4E/`CC_design.swan`) rather than computing it internally, so the evaluation script reproduces the "rising edge of `on` locks `set_point = v_speed`" rule in Python and feeds the held value every cycle. The scenario CSVs' `set` column is not part of this model's interface — only `on` and `res` affect `set_point`/state — and is accepted by `run_cycle()` purely to keep the call site self-documenting.
 
 Create `evaluate_cc.py`:
 
@@ -570,37 +576,54 @@ Create `evaluate_cc.py`:
 import csv
 import glob
 import os
+import sys
+from pathlib import Path
 
 from ansys.scadeone.core import ScadeOne
 from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 
 SCADE_INSTALL = r"C:\Program Files\ANSYS Inc\v251\SCADE"
 PROJECT_DIR   = r"path\to\your\CruiseControl.sproj"
+WRAPPER_NAME  = "cc_wrapper"
 
 app = ScadeOne(install_dir=SCADE_INSTALL)
 prj = app.load_project(PROJECT_DIR)
 prj.load_jobs()
-job = prj.get_job("CodeGenerationJob_CC")
-gen = PythonWrapper(prj, job)
+gen = PythonWrapper(prj, "CodeGenerationJob_CC", output=WRAPPER_NAME)
 gen.generate()
 
-# Instantiate generated operator class — check generated file for exact name.
-cc = gen.get_operator_instance()
+# Instantiate generated operator class — check cc_wrapper/cc_wrapper.py if
+# the class name differs for your Scade One version/project (pattern is
+# <operator>_<design>, same convention as Lab 3.1's wrapper classes).
+sys.path.insert(0, str(Path(__file__).parent / WRAPPER_NAME))
+from cc_wrapper import cruise_control_CC_design  # noqa: E402
+
+cc = cruise_control_CC_design()
 
 SCENARIOS_DIR, RESULTS_DIR, TOLERANCE = "scenarios", "results", 1e-3
 
+_prev_on, _held_set_point = False, 0.0
 
-def run_cycle(on, set_flag, v_speed, brake, accel, res):
+
+def run_cycle(on, _set_flag, v_speed, brake, accel, res):
     """Set inputs, run one cycle, return throttle output."""
-    cc.on, cc.set, cc.v_speed = on, set_flag, v_speed
-    cc.brake, cc.accel, cc.res = brake, accel, res
+    global _prev_on, _held_set_point
+    if on and not _prev_on:
+        _held_set_point = v_speed
+    _prev_on = on
+
+    cc.inputs.on, cc.inputs.v_speed = on, v_speed
+    cc.inputs.brake, cc.inputs.accel, cc.inputs.res = brake, accel, res
+    cc.inputs.set_point = _held_set_point
     cc.cycle()
-    return cc.throttle
+    return cc.outputs.throttle
 
 
 def run_scenario(path):
+    global _prev_on, _held_set_point
     tid = os.path.splitext(os.path.basename(path))[0]
     cc.reset()
+    _prev_on, _held_set_point = False, 0.0
     trace, checks = [], []
 
     with open(path, newline="") as f:
@@ -698,6 +721,8 @@ Run:
 ```text
 python evaluate_cc.py
 ```
+
+<img src="img/python_run_eval.png" width="100%">
 
 Inspect `results/summary.csv` (the PASS/FAIL traceability report) and the charts in `results/plots/`. Compare the summary to Lab 2's verification report. Write 2–3 sentences: what is the same, and what is different about testing via generated C plus scenario files vs. testing your Python implementation directly?
 

@@ -35,7 +35,7 @@ being listed in one of the generator's own manifest files
   `PythonWrapper(prj, "CodeGenerationJob_limiter",
   output="limiter_wrapper").generate()` and the counter equivalent.
 - **Lab 3.2**: `src/lab3_2/solution/CruiseControl/generate_python_wrapper.bat`
-  — runs `py -3.12 -m ansys.scadeone.core.cli pycodewrap --install-dir "..."
+  — runs `py -3 -m ansys.scadeone.core.cli pycodewrap --install-dir "..."
   --job "CodeGenerationJob0" --out "cc_wrapper" "...CruiseControl.sproj"`.
 
 Both require: a local Scade One Student Edition install (hardcoded path

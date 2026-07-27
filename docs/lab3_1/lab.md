@@ -542,6 +542,7 @@ ansys-scadeone-core==0.8.2
 
 ```text
 pip install -r requirements.txt
+py -3 -m pip install -r requirements.txt --user
 ```
 
 Then create `setup_wrapper.py` in your project folder:

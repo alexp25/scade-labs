@@ -31,13 +31,23 @@ def _ctypes_array2tuple(value: ctypes.Array) -> tuple:
 
 
 # operator inputs
-class main_CC_design_Inputs:
+class cruise_control_CC_design_Inputs:
     def __init__(self) -> None:
+        self._v_speed: float = 0.0
         self._brake: float = 0.0
         self._accel: float = 0.0
         self._on: bool = False
         self._res: bool = False
         self._set_point: float = 0.0
+
+    @property
+    def v_speed(self) -> float:
+        return self._v_speed
+
+    @v_speed.setter
+    def v_speed(self, value: float) -> None:
+        self._v_speed = value
+
 
     @property
     def brake(self) -> float:
@@ -85,52 +95,41 @@ class main_CC_design_Inputs:
 
 
 # operator outputs
-class main_CC_design_Outputs:
+class cruise_control_CC_design_Outputs:
     def __init__(self) -> None:
-        self._speed_out = ctypes.c_float(0.0)
-        self._gear_out = ctypes.c_int32(0)
-        self._rpm_out = ctypes.c_float(0.0)
+        self._throttle = ctypes.c_float(0.0)
 
     @property
-    def speed_out(self) -> float:
-        return self._speed_out.value
-
-    @property
-    def gear_out(self) -> int:
-        return self._gear_out.value
-
-    @property
-    def rpm_out(self) -> float:
-        return self._rpm_out.value
+    def throttle(self) -> float:
+        return self._throttle.value
 
 
-class main_CC_design:
+class cruise_control_CC_design:
     def __init__(self) -> None:
-        alloc_fct = _lib.py_alloc_main_CC_design
+        alloc_fct = _lib.py_alloc_cruise_control_CC_design
         alloc_fct.argtypes = []
         alloc_fct.restype = ctypes.c_void_p
         context = alloc_fct()
         self._out_c = ctypes.c_void_p.from_address(context)
-        self.reset_fct = _lib.main_reset_CC_design
+        self.reset_fct = _lib.cruise_control_reset_CC_design
         self.reset_fct.restype = ctypes.c_void_p
-        self.cycle_fct = _lib.main_CC_design
+        self.cycle_fct = _lib.cruise_control_CC_design
         self.cycle_fct.argtypes = [
             ctypes.c_float,
             ctypes.c_float,
+            ctypes.c_float,
             ctypes.c_uint8,
             ctypes.c_uint8,
             ctypes.c_float,
-            ctypes.POINTER(ctypes.c_float),
-            ctypes.POINTER(ctypes.c_int32),
             ctypes.POINTER(ctypes.c_float),
             ctypes.POINTER(ctypes.c_void_p),
         ]
         self.cycle_fct.restype = ctypes.c_void_p
-        self.inputs = main_CC_design_Inputs()
-        self.outputs = main_CC_design_Outputs()
+        self.inputs = cruise_control_CC_design_Inputs()
+        self.outputs = cruise_control_CC_design_Outputs()
 
     def __del__(self):
-        free_fct = _lib.py_free_main_CC_design
+        free_fct = _lib.py_free_cruise_control_CC_design
         free_fct.argtypes = [ctypes.c_void_p]
         free_fct.restype = None
         free_fct(ctypes.byref(self._out_c))
@@ -141,14 +140,13 @@ class main_CC_design:
     def cycle(self, cycles: int = 1) -> None:
         for i in range(cycles):
             self.cycle_fct(
+                self.inputs._v_speed,
                 self.inputs._brake,
                 self.inputs._accel,
                 self.inputs._on,
                 self.inputs._res,
                 self.inputs._set_point,
-                ctypes.byref(self.outputs._speed_out),
-                ctypes.byref(self.outputs._gear_out),
-                ctypes.byref(self.outputs._rpm_out),
+                ctypes.byref(self.outputs._throttle),
                 ctypes.byref(self._out_c),
             )
 

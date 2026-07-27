@@ -5,14 +5,14 @@
 #   pip install -r requirements.txt
 #
 # Then run:
-#   py -3.12 setup_wrapper.py
+#   py -3 setup_wrapper.py
 
 from pathlib import Path
 from ansys.scadeone.core import ScadeOne
 from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 
 SCADE_INSTALL = r"C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One"
-PROJECT_DIR   = r"C:\WORKSPACE\facultate\scade-labs\lab3\solution\demo.sproj"
+PROJECT_DIR   = Path(__file__).resolve().parent / "demo.sproj"
 
 app = ScadeOne(install_dir=SCADE_INSTALL)
 prj = app.load_project(PROJECT_DIR)
