@@ -1,5 +1,15 @@
-cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
-1,True,False,0.0,0.0,0.300,False,,,activate
-2,True,False,80.0,0.0,0.300,False,,,cc_active
-3,True,False,80.0,15.0,0.300,False,,,brake -> cc_standby
-4,True,False,80.0,0.0,0.300,True,,,res=true and brake<10.0 -> cc_active resumes - see chart
+cycle,on,set,v_speed,brake,accel,res,set_point,expected_throttle,req,note
+1,True,False,0.0,0.0,0.300,False,0.000,,,activate
+2,True,False,28.0,0.0,0.300,False,0.000,,,cc_active
+3,True,False,46.2,0.0,0.300,False,0.000,,,
+4,True,False,58.0,0.0,0.300,False,0.000,,,
+5,True,False,65.7,0.0,0.300,False,0.000,,,
+6,True,False,70.7,0.0,0.300,False,0.000,,,
+7,True,False,70.7,15.0,0.300,False,0.000,,,brake -> cc_standby
+8,True,False,45.6,15.0,0.300,False,0.000,,,
+9,True,False,31.8,15.0,0.300,False,0.000,,,
+10,True,False,31.8,0.0,0.300,False,0.000,,,"brake released, still standby (res not yet set)"
+11,True,False,31.8,0.0,0.300,True,0.000,,,res=true and brake<10.0 -> cc_active resumes - see chart
+12,True,False,37.8,0.0,0.300,True,0.000,,,
+13,True,False,52.5,0.0,0.300,True,0.000,,,
+14,True,False,62.1,0.0,0.300,True,0.000,,,

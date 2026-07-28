@@ -16,11 +16,23 @@
 # run_cycle() accordingly, same caveat as lab.md's Activity 6D.
 #
 # The cruise_control node takes set_point as a plain input rather than
-# computing it internally (see assets/CC_design.swan), so this script
-# reproduces Activity 4E's "rising edge of on locks set_point = v_speed"
-# rule in Python and feeds the held value in every cycle. The scenario
-# CSVs' "set" column is not part of this model's interface (only "on" and
+# computing it internally (see assets/CC_design.swan). Each scenario CSV's
+# "set_point" column already encodes Activity 4E's "rising edge of on locks
+# set_point = v_speed" rule (worked out once when the scenario was authored),
+# so this script just feeds that column straight into cc.inputs.set_point
+# every cycle - no derivation logic needed here. The CSVs' "set" column is
+# a separate thing: it is not part of this model's interface (only "on" and
 # "res" affect set_point/state) and is kept only for traceability/logging.
+#
+# The wrapper only exposes "throttle" as an output - the automaton's actual
+# state (cc_disabled/cc_active/cc_standby) is internal to the generated
+# model and not observable through cc.outputs. The "state" column in the
+# trace/plot is therefore NOT read from the model: it is a Python-side
+# re-derivation of the state, driven off the same on/brake/accel/res guards
+# as the Activity 7A transition table, kept only so the chart can show
+# roughly where the automaton should be. Treat it as a plotting aid, not a
+# verified model output - it can drift from the model's real state if the
+# guards above are ever changed in CC_design.swan without updating this file.
 #
 # Requires a local Scade One install + a regenerated wrapper; cannot be run
 # in an environment without Scade One (see .agents/testing.md).
@@ -58,62 +70,117 @@ cc = cruise_control_CC_design()
 SCENARIOS_DIR, RESULTS_DIR, TOLERANCE = "scenarios", "results", 1e-3
 PLOTS_DIR = os.path.join(RESULTS_DIR, "plots")
 
-_prev_on, _held_set_point = False, 0.0
+_prev_on, _cc_state = False, "active"
 
 
-def run_cycle(on, _set_flag, v_speed, brake, accel, res):
-    """Set inputs, run one cycle, return throttle output.
+def run_cycle(on, _set_flag, v_speed, brake, accel, res, set_point):
+    """Set inputs, run one cycle, return (throttle, state).
 
     _set_flag (the scenario CSV's "set" column) is not part of this model's
     interface - see the NOTE at the top of this file - and is accepted only
     to keep the call site in run_scenario() self-documenting.
+
+    state is re-derived in Python from the same guards as the Activity 7A
+    transition table (on; brake > 10.0 or accel > 10.0; res and brake <
+    10.0) - see the NOTE at the top of this file for why this is a display
+    aid, not a value read from the model.
     """
-    global _prev_on, _held_set_point
+    global _prev_on, _cc_state
     if on and not _prev_on:
-        _held_set_point = v_speed
+        _cc_state = "active"  # entering cc_enabled resets the inner state
     _prev_on = on
+
+    if on:
+        if brake > 10.0 or accel > 10.0:
+            _cc_state = "standby"
+        elif res and brake < 10.0:
+            _cc_state = "active"
+        state = _cc_state
+    else:
+        state = "disabled"
 
     cc.inputs.on, cc.inputs.v_speed = on, v_speed
     cc.inputs.brake, cc.inputs.accel, cc.inputs.res = brake, accel, res
-    cc.inputs.set_point = _held_set_point
+    cc.inputs.set_point = set_point
     cc.cycle()
-    return cc.outputs.throttle
+    return cc.outputs.throttle, state
+
+
+_STATE_LEVELS = ["disabled", "standby", "active"]
 
 
 def plot_scenario(tid, trace):
     cycles = [int(r["cycle"]) for r in trace]
     throttle = [float(r["throttle"]) for r in trace]
     v_speed = [float(r["v_speed"]) for r in trace]
+    set_point = [float(r["set_point"]) for r in trace]
+    brake = [float(r["brake"]) for r in trace]
+    on = [1 if r["on"] == "True" else 0 for r in trace]
+    set_flag = [1 if r["set"] == "True" else 0 for r in trace]
+    res = [1 if r["res"] == "True" else 0 for r in trace]
+    state = [_STATE_LEVELS.index(r["state"]) for r in trace]
 
-    fig, ax1 = plt.subplots()
+    fig, (ax1, ax3) = plt.subplots(2, 1, sharex=True, figsize=(7, 6))
+
+    # Top: throttle, v_speed / set_point (same units, same axis), and brake.
     ax1.plot(cycles, throttle, color="tab:blue", label="throttle")
-    ax1.set_xlabel("cycle")
     ax1.set_ylabel("throttle", color="tab:blue")
+    ax1.set_title(tid)
 
     ax2 = ax1.twinx()
     ax2.plot(cycles, v_speed, color="tab:orange", label="v_speed")
-    ax2.set_ylabel("v_speed", color="tab:orange")
+    ax2.plot(cycles, set_point, color="tab:orange", linestyle="--", label="set_point")
+    ax2.set_ylabel("v_speed / set_point", color="tab:orange")
+    ax2.legend(loc="upper left", fontsize=8)
 
-    plt.title(tid)
+    ax6 = ax1.twinx()
+    ax6.spines["right"].set_position(("outward", 60))
+    ax6.plot(cycles, brake, color="tab:brown", label="brake")
+    ax6.set_ylabel("brake", color="tab:brown")
+
+    # Bottom: boolean inputs (on/set/res) plus the derived cc state.
+    ax3.step(cycles, on, where="post", color="tab:green", label="on")
+    ax3.step(cycles, set_flag, where="post", color="tab:purple", label="set")
+    ax3.step(cycles, res, where="post", color="tab:red", label="res")
+    ax3.set_ylim(-0.2, 1.2)
+    ax3.set_yticks([0, 1])
+    ax3.set_ylabel("inputs (bool)")
+    ax3.set_xlabel("cycle")
+    ax3.legend(loc="upper left", fontsize=8)
+
+    ax4 = ax3.twinx()
+    ax4.step(cycles, state, where="post", color="tab:gray",
+              linestyle="--", label="cc state")
+    ax4.set_ylim(-0.2, len(_STATE_LEVELS) - 0.8)
+    ax4.set_yticks(range(len(_STATE_LEVELS)))
+    ax4.set_yticklabels(_STATE_LEVELS)
+    ax4.set_ylabel("cc state (derived)")
+
     fig.tight_layout()
-    fig.savefig(os.path.join(PLOTS_DIR, f"{tid}.png"))
+    plot_path = os.path.join(PLOTS_DIR, f"{tid}.png")
+    fig.savefig(plot_path)
     plt.close(fig)
+    return plot_path
 
 
-def run_scenario(path):
-    global _prev_on, _held_set_point
+def run_scenario(path, index=None, total=None):
+    global _prev_on, _cc_state
     tid = os.path.splitext(os.path.basename(path))[0]
+    prefix = f"[{index}/{total}] " if index else ""
+    print(f"{prefix}Running {tid} ...")
+
     cc.reset()
-    _prev_on, _held_set_point = False, 0.0
+    _prev_on, _cc_state = False, "active"
     trace, checks = [], []
 
     with open(path, newline="") as f:
         for row in csv.DictReader(f):
-            throttle = run_cycle(
+            throttle, state = run_cycle(
                 row["on"] == "True", row["set"] == "True", float(row["v_speed"]),
                 float(row["brake"]), float(row["accel"]), row["res"] == "True",
+                float(row["set_point"]),
             )
-            trace.append({**row, "throttle": f"{throttle:.3f}"})
+            trace.append({**row, "throttle": f"{throttle:.3f}", "state": state})
             if row["expected_throttle"]:
                 expected = float(row["expected_throttle"])
                 passed = abs(throttle - expected) <= TOLERANCE
@@ -123,27 +190,42 @@ def run_scenario(path):
                     "actual": throttle, "status": "PASS" if passed else "FAIL",
                 })
 
-    with open(os.path.join(RESULTS_DIR, f"{tid}_trace.csv"), "w", newline="") as f:
+    trace_path = os.path.join(RESULTS_DIR, f"{tid}_trace.csv")
+    with open(trace_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=trace[0].keys())
         writer.writeheader()
         writer.writerows(trace)
 
-    plot_scenario(tid, trace)
-    return checks
+    plot_path = plot_scenario(tid, trace)
+
+    if checks:
+        n_fail = sum(1 for c in checks if c["status"] == "FAIL")
+        print(f"    {len(trace)} cycles, {len(checks)} checkpoint(s): "
+              f"{len(checks) - n_fail} passed, {n_fail} failed")
+    else:
+        print(f"    {len(trace)} cycles, no checkpoints - see chart for regulator behaviour")
+
+    return checks, [trace_path, plot_path]
 
 
 if __name__ == "__main__":
     os.makedirs(PLOTS_DIR, exist_ok=True)
     all_checks = []
+    generated_files = []
 
-    for path in sorted(glob.glob(os.path.join(SCENARIOS_DIR, "*.csv"))):
-        all_checks.extend(run_scenario(path))
+    scenario_paths = sorted(glob.glob(os.path.join(SCENARIOS_DIR, "*.csv")))
+    for i, path in enumerate(scenario_paths, start=1):
+        checks, files = run_scenario(path, i, len(scenario_paths))
+        all_checks.extend(checks)
+        generated_files.extend(files)
 
-    with open(os.path.join(RESULTS_DIR, "summary.csv"), "w", newline="") as f:
+    summary_path = os.path.join(RESULTS_DIR, "summary.csv")
+    with open(summary_path, "w", newline="") as f:
         fields = ["tid", "cycle", "req", "note", "expected", "actual", "status"]
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         writer.writerows(all_checks)
+    generated_files.append(summary_path)
 
     print("=" * 70)
     print("  VERIFICATION REPORT -- cruise_control (Scade One, scenario files)")
@@ -155,3 +237,9 @@ if __name__ == "__main__":
     print("=" * 70)
     print("VALIDATION: ALL REQUIREMENTS MET." if n_fail == 0
           else f"VALIDATION: ISSUES FOUND ({n_fail} failing).")
+
+    print("=" * 70)
+    print("  GENERATED FILES -- inspect these for details")
+    print("=" * 70)
+    for f in generated_files:
+        print(f"  {f}")

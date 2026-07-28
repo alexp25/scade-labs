@@ -1,2 +1,13 @@
-cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
-1,False,False,0.0,0.0,0.400,False,0.400,REQ-01,cc_disabled: throttle must mirror accel
+cycle,on,set,v_speed,brake,accel,res,set_point,expected_throttle,req,note
+1,False,False,0.0,0.0,0.000,False,0.000,0.000,REQ-01,cc_disabled: throttle must mirror accel
+2,False,False,5.0,0.0,0.150,False,0.000,0.150,REQ-01,
+3,False,False,12.0,0.0,0.300,False,0.000,0.300,REQ-01,
+4,False,False,20.0,0.0,0.450,False,0.000,0.450,REQ-01,
+5,False,False,28.0,0.0,0.550,False,0.000,0.550,REQ-01,
+6,False,False,35.0,0.0,0.600,False,0.000,0.600,REQ-01,
+7,False,False,40.0,0.0,0.600,False,0.000,0.600,REQ-01,
+8,False,False,38.0,0.0,0.500,False,0.000,0.500,REQ-01,
+9,False,False,32.0,0.0,0.380,False,0.000,0.380,REQ-01,
+10,False,False,24.0,0.0,0.250,False,0.000,0.250,REQ-01,
+11,False,False,14.0,0.0,0.120,False,0.000,0.120,REQ-01,
+12,False,False,5.0,0.0,0.000,False,0.000,0.000,REQ-01,"pedal released, coasting - throttle still mirrors accel"

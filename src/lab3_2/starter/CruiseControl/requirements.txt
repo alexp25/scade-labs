@@ -1,2 +1,2 @@
 ansys-scadeone-core==0.8.2
-matplotlib
+matplotlib==3.10.5

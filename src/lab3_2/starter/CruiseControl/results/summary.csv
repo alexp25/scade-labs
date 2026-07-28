@@ -1,5 +1,31 @@
 tid,cycle,req,note,expected,actual,status
-tc01_cc_disabled_passthrough,1,REQ-01,cc_disabled: throttle must mirror accel,0.4,0.4000000059604645,PASS
-tc03_brake_suspends,3,"REQ-02,REQ-04",brake > 10.0 moves cc_active -> cc_standby; throttle falls back to accel,0.3,0.0,FAIL
-tc04_set_without_res_stays_suspended,4,REQ-04,set alone (no res) must NOT resume regulation - the key trap from TC-05 in Lab 2,0.3,0.30000001192092896,PASS
-tc06_cc_off,3,REQ-01,on=false -> cc_enabled -> cc_disabled; throttle mirrors accel again,0.3,0.0,FAIL
+tc01_cc_disabled_passthrough,1,REQ-01,cc_disabled: throttle must mirror accel,0.0,0.0,PASS
+tc01_cc_disabled_passthrough,2,REQ-01,,0.15,0.15000000596046448,PASS
+tc01_cc_disabled_passthrough,3,REQ-01,,0.3,0.30000001192092896,PASS
+tc01_cc_disabled_passthrough,4,REQ-01,,0.45,0.44999998807907104,PASS
+tc01_cc_disabled_passthrough,5,REQ-01,,0.55,0.550000011920929,PASS
+tc01_cc_disabled_passthrough,6,REQ-01,,0.6,0.6000000238418579,PASS
+tc01_cc_disabled_passthrough,7,REQ-01,,0.6,0.6000000238418579,PASS
+tc01_cc_disabled_passthrough,8,REQ-01,,0.5,0.5,PASS
+tc01_cc_disabled_passthrough,9,REQ-01,,0.38,0.3799999952316284,PASS
+tc01_cc_disabled_passthrough,10,REQ-01,,0.25,0.25,PASS
+tc01_cc_disabled_passthrough,11,REQ-01,,0.12,0.11999999731779099,PASS
+tc01_cc_disabled_passthrough,12,REQ-01,"pedal released, coasting - throttle still mirrors accel",0.0,0.0,PASS
+tc03_brake_suspends,7,"REQ-02,REQ-04",brake > 10.0 moves cc_active -> cc_standby; throttle falls back to accel,0.3,0.0,FAIL
+tc03_brake_suspends,8,REQ-02,cc_standby continues: throttle still mirrors accel while braking,0.3,0.30000001192092896,PASS
+tc03_brake_suspends,9,REQ-02,,0.3,0.30000001192092896,PASS
+tc03_brake_suspends,10,REQ-02,,0.3,0.30000001192092896,PASS
+tc03_brake_suspends,11,REQ-02,,0.3,0.30000001192092896,PASS
+tc03_brake_suspends,12,REQ-02,,0.3,0.30000001192092896,PASS
+tc03_brake_suspends,13,REQ-02,,0.3,0.30000001192092896,PASS
+tc04_set_without_res_stays_suspended,7,"REQ-02,REQ-04",brake -> cc_standby,0.3,0.0,FAIL
+tc04_set_without_res_stays_suspended,8,REQ-02,cc_standby continues: throttle still mirrors accel,0.3,0.30000001192092896,PASS
+tc04_set_without_res_stays_suspended,9,REQ-02,brake released but cc_standby persists without res,0.3,0.30000001192092896,PASS
+tc04_set_without_res_stays_suspended,10,REQ-04,set alone (no res) must NOT resume regulation - the key trap from TC-05 in Lab 2,0.3,0.30000001192092896,PASS
+tc04_set_without_res_stays_suspended,11,REQ-04,still suspended: set alone has no effect without res,0.3,0.30000001192092896,PASS
+tc04_set_without_res_stays_suspended,12,REQ-04,driver pedal still passes straight through while suspended,0.45,0.44999998807907104,PASS
+tc04_set_without_res_stays_suspended,13,REQ-04,,0.2,0.20000000298023224,PASS
+tc06_cc_off,9,REQ-01,on=false -> cc_enabled -> cc_disabled; throttle mirrors accel again,0.3,0.0,FAIL
+tc06_cc_off,10,REQ-01,,0.5,0.0,FAIL
+tc06_cc_off,11,REQ-01,,0.2,0.0,FAIL
+tc06_cc_off,12,REQ-01,"cc fully disabled, driver has full pedal control",0.0,0.0,PASS

@@ -1,3 +1,15 @@
-cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
-1,True,False,0.0,0.0,0.400,False,,,activate: rising edge of on locks set_point = v_speed
-2,True,False,80.0,0.0,0.400,False,,,"cc_active: throttle now driven by the regulator - see chart, no fixed expected value"
+cycle,on,set,v_speed,brake,accel,res,set_point,expected_throttle,req,note
+1,True,False,0.0,0.0,0.400,False,0.000,,,activate: rising edge of on locks set_point = v_speed
+2,True,False,28.0,0.0,0.400,False,0.000,,,"cc_active: throttle now driven by the regulator - see chart, no fixed expected value"
+3,True,False,46.2,0.0,0.400,False,0.000,,,
+4,True,False,58.0,0.0,0.400,False,0.000,,,
+5,True,False,65.7,0.0,0.400,False,0.000,,,
+6,True,False,70.7,0.0,0.400,False,0.000,,,
+7,True,False,74.0,0.0,0.400,False,0.000,,,
+8,True,False,76.1,0.0,0.400,False,0.000,,,
+9,True,False,77.5,0.0,0.400,False,0.000,,,
+10,True,False,78.3,0.0,0.400,False,0.000,,,
+11,True,False,79.0,0.0,0.400,False,0.000,,,
+12,True,False,80.0,0.0,0.400,False,0.000,,,
+13,True,False,80.0,0.0,0.400,False,0.000,,,
+14,True,False,80.0,0.0,0.400,False,0.000,,,"cruise speed reached, regulator holds steady state - see chart"

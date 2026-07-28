@@ -529,7 +529,7 @@ This produces a class for `cruise_control`. The class name follows the pattern `
 
 In Lab 2, each test case was a tuple hardcoded inline in the test script. Here, each scenario is instead a small **CSV file** under a `scenarios/` folder — one file per test case, one row per simulation cycle. Storing scenarios as data (not code) means you can add or edit a test without touching the evaluation script, and — because `cruise_control` is stateful — a scenario can describe a short *sequence* of cycles (e.g. "activate, then brake, then try to resume without `res`") instead of a single input/output pair.
 
-Each row sets the operator's inputs for that cycle. The optional `expected_throttle` / `req` / `note` columns mark **checkpoint rows** — cycles where the throttle value is fully predictable (e.g. `cc_disabled`/`cc_standby` always mirror `accel`) and therefore worth asserting. Cycles where `cc_active`'s regulator is converging are left unchecked here — you evaluate those visually from the chart in Activity 6E instead.
+Each row sets the operator's inputs for that cycle — including `set_point`, worked out by hand when the scenario is authored by applying Activity 4E's "rising edge of `on` locks `set_point = v_speed`" rule to that row's `on`/`v_speed` history, since `cruise_control` takes `set_point` as a plain input rather than computing it internally (see `CC_design.swan`). The optional `expected_throttle` / `req` / `note` columns mark **checkpoint rows** — cycles where the throttle value is fully predictable (e.g. `cc_disabled`/`cc_standby` always mirror `accel`) and therefore worth asserting. Cycles where `cc_active`'s regulator is converging are left unchecked here — you evaluate those visually from the chart in Activity 6E instead.
 
 Project layout:
 
@@ -549,20 +549,33 @@ CruiseControl/
 Example — `tc04_set_without_res_stays_suspended.csv`, the graphical equivalent of TC-05's trap in Lab 2 (REQ-04: `set` alone must not resume regulation, only explicit `res`):
 
 ```text
-cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
-1,True,False,0.0,0.0,0.300,False,,,activate
-2,True,False,80.0,0.0,0.300,False,,,cc_active
-3,True,False,80.0,15.0,0.300,False,,,brake -> cc_standby
-4,True,True,80.0,0.0,0.300,False,0.300,REQ-04,set alone (no res) must NOT resume regulation
+cycle,on,set,v_speed,brake,accel,res,set_point,expected_throttle,req,note
+1,True,False,0.0,0.0,0.300,False,0.000,,,activate
+2,True,False,80.0,0.0,0.300,False,0.000,,,cc_active
+3,True,False,80.0,15.0,0.300,False,0.000,,,brake -> cc_standby
+4,True,True,80.0,0.0,0.300,False,0.000,0.300,REQ-04,set alone (no res) must NOT resume regulation
 ```
 
+`set_point` locks to `v_speed` on row 1 (the rising edge of `on`, while `v_speed` is still `0.0`) and then holds `0.000` for the rest of the file — it only changes if the scenario deactivates and reactivates `on` at a different speed, which none of the six scenarios below do.
+
 Create the remaining five scenario files the same way, one per row of the transition table in Activity 4B plus the `cc_disabled`/`cc_off` cases — reuse the REQ tags from that table so the `req` column stays traceable back to Part 4.
+
+Each scenario runs 12–14 cycles rather than the minimal 3–4-row trace shown above: instead of jumping `v_speed` directly between two values, the input ramps up or down gradually cycle-by-cycle — mimicking a car accelerating under the throttle or decelerating under the brake — so the Activity 6E chart shows a realistic-looking trajectory instead of a single step. The checkpoint rows (`expected_throttle`/`req`/`note` filled in) still land on the same transition cycles described in Activity 4B; the extra ramp cycles around them are unchecked context, not new assertions.
+
+| Scenario | Cycles | What it exercises | REQ |
+|---|---|---|---|
+| `tc01_cc_disabled_passthrough.csv` | 12 | CC never enabled; accel pedal is pressed and released — throttle must mirror `accel` on every cycle | REQ-01 |
+| `tc02_cc_active_regulates.csv` | 14 | `on` rising edge locks `set_point`; `v_speed` ramps smoothly from 0 up to cruise while `cc_active` — throttle is the regulator's output, checked visually via the Activity 6E chart, not asserted | — (chart only) |
+| `tc03_brake_suspends.csv` | 13 | Activate, ramp to near-cruise speed, then `brake > 10.0` moves `cc_active → cc_standby` mid-run — throttle falls back to mirroring `accel` for every remaining braking cycle | REQ-02, REQ-04 |
+| `tc04_set_without_res_stays_suspended.csv` | 13 | Same brake-suspend setup, then `set` alone (no `res`) is applied — must **not** resume regulation, the TC-05 trap from Lab 2 | REQ-02, REQ-04 |
+| `tc05_res_resumes.csv` | 14 | Same brake-suspend setup, then `res` with `brake < 10.0` moves `cc_standby → cc_active` — the regulator's resumed convergence is checked visually, not asserted | — (chart only) |
+| `tc06_cc_off.csv` | 12 | Activate, ramp to cruise, then `on = False` disables CC entirely — throttle mirrors `accel` again for every remaining cycle, including as the driver's pedal changes | REQ-01 |
 
 ### Activity 6D — Write the Python Evaluation Script
 
 Inputs and outputs are grouped under `.inputs.<name>` / `.outputs.<name>` on the generated object, and the cycle method is `.cycle()` — same API as Lab 3.1's wrapper tests. As in Activity 6B, the job name passed to `PythonWrapper` is a string, not `prj.get_job(...)`.
 
-The `cruise_control` node takes `set_point` as a plain input (see Activity 4E/`CC_design.swan`) rather than computing it internally, so the evaluation script reproduces the "rising edge of `on` locks `set_point = v_speed`" rule in Python and feeds the held value every cycle. The scenario CSVs' `set` column is not part of this model's interface — only `on` and `res` affect `set_point`/state — and is accepted by `run_cycle()` purely to keep the call site self-documenting.
+Each scenario CSV's `set_point` column already encodes the Activity 4E "rising edge of `on` locks `set_point = v_speed`" rule (worked out once when the scenario was authored — see Activity 6C), so `run_cycle()` just feeds that column straight into `cc.inputs.set_point` every cycle; no derivation logic is needed here. The scenario CSVs' `set` column is a separate thing: it is not part of this model's interface — only `on` and `res` affect `set_point`/state — and is accepted by `run_cycle()` purely to keep the call site self-documenting.
 
 Create `evaluate_cc.py`:
 
@@ -602,28 +615,19 @@ cc = cruise_control_CC_design()
 
 SCENARIOS_DIR, RESULTS_DIR, TOLERANCE = "scenarios", "results", 1e-3
 
-_prev_on, _held_set_point = False, 0.0
 
-
-def run_cycle(on, _set_flag, v_speed, brake, accel, res):
+def run_cycle(on, _set_flag, v_speed, brake, accel, res, set_point):
     """Set inputs, run one cycle, return throttle output."""
-    global _prev_on, _held_set_point
-    if on and not _prev_on:
-        _held_set_point = v_speed
-    _prev_on = on
-
     cc.inputs.on, cc.inputs.v_speed = on, v_speed
     cc.inputs.brake, cc.inputs.accel, cc.inputs.res = brake, accel, res
-    cc.inputs.set_point = _held_set_point
+    cc.inputs.set_point = set_point
     cc.cycle()
     return cc.outputs.throttle
 
 
 def run_scenario(path):
-    global _prev_on, _held_set_point
     tid = os.path.splitext(os.path.basename(path))[0]
     cc.reset()
-    _prev_on, _held_set_point = False, 0.0
     trace, checks = [], []
 
     with open(path, newline="") as f:
@@ -631,6 +635,7 @@ def run_scenario(path):
             throttle = run_cycle(
                 row["on"] == "True", row["set"] == "True", float(row["v_speed"]),
                 float(row["brake"]), float(row["accel"]), row["res"] == "True",
+                float(row["set_point"]),
             )
             trace.append({**row, "throttle": f"{throttle:.3f}"})
             if row["expected_throttle"]:
@@ -684,35 +689,178 @@ if __name__ == "__main__":
 
 The checkpoint rows in Activity 6D only assert the deterministic cases (`cc_disabled`/`cc_standby`, where `throttle == accel`). To evaluate the regulator while `cc_active` — where `throttle` changes gradually cycle by cycle as the PI controller converges — add a plotting step that turns each scenario's trace into a chart.
 
-Add to `evaluate_cc.py`:
+One chart isn't enough to read a scenario at a glance: `throttle`/`v_speed` alone don't show *why* the regulator behaved that way — you have to cross-reference the CSV to see when `on`/`set`/`res`/`brake` changed. Split the figure into two stacked subplots instead:
+
+- **Top** — the dynamic, continuous quantities: `throttle`, `v_speed` and `set_point` (both in the same units, so they share an axis and are only distinguishable by line style), and `brake` on its own axis.
+- **Bottom** — the discrete inputs/state that drive the automaton: the boolean inputs `on`/`set`/`res`, and the automaton's own state (`cc_disabled`/`cc_standby`/`cc_active`).
+
+`set_point` is already in the trace as of Activity 6D — it's just the scenario CSV's own `set_point` column, carried through by `trace.append({**row, ...})`, no extra work needed. The automaton's actual internal state is different: it isn't observable through `cc.outputs` at all (only `throttle` is exposed), so it has to be **re-derived** in Python before it can be plotted, using the same guards as the Activity 7A transition table (`on`; `brake > 10.0 or accel > 10.0`; `res and brake < 10.0`). Treat that derived state as a plotting aid, not a verified model output — it's a second, independent implementation of the same guards, kept in sync by hand, not something read back from the generated model.
+
+Update `run_cycle()` to also return the derived state, and thread it through `run_scenario()` into the trace:
+
+```python
+_prev_on, _cc_state = False, "active"
+
+
+def run_cycle(on, _set_flag, v_speed, brake, accel, res, set_point):
+    """Set inputs, run one cycle, return (throttle, state)."""
+    global _prev_on, _cc_state
+    if on and not _prev_on:
+        _cc_state = "active"  # entering cc_enabled resets the inner state
+    _prev_on = on
+
+    if on:
+        if brake > 10.0 or accel > 10.0:
+            _cc_state = "standby"
+        elif res and brake < 10.0:
+            _cc_state = "active"
+        state = _cc_state
+    else:
+        state = "disabled"
+
+    cc.inputs.on, cc.inputs.v_speed = on, v_speed
+    cc.inputs.brake, cc.inputs.accel, cc.inputs.res = brake, accel, res
+    cc.inputs.set_point = set_point
+    cc.cycle()
+    return cc.outputs.throttle, state
+```
+
+In `run_scenario()`, unpack the extra return value, reset `_cc_state` alongside `_prev_on`, and store `state` in each trace row:
+
+```python
+_prev_on, _cc_state = False, "active"
+...
+throttle, state = run_cycle(
+    row["on"] == "True", row["set"] == "True", float(row["v_speed"]),
+    float(row["brake"]), float(row["accel"]), row["res"] == "True",
+    float(row["set_point"]),
+)
+trace.append({**row, "throttle": f"{throttle:.3f}", "state": state})
+```
+
+Now add the two-subplot `plot_scenario()`:
 
 ```python
 import matplotlib.pyplot as plt
 
 PLOTS_DIR = os.path.join(RESULTS_DIR, "plots")
+_STATE_LEVELS = ["disabled", "standby", "active"]
 
 
 def plot_scenario(tid, trace):
     cycles = [int(r["cycle"]) for r in trace]
     throttle = [float(r["throttle"]) for r in trace]
     v_speed = [float(r["v_speed"]) for r in trace]
+    set_point = [float(r["set_point"]) for r in trace]
+    brake = [float(r["brake"]) for r in trace]
+    on = [1 if r["on"] == "True" else 0 for r in trace]
+    set_flag = [1 if r["set"] == "True" else 0 for r in trace]
+    res = [1 if r["res"] == "True" else 0 for r in trace]
+    state = [_STATE_LEVELS.index(r["state"]) for r in trace]
 
-    fig, ax1 = plt.subplots()
+    fig, (ax1, ax3) = plt.subplots(2, 1, sharex=True, figsize=(7, 6))
+
+    # Top: throttle, v_speed / set_point (same units, same axis), and brake.
     ax1.plot(cycles, throttle, color="tab:blue", label="throttle")
-    ax1.set_xlabel("cycle")
     ax1.set_ylabel("throttle", color="tab:blue")
+    ax1.set_title(tid)
 
     ax2 = ax1.twinx()
     ax2.plot(cycles, v_speed, color="tab:orange", label="v_speed")
-    ax2.set_ylabel("v_speed", color="tab:orange")
+    ax2.plot(cycles, set_point, color="tab:orange", linestyle="--", label="set_point")
+    ax2.set_ylabel("v_speed / set_point", color="tab:orange")
+    ax2.legend(loc="upper left", fontsize=8)
 
-    plt.title(tid)
+    ax6 = ax1.twinx()
+    ax6.spines["right"].set_position(("outward", 60))
+    ax6.plot(cycles, brake, color="tab:brown", label="brake")
+    ax6.set_ylabel("brake", color="tab:brown")
+
+    # Bottom: boolean inputs (on/set/res) plus the derived cc state.
+    ax3.step(cycles, on, where="post", color="tab:green", label="on")
+    ax3.step(cycles, set_flag, where="post", color="tab:purple", label="set")
+    ax3.step(cycles, res, where="post", color="tab:red", label="res")
+    ax3.set_ylim(-0.2, 1.2)
+    ax3.set_yticks([0, 1])
+    ax3.set_ylabel("inputs (bool)")
+    ax3.set_xlabel("cycle")
+    ax3.legend(loc="upper left", fontsize=8)
+
+    ax4 = ax3.twinx()
+    ax4.step(cycles, state, where="post", color="tab:gray",
+              linestyle="--", label="cc state")
+    ax4.set_ylim(-0.2, len(_STATE_LEVELS) - 0.8)
+    ax4.set_yticks(range(len(_STATE_LEVELS)))
+    ax4.set_yticklabels(_STATE_LEVELS)
+    ax4.set_ylabel("cc state (derived)")
+
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS_DIR, f"{tid}.png"))
     plt.close(fig)
 ```
 
-Call `plot_scenario(tid, trace)` at the end of `run_scenario()`, and create `PLOTS_DIR` alongside `RESULTS_DIR` in `__main__`. Each PNG shows `throttle` and `v_speed` over the scenario's cycles on twin axes — this is what lets you *see* dynamic behaviour (e.g. the regulator's gradual convergence in `tc02_cc_active_regulates.png`) that a single expected-value assertion cannot capture.
+Call `plot_scenario(tid, trace)` at the end of `run_scenario()`, and create `PLOTS_DIR` alongside `RESULTS_DIR` in `__main__`. Each PNG has two stacked subplots sharing a cycle axis: `throttle`/`v_speed`/`set_point`/`brake` on top, `on`/`set`/`res`/derived `cc state` on the bottom — this is what lets you *see* dynamic behaviour (e.g. the regulator's gradual convergence toward `set_point` in `tc02_cc_active_regulates.png`, or exactly which cycle's `brake` spike flips the bottom chart's state trace from `active` to `standby` in `tc03_brake_suspends.png`) that a single expected-value assertion cannot capture.
+
+Finally, have the script tell you exactly which files it produced, so you don't have to guess names or dig through `results/` by hand, and print progress **as each scenario runs** instead of staying silent until the final report — useful once you have more than a couple of scenario files, and essential once a run takes long enough that you want to know it's still making progress. Have `plot_scenario()` return the PNG path, have `run_scenario()` print a `[i/N] Running <tid> ...` line plus a per-scenario checkpoint summary and return both the trace CSV path and the plot path alongside `checks`, and collect everything (plus `results/summary.csv`) into a `generated_files` list printed at the end of `__main__`:
+
+```python
+def plot_scenario(tid, trace):
+    ...
+    plot_path = os.path.join(PLOTS_DIR, f"{tid}.png")
+    fig.savefig(plot_path)
+    plt.close(fig)
+    return plot_path
+
+
+def run_scenario(path, index=None, total=None):
+    ...
+    tid = os.path.splitext(os.path.basename(path))[0]
+    prefix = f"[{index}/{total}] " if index else ""
+    print(f"{prefix}Running {tid} ...")
+
+    ...  # cc.reset(), the reset globals, and the cycle loop as before
+
+    trace_path = os.path.join(RESULTS_DIR, f"{tid}_trace.csv")
+    with open(trace_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=trace[0].keys())
+        writer.writeheader()
+        writer.writerows(trace)
+
+    plot_path = plot_scenario(tid, trace)
+
+    if checks:
+        n_fail = sum(1 for c in checks if c["status"] == "FAIL")
+        print(f"    {len(trace)} cycles, {len(checks)} checkpoint(s): "
+              f"{len(checks) - n_fail} passed, {n_fail} failed")
+    else:
+        print(f"    {len(trace)} cycles, no checkpoints - see chart for regulator behaviour")
+
+    return checks, [trace_path, plot_path]
+
+
+if __name__ == "__main__":
+    os.makedirs(PLOTS_DIR, exist_ok=True)
+    all_checks, generated_files = [], []
+
+    scenario_paths = sorted(glob.glob(os.path.join(SCENARIOS_DIR, "*.csv")))
+    for i, path in enumerate(scenario_paths, start=1):
+        checks, files = run_scenario(path, i, len(scenario_paths))
+        all_checks.extend(checks)
+        generated_files.extend(files)
+
+    summary_path = os.path.join(RESULTS_DIR, "summary.csv")
+    with open(summary_path, "w", newline="") as f:
+        ...  # write all_checks as before
+    generated_files.append(summary_path)
+
+    # ... existing VERIFICATION REPORT / VALIDATION printout ...
+
+    print("=" * 70)
+    print("  GENERATED FILES -- inspect these for details")
+    print("=" * 70)
+    for f in generated_files:
+        print(f"  {f}")
+```
 
 ### Activity 6F — Run and Compare
 
@@ -724,7 +872,7 @@ python evaluate_cc.py
 
 <img src="img/python_run_eval.png" width="100%">
 
-Inspect `results/summary.csv` (the PASS/FAIL traceability report) and the charts in `results/plots/`. Compare the summary to Lab 2's verification report. Write 2–3 sentences: what is the same, and what is different about testing via generated C plus scenario files vs. testing your Python implementation directly?
+The script's own **GENERATED FILES** printout lists every trace CSV, plot PNG, and `results/summary.csv` it just wrote — use it to jump straight to the right file instead of browsing `results/` by hand. Inspect `results/summary.csv` (the PASS/FAIL traceability report) and the charts in `results/plots/`. Compare the summary to Lab 2's verification report. Write 2–3 sentences: what is the same, and what is different about testing via generated C plus scenario files vs. testing your Python implementation directly?
 
 ---
 

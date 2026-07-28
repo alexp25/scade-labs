@@ -47,14 +47,20 @@ partially documents a step, that's stated explicitly.
 1. Generate the code-generation job + Python wrapper (Activities 6A/6B —
    requires local Scade One, same prerequisite as the modeling workflow).
 2. Define each test scenario as a CSV file under `scenarios/` (one row per
-   simulation cycle; optional `expected_throttle`/`req`/`note` columns mark
-   checkpoint rows). Six examples ship in
-   `src/lab3_2/solution/CruiseControl/scenarios/` (`tc01`…`tc06`).
-3. Run `evaluate_cc.py` — it drives the wrapper cycle-by-cycle per scenario,
-   writes `results/<tid>_trace.csv`, checks checkpoint rows, and writes
-   `results/summary.csv` (the traceability report, REQ-tagged, PASS/FAIL,
-   same banner style as Lab 2) plus `results/plots/<tid>.png` (throttle +
-   `v_speed` vs. cycle).
+   simulation cycle; `set_point` is a real model input authored by hand per
+   Activity 4E's "rising edge of `on` locks `set_point = v_speed`" rule;
+   optional `expected_throttle`/`req`/`note` columns mark checkpoint rows).
+   Six examples ship in `src/lab3_2/starter/CruiseControl/scenarios/`
+   (`tc01`…`tc06`), each 12-14 cycles with `v_speed` ramped gradually rather
+   than jumped between two values.
+3. Run `evaluate_cc.py` — it prints progress per scenario as it runs, drives
+   the wrapper cycle-by-cycle per scenario, writes `results/<tid>_trace.csv`,
+   checks checkpoint rows, and writes `results/summary.csv` (the
+   traceability report, REQ-tagged, PASS/FAIL, same banner style as Lab 2)
+   plus `results/plots/<tid>.png` — two stacked subplots: `throttle`/
+   `v_speed`/`set_point`/`brake` on top, boolean inputs (`on`/`set`/`res`)
+   plus a Python-re-derived `cc state` (not read from the model) on the
+   bottom. It also prints a final list of every file it generated.
 4. Compare `results/summary.csv` and the charts to Lab 2's verification
    report (Activity 6F).
 

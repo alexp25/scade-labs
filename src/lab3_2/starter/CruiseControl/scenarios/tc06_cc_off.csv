@@ -1,4 +1,13 @@
-cycle,on,set,v_speed,brake,accel,res,expected_throttle,req,note
-1,True,False,0.0,0.0,0.300,False,,,activate
-2,True,False,80.0,0.0,0.300,False,,,cc_active
-3,False,False,80.0,0.0,0.300,False,0.300,REQ-01,on=false -> cc_enabled -> cc_disabled; throttle mirrors accel again
+cycle,on,set,v_speed,brake,accel,res,set_point,expected_throttle,req,note
+1,True,False,0.0,0.0,0.300,False,0.000,,,activate
+2,True,False,28.0,0.0,0.300,False,0.000,,,cc_active
+3,True,False,46.2,0.0,0.300,False,0.000,,,
+4,True,False,58.0,0.0,0.300,False,0.000,,,
+5,True,False,65.7,0.0,0.300,False,0.000,,,
+6,True,False,70.7,0.0,0.300,False,0.000,,,
+7,True,False,76.1,0.0,0.300,False,0.000,,,
+8,True,False,77.5,0.0,0.300,False,0.000,,,steady cruise before shutoff
+9,False,False,77.5,0.0,0.300,False,0.000,0.300,REQ-01,on=false -> cc_enabled -> cc_disabled; throttle mirrors accel again
+10,False,False,70.0,0.0,0.500,False,0.000,0.500,REQ-01,
+11,False,False,60.0,0.0,0.200,False,0.000,0.200,REQ-01,
+12,False,False,50.0,0.0,0.000,False,0.000,0.000,REQ-01,"cc fully disabled, driver has full pedal control"
