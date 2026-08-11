@@ -1,0 +1,5 @@
+tid,req,nodes,inputs,expected,actual,status
+TC-CNT-00,REQ-CNT-01,#2 (#3 pre #4),"cycle=0, init_value=0, step=1",0,0,PASS
+TC-CNT-01,REQ-CNT-02,#6 (#7 + #8),"cycle=1, init_value=0, step=1",1,1,PASS
+TC-CNT-02,REQ-CNT-02,#6 (#7 + #8),"cycle=2, init_value=0, step=1",2,2,PASS
+TC-CNT-03,REQ-CNT-02,#6 (#7 + #8),"cycle=3, init_value=0, step=1",3,3,PASS

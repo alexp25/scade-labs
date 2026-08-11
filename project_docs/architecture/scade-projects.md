@@ -4,14 +4,30 @@ Two independent Scade One projects exist, both under `src/`, both reference
 solutions (no student-editable starter — these labs are GUI-modeling
 exercises, not code-stub exercises).
 
-## Lab 3.1 — `src/lab3_1/solution/` (`demo.sproj`)
+## Lab 3 — `src/lab3/solution/` (`demo.sproj`) — the working copy; `src/lab3/starter/` has the same files but does not open
 
-**Project manifest** `demo.sproj` — plain JSON:
+Lab 3's Scade One project exists in **two directories with identical file
+content but different layouts**:
+
+- `src/lab3/solution/` — `blocks.swan`/`test.swant` live under `assets/`,
+  matching Scade One's own convention. **This is the copy that actually
+  opens** — use it for anything that requires a working project.
+- `src/lab3/starter/` — the same `blocks.swan`/`test.swant`, but flattened
+  to sit directly beside `demo.sproj` instead of under `assets/`. Scade One
+  does not discover `.swan` files there, so opening this project shows it
+  empty. This happened when the former Lab 4.1's `src/lab4_1/starter/`
+  content was flattened during the Lab 3/Lab 4 merge; left as-is per
+  explicit maintainer instruction rather than "fixed" in place — the
+  correctly-laid-out `solution/` copy was added alongside it instead.
+
+**Project manifest** `demo.sproj` — plain JSON (identical in both copies):
 ```json
 { "Version": "1.0", "Name": "demo", "Dependencies": [], "Resources": [] }
 ```
 
-**Model source** `assets/blocks.swan` (Swan `2025.2`/graph `2.1`), hand-authored:
+**Model source** `blocks.swan` (`solution/assets/blocks.swan`; flattened to
+`starter/blocks.swan` — same content, see layout note above; Swan
+`2025.2`/graph `2.1`), hand-authored:
 - `function limiter(value_in, min, max: float64) returns (value_out: float64)`
   — diagram-form double clamp (`if value_in > max then max else value_in`,
   then clamped again against `min`).
@@ -20,7 +36,8 @@ exercises, not code-stub exercises).
   the first cycle.
 - `const init: float64 = 0;`
 
-**Test harness** `assets/test.swant` — hand-authored, **populated**:
+**Test harness** `test.swant` (`solution/assets/test.swant`; flattened to
+`starter/test.swant`) — hand-authored, **populated**:
 - `_harness harness_counter` — instantiates `blocks::counter` as
   `$my_counter` (`#pragma swt under_test`), wires `1_i32`→`step`,
   `0_i32`→`init_value`, `_stop_condition` wired to `false` (a Scade One
@@ -37,12 +54,12 @@ imports `ansys.scadeone.core.ScadeOne` and
 requires a local Scade One install at
 `C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One`.
 
-## Lab 3.2 — `src/lab3_2/solution/CruiseControl/` (`CruiseControl.sproj`)
+## Lab 4 — `src/lab4/starter/CruiseControl/` (`CruiseControl.sproj`)
 
 **Project manifest** — plain JSON, declares one `SimulationData` resource
 (`resources/main_inputs.sd`).
 
-**Conceptual split** (documented for students in `docs/lab3_2/lab.md`'s
+**Conceptual split** (documented for students in `docs/lab4/lab.md`'s
 "Project Structure" section, added this session): the project has three
 packages with three distinct roles — `CC_design` is the actual deliverable
 (the only node targeted for code generation in Part 6); `Car_design` is a
@@ -67,7 +84,7 @@ interactive/manual simulation and is never a code-generation target. Only
     gain `0.2`), summed then clamped by two `limiter` instance blocks
     (`[-100,100]` then `[0,100]`).
   - `node limiter(input, upper_limit, lower_limit: float32) returns (output:
-    float32)` — same clamp pattern as Lab 3.1's `limiter`, `node`/float32 form.
+    float32)` — same clamp pattern as Lab 3's `limiter`, `node`/float32 form.
 - `assets/Car_design.swan` — vehicle plant model: `node car(throttle_percent,
   brake: float32) returns (speed, rpm: float32; gear: int32)`. Gear selection
   via a `case` construct over speed thresholds (20/40/70/100/130 km/h),
@@ -78,10 +95,12 @@ interactive/manual simulation and is never a code-generation target. Only
   `throttle_percent = accel*100.0`, no cruise control — plant-only
   exploration).
 
-**Test harness** `assets/Main_test.swant` — **present but empty**: only the
-version header, no `_harness` body. Lab.md describes test-harness activities
-for this lab, but no test vectors are actually committed here — building
-this out is left to the student/instructor, not shipped as a reference.
+**Test harness** — none ships for this model. An earlier, empty
+`assets/Main_test.swant` scaffold has since been removed from the tree;
+`lab.md` no longer describes test-harness-building activities for this lab
+(Part 5 only briefly mentions Scade One test harnesses before Part 6's
+Python evaluation script, `evaluate_cc.py`, takes over as the actual
+verification mechanism).
 
 **Generated artifacts**, `cc_wrapper/`:
 - `cc_wrapper.py`, `cc_wrapper.c`, `cc_wrapper.def` — generated
@@ -113,12 +132,12 @@ this out is left to the student/instructor, not shipped as a reference.
   anywhere in the repo.
 - Python `3.12` required for wrapper generation/testing (`py -3 ...`, used
   consistently across both labs' scripts and `lab.md` files).
-- `ansys-scadeone-core==0.8.2` pinned for Lab 3.1;
-  **unpinned `ansys-scadeone-core`** for Lab 3.2 — a real inconsistency
+- `ansys-scadeone-core==0.8.2` pinned for Lab 3;
+  **unpinned `ansys-scadeone-core`** for Lab 4 — a real inconsistency
   between the two labs' stated dependencies, documented but not silently
   "fixed" here (pinning it would require a maintainer decision about which
   version was actually used to generate the shipped `cc_wrapper.*` files).
-- The repo's own `docs/lab3_1/lab.md` warns: "The exact class name and
+- The repo's own `docs/lab3/lab.md` warns: "The exact class name and
   instantiation method depend on your Scade One version and project name —
   check the generated wrapper file" — an acknowledged version-drift risk in
   the generated wrappers, not something this documentation pass can resolve
@@ -132,7 +151,7 @@ page, only skimmed for characterization:
   job output (`CruiseControl/jobs/codegen_*/out/{cg_map.json, code/}`) plus a
   `CruiseControl.zip`; looks like in-progress/scratch job output.
 - `old/scade_demo/` (tracked) — earlier `demo/`/`project2/` Scade projects,
-  superseded by the current `src/lab3_1`/`src/lab3_2` solutions.
+  superseded by the current `src/lab3`/`src/lab4` solutions.
 
 ## Do not hand-edit
 

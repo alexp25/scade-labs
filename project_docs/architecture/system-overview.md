@@ -25,16 +25,16 @@ scade-labs/
 │   ├── index.html          portfolio page
 │   ├── assets/css/syntax.css
 │   ├── lab2/{index.html, lab.md}
-│   ├── lab3_1/{index.html, lab.md, img/}
-│   ├── lab3_2/{index.html, lab.md, lab_old.md, img/}
+│   ├── lab3/{index.html, lab.md, img/}
+│   ├── lab4/{index.html, lab.md, lab_old.md, img/}
 │   ├── assets/js/{firebase-config.js, firebase-client.js, auth-header.js}
 │   ├── account/index.html  login/register + "my progress"
 │   └── admin/index.html    admin-only progress view (ADR 0002)
 ├── firestore.rules         Firestore Security Rules source of truth (ADR 0002)
 ├── src/                    lab source code, NOT published
 │   ├── lab2/{starter, solution, README.md, .gitignore}
-│   ├── lab3_1/solution/
-│   └── lab3_2/solution/CruiseControl/
+│   ├── lab3/starter/
+│   └── lab4/starter/CruiseControl/
 ├── old/                    tracked legacy archive
 └── scade_demo/             untracked local Scade One job output
 ```
@@ -44,10 +44,10 @@ scade-labs/
 1. **Lab 2** — pure Python, browser-executable (Skulpt), teaches SDLC/
    requirements/V&V via a small cruise-control state machine. No proprietary
    tooling required by students.
-2. **Lab 3.1** — Ansys Scade One modeling fundamentals (typed operators,
+2. **Lab 3** — Ansys Scade One modeling fundamentals (typed operators,
    combinatorial `limiter`, sequential `counter`, test harnesses). Requires
    the Scade One Student Edition desktop application.
-3. **Lab 3.2** — a larger Scade One model (state machine + PI regulator +
+3. **Lab 4** — a larger Scade One model (state machine + PI regulator +
    vehicle plant) that reimplements Lab 2's cruise-control logic as a
    graphical model, with Python-wrapper testing and a partial
    requirements-traceability exercise inside the tool.
@@ -67,7 +67,7 @@ See [`site-and-publishing.md`](site-and-publishing.md).
   see `project_docs/maintenance/validation-checklist.md`).
 - **Current vs. legacy**: `old/` (tracked) and root `scade_demo/` (untracked)
   are superseded/out-of-scope and not linked from any published page.
-  `docs/lab3_2/lab_old.md` is a special case: it sits *inside* the current
+  `docs/lab4/lab_old.md` is a special case: it sits *inside* the current
   published lab directory but is not fetched by any `index.html` — a latent
   editing hazard, not a functioning duplicate.
 

@@ -58,26 +58,26 @@ color-coding and to drive a validation banner. Because Lab 2 imports nothing
 beyond the stdlib, it runs unmodified under Skulpt — this is why Lab 2, and
 only Lab 2, can offer a fully in-browser exercise.
 
-## Lab 3.1 / 3.2 — Scade One Python wrapper testing (requires local install)
+## Lab 3 / 3.2 — Scade One Python wrapper testing (requires local install)
 
 Both labs follow the same pattern: a Scade One code-generation job produces
 C code; a `PythonWrapper` (from `ansys.scadeone.core.svc.pywrapper
 .python_wrapper`) generates a ctypes-based `.py` wrapper around a compiled
 `.dll`; a hand-written test/demo script drives it.
 
-- **Lab 3.1**: `test_counter.py` ("Mirrors the multi-cycle simulation from
+- **Lab 3**: `test_counter.py` ("Mirrors the multi-cycle simulation from
   Activity 4D") drives `counter_wrapper` through `expected_sequence =
   [0,1,2,3,4,5]`. `test_limiter.py` ("Mirrors the 3 manual simulation steps
   from Activity 2D") checks 3 cases (pass-through, clamp-max, clamp-min,
   tolerance `1e-9`). Both print manual PASS/FAIL text — no assertion
   framework.
-- **Lab 3.2**: `tester.py` is a **live console demo, not an automated
+- **Lab 4**: `tester.py` is a **live console demo, not an automated
   test** — a 1000-cycle loop toggling `accel`/`on`/`res`/`set_point`
   (cruise control engages at cycle 200, `set_point=50.0`), printing
   speed/gear/rpm/state each cycle with `time.sleep(0.05)`. There are no
   assertions and no PASS/FAIL output; a human reads the trace. Kept as-is —
   not part of the Part 6 lesson flow.
-- `docs/lab3_2/lab.md` Part 6 (Activities 6C–6F, rewritten in this session to
+- `docs/lab4/lab.md` Part 6 (Activities 6C–6F, rewritten in this session to
   replace Scade One test-harness building with a Python-driven evaluation
   workflow) now teaches `evaluate_cc.py`: test scenarios are stored as CSV
   files under `scenarios/` (one row per simulation cycle, optional
@@ -86,8 +86,8 @@ C code; a `PythonWrapper` (from `ansys.scadeone.core.svc.pywrapper
   `results/summary.csv` traceability report, and plots
   `results/plots/<tid>.png` (throttle + `v_speed` vs. cycle on twin axes) via
   `matplotlib`. A matching reference copy —
-  `src/lab3_2/solution/CruiseControl/evaluate_cc.py` plus six scenario CSVs
-  under `src/lab3_2/solution/CruiseControl/scenarios/` — **does exist in the
+  `src/lab4/starter/CruiseControl/evaluate_cc.py` plus six scenario CSVs
+  under `src/lab4/starter/CruiseControl/scenarios/` — **does exist in the
   repository** (unlike the lab.md's prior `test_cc_main.py` snippet, which
   had no backing file). It still illustrates the same simplified hypothetical
   wrapper API (`cc.on`, `cc.brake`, `cc.cycle()`, `cc.throttle`) as before —
@@ -107,19 +107,19 @@ sibling `.dll`, produced only by Scade One's code generator).
 ## Correspondence between the Python reference and the Scade models
 
 Explicitly stated by the repo (not inferred):
-- Lab 3.1's `test_limiter.py`/`test_counter.py` docstrings state they mirror
-  specific Lab 3.1 manual-simulation activities.
-- `docs/lab3_2/lab.md` states its wrapper test "mirrors the test cases from
+- Lab 3's `test_limiter.py`/`test_counter.py` docstrings state they mirror
+  specific Lab 3 manual-simulation activities.
+- `docs/lab4/lab.md` states its wrapper test "mirrors the test cases from
   Lab 2" and asks students to "compare the output to Lab 2's verification
   report."
 
 **There is no automated cross-check** between Lab 2's Python state machine
-and Lab 3.2's Swan `cruise_control` node — correspondence is manual: a human
+and Lab 4's Swan `cruise_control` node — correspondence is manual: a human
 runs both and compares printed output. No script in the repo runs both and
 diffs the results.
 
 ## Simulation controls / timing
 
-Only Lab 3.2's `tester.py` has a timing element: `time.sleep(0.05)` between
+Only Lab 4's `tester.py` has a timing element: `time.sleep(0.05)` between
 printed cycles, purely for human-readable pacing of the console trace — not
 a real-time simulation constraint of the model itself.

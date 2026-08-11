@@ -32,7 +32,7 @@ gated — there is no pipeline in this repository.
       `lab.md`), and the `req`/`tid` fields in both starter and solution
       code, together.
 
-## Lab 3.1 / 3.2 (Scade One) changes — requires a local Scade One install
+## Lab 3 / 3.2 (Scade One) changes — requires a local Scade One install
 
 Not runnable in the environment used for this documentation pass — treat as
 a manual maintainer procedure:
@@ -40,7 +40,7 @@ a manual maintainer procedure:
 - [ ] Manual simulation matches the expected values stated in `lab.md`.
 - [ ] Wrapper regenerated (`setup_wrapper.py` / `generate_python_wrapper.bat`)
       if the model changed.
-- [ ] `python test_counter.py` / `test_limiter.py` (Lab 3.1) print all PASS.
+- [ ] `python test_counter.py` / `test_limiter.py` (Lab 3) print all PASS.
 - [ ] If you changed `CC_design.swan`'s automaton, re-check whether the
       `#pragma requirement` tags (currently only 1 of the 4 Activity 7A
       describes) still make sense, or explicitly note the gap remains.

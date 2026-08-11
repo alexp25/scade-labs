@@ -52,7 +52,7 @@ lab and take every quiz; only the recording of that activity requires login.
 |---|---|---|---|
 | `profiles` | Firebase Auth UID | `email`, `displayName`, `isAdmin`, `createdAt` | Client, on first login (`isAdmin` always created `false`; only editable via the Firebase console) |
 | `labOpens` | `{uid}_{labId}` | `userId`, `labId`, `firstOpenedAt`, `lastOpenedAt`, `openCount` | Client, via `window.recordLabOpen(labId)`, called once per page load once a session exists |
-| `quizAttempts` | auto-ID | `userId`, `labId`, `quizId`, `score`, `total`, `submittedAt` | Client, via `window.recordQuizAttempt(...)`, called from Lab 3.1/3.2's quiz submit handler and from Lab 2's `runCode()` (using `quizId: 'code-run'`, `score`/`total` = pass/fail line counts from the test output) |
+| `quizAttempts` | auto-ID | `userId`, `labId`, `quizId`, `score`, `total`, `submittedAt` | Client, via `window.recordQuizAttempt(...)`, called from Lab 3/3.2's quiz submit handler and from Lab 2's `runCode()` (using `quizId: 'code-run'`, `score`/`total` = pass/fail line counts from the test output) |
 
 ## Security model
 

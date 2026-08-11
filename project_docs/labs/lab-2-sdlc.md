@@ -14,7 +14,7 @@ remark).
 ## Prerequisites
 
 None stated in `lab.md` (no `## Prerequisites` heading exists in this lab —
-unlike Lab 3.1/3.2). The lab opens directly with Objectives → The Problem →
+unlike Lab 3/Lab 4). The lab opens directly with Objectives → The Problem →
 Structure.
 
 ## Learning outcomes (quoted, `docs/lab2/lab.md`)
@@ -106,11 +106,11 @@ that REQ-X is met.'" Each test tuple in the code also carries a literal
 `req` field printed at runtime (e.g. `TC-05 [REQ-04]`). A consolidated
 REQ×TC traceability-matrix table appears later in `lab.md`. See
 `project_docs/verification/requirements-and-traceability.md` for the full
-table and how this compares to Lab 3.2's partial in-tool traceability.
+table and how this compares to Lab 4's partial in-tool traceability.
 
 ## Known limitations
 
-- No dedicated Prerequisites section (structural asymmetry vs. Lab 3.1/3.2 —
+- No dedicated Prerequisites section (structural asymmetry vs. Lab 3/Lab 4 —
   documented, not "fixed," since this may be intentional given Lab 2 needs
   no special setup).
 - Lab 2's in-browser path depends on 3 CDNs (skulpt.org + 2×cdnjs) with no

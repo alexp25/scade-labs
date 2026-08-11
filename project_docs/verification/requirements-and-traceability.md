@@ -28,7 +28,7 @@ and `req` fields (e.g. `"TC-05"`, `"REQ-04"`), printed at runtime.
 **Classification: EXPLICIT.** Stated in prose and duplicated as data — not
 an inference a reader has to construct.
 
-## Lab 3.1 — no requirements exist
+## Lab 3 — no requirements exist
 
 Grepped for requirement/trace/REQ/V&V/verification language across the
 entire lab — zero REQ-xx identifiers, zero requirements framing. Test
@@ -36,7 +36,7 @@ harnesses and Python tests check hardcoded expected values only ("Expected
 output: `value_out = 100.0`"). This lab teaches tool mechanics; there is
 nothing to trace.
 
-## Lab 3.2 — one real mechanism, partially realized
+## Lab 4 — one real mechanism, partially realized
 
 - Restates Lab 2's **state names and interface** (not its REQ-xx prose) in
   "The System (recap from Lab 2)."
@@ -50,7 +50,7 @@ nothing to trace.
   link the following model elements to their REQ IDs... This is what Lab 9
   of the original SCADE Suite training covered."*
 - **Verified against the shipped solution**:
-  `src/lab3_2/solution/CruiseControl/assets/CC_design.swan` contains exactly
+  `src/lab4/starter/CruiseControl/assets/CC_design.swan` contains exactly
   **one** `#pragma requirement` (`reQ2`, on the whole `cruise_control` node)
   — not the four transition-level links Activity 7A instructs students to
   create. The reference solution demonstrates the mechanism but does not
@@ -63,19 +63,19 @@ nothing to trace.
 | Test | Exercises | REQ | Classification | Evidence |
 |---|---|---|---|---|
 | TC-01…TC-07 (Lab 2) | full cruise-control state machine | REQ-01…04 | **EXPLICIT** | lab.md prose + `req`/`tid` fields in code |
-| limiter/counter tests (Lab 3.1) | clamp / increment behavior | — | **N/A** | no REQ IDs exist in Lab 3.1 |
-| `evaluate_cc.py` scenario checkpoints (Lab 3.2) | cruise-control scenarios, one CSV file per scenario under `scenarios/` | REQ-01/02/04 | **NAMING-BASED, FILE-BACKED** | `req` column in each scenario CSV, written to `results/summary.csv`; no "verifies" sentence, but (unlike the prior `test_cc_main.py` instructional snippet) both `docs/lab3_2/lab.md` and `src/lab3_2/solution/CruiseControl/{scenarios/,evaluate_cc.py}` now exist as real files |
-| Activity 7A model-element links (Lab 3.2) | 4 transitions | REQ-01/02/04 | **EXPLICIT instruction, 25% REALIZED** (1 of 4 present) | lab.md Activity 7A vs. `CC_design.swan` pragma |
-| Reflection-quiz "Scenario S-03" (Lab 3.2) | reactivation requires explicit `res` | REQ-04 (by analogy) | **INFERRED** | quiz answer describes behavior, never states the REQ ID |
+| limiter/counter tests (Lab 3) | clamp / increment behavior | — | **N/A** | no REQ IDs exist in Lab 3 |
+| `evaluate_cc.py` scenario checkpoints (Lab 4) | cruise-control scenarios, one CSV file per scenario under `scenarios/` | REQ-01/02/04 | **NAMING-BASED, FILE-BACKED** | `req` column in each scenario CSV, written to `results/summary.csv`; no "verifies" sentence, but (unlike the prior `test_cc_main.py` instructional snippet) both `docs/lab4/lab.md` and `src/lab4/starter/CruiseControl/{scenarios/,evaluate_cc.py}` now exist as real files |
+| Activity 7A model-element links (Lab 4) | 4 transitions | REQ-01/02/04 | **EXPLICIT instruction, 25% REALIZED** (1 of 4 present) | lab.md Activity 7A vs. `CC_design.swan` pragma |
+| Reflection-quiz "Scenario S-03" (Lab 4) | reactivation requires explicit `res` | REQ-04 (by analogy) | **INFERRED** | quiz answer describes behavior, never states the REQ ID |
 
 ## Completion criteria per lab
 
 - **Lab 2**: "All 7 tests must print PASS" + runtime banner
   `VALIDATION: ALL REQUIREMENTS MET.` — **verified this session** (see
   `project_docs/verification/testing-and-simulation.md`).
-- **Lab 3.1**: no aggregate banner; per-activity expected values plus the
+- **Lab 3**: no aggregate banner; per-activity expected values plus the
   generated test scripts' own `"ALL PASS"`/`"SOME TESTS FAILED"` print.
-- **Lab 3.2**: activity-based through Part 5 ("0 errors" build, "`throttle`
+- **Lab 4**: activity-based through Part 5 ("0 errors" build, "`throttle`
   equals `accel` (0.5)"); Part 6 now ends with `evaluate_cc.py`'s own
   `"VALIDATION: ALL REQUIREMENTS MET."` / `"...ISSUES FOUND"` banner over the
   checkpoint scenarios (mirroring Lab 2's banner), followed by a manual
@@ -86,7 +86,7 @@ nothing to trace.
 Grepped the whole repo for DO-178C, DO-331, ISO 26262, IEC 61508, EN 50128,
 "certified"/"certification"/"compliance." Zero hits for DO-331, IEC 61508, or
 EN 50128. Every DO-178C/ISO 26262/"certified" hit found (in `docs/lab2/lab.md`,
-`docs/lab3_2/lab.md`, and the deprecated `docs/lab3_2/lab_old.md` /
+`docs/lab4/lab.md`, and the deprecated `docs/lab4/lab_old.md` /
 `old/lab2_old/`) is either:
 (a) a closing remark about what commercial tools do at industrial scale, or
 (b) an explicit reflection-quiz question asking the student to explain a
@@ -103,7 +103,8 @@ claim without explicit new evidence.
   + a dict the student fills into the editor, not a repo artifact).
 - No code-coverage tool anywhere in the repo.
 - No CI pipeline (no `.github/workflows/`).
-- Lab 3.2's `Main_test.swant` harness scaffold is empty.
-- Lab 3.1's tests are plain scripts (manual string comparison), not an
+- Lab 4 ships no `.swant` test-harness file (an earlier empty
+  `Main_test.swant` scaffold has since been removed).
+- Lab 3's tests are plain scripts (manual string comparison), not an
   assertion framework, and carry no requirement linkage (none exist to link
   to).

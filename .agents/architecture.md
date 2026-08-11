@@ -21,16 +21,16 @@ scade-labs/
 │   ├── index.html                                    portfolio page (static HTML, no front matter)
 │   ├── assets/css/syntax.css                         Rouge syntax-highlight CSS (unreferenced by any page — see publishing.md)
 │   ├── lab2/{index.html, lab.md}                     Lab 2 page (no img/)
-│   ├── lab3_1/{index.html, lab.md, img/}              Lab 3.1 page
-│   ├── lab3_2/{index.html, lab.md, lab_old.md, img/}  Lab 3.2 page (lab_old.md is unused/orphaned)
+│   ├── lab3/{index.html, lab.md, img/}               Lab 3 page (requirements + Scade One/Swan intro + Limiter/Counter + traceability)
+│   ├── lab4/{index.html, lab.md, lab_old.md, img/}   Lab 4 page (Cruise Control design/implementation/traceability; lab_old.md is unused/orphaned)
 │   ├── assets/js/{firebase-config.js, firebase-client.js, auth-header.js}  Firebase bootstrap + shared auth/tracking widget (ADR 0002)
 │   ├── account/index.html                            login/register + "my progress" page
 │   └── admin/index.html                               admin-only progress view (protected by Firestore rules, not by hiding this URL)
 ├── firestore.rules       Firestore Security Rules source of truth — hand-pasted into the Firebase console, no deploy pipeline (ADR 0002)
 ├── src/                  lab source code — NOT published, not linked from docs/
 │   ├── lab2/{starter, solution, README.md, .gitignore}
-│   ├── lab3_1/solution/  (Swan model + Python wrapper, no starter/)
-│   └── lab3_2/solution/CruiseControl/  (Swan model + C/Python wrapper, no starter/)
+│   ├── lab3/{starter, solution}  (both hold requirements text + a Scade One project — demo.sproj, blocks.swan, test.swant, wrappers, Python test scripts; starter/ has blocks.swan/test.swant flattened, which breaks Scade One's discovery, left as-is per maintainer instruction; solution/ has the correct assets/ layout and actually opens — see .agents/scade-models.md)
+│   └── lab4/starter/CruiseControl/  (Swan model + C/Python wrapper; populated/working, doubles as the reference — no separate solution/)
 ├── old/                  tracked legacy archive (old/lab2_old/, old/scade_demo/) — superseded, not linked from any published page
 └── scade_demo/           untracked local Scade One codegen job output at repo root — not part of the curriculum, left as-is
 ```
@@ -92,14 +92,14 @@ acts as a static-file build/serve tool, not a templating engine. Full detail:
 
 ## Current vs. legacy boundary
 
-- **Current/active:** `docs/lab2/`, `docs/lab3_1/`, `docs/lab3_2/` and their
-  matching `src/lab2/`, `src/lab3_1/`, `src/lab3_2/` — linked from
+- **Current/active:** `docs/lab2/`, `docs/lab3/`, `docs/lab4/` and their
+  matching `src/lab2/`, `src/lab3/`, `src/lab4/` — linked from
   `docs/index.html`.
 - **Legacy/out of scope:** `old/lab2_old/` and `old/scade_demo/` (tracked,
   superseded), and root `scade_demo/` (untracked local SCADE codegen job
   output). None are referenced from any published page (verified: no
   `old/`/`scade_demo` hits anywhere under `docs/`).
-- **Orphaned but still inside the published tree:** `docs/lab3_2/lab_old.md`
+- **Orphaned but still inside the published tree:** `docs/lab4/lab_old.md`
   is a stale earlier draft of `lab.md`, not fetched by any `index.html`
   (only `lab.md` is fetched) — a latent risk if a future editor edits the
   wrong file. Left in place (not explicitly asked to delete legacy content).

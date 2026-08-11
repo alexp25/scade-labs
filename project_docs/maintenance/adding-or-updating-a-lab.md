@@ -7,7 +7,7 @@ find it wrong once you actually try it, correct this file.
 ## Adding a new lab
 
 1. Create `docs/labN/` with:
-   - `index.html` — copy an existing lab's shell (e.g. `docs/lab3_1/index.html`
+   - `index.html` — copy an existing lab's shell (e.g. `docs/lab3/index.html`
      if the new lab has no live editor; `docs/lab2/index.html` if it needs
      one). Keep the `fetch('lab.md')` + `marked.js` render pattern — this is
      what every published page uses (see
@@ -20,7 +20,7 @@ find it wrong once you actually try it, correct this file.
    - `solution/` — reference implementation/model (never link this from
      `docs/`).
    - `starter/` — only if the lab has a student-editable code stub, as
-     Lab 2 does. Lab 3.1/3.2 are GUI-modeling exercises with no starter.
+     Lab 2 does. Lab 3/3.2 are GUI-modeling exercises with no starter.
 3. Add a card to `docs/index.html` (see the existing 4 `.lab-num` cards for
    the pattern — `href="./labN/"`, matching title).
 4. Update `.agents/lab-map.md` and add a `project_docs/labs/labN-*.md` page
@@ -44,7 +44,7 @@ find it wrong once you actually try it, correct this file.
    auto-checked (nothing cross-validates lab.md's stated requirements
    against the code).
 4. If Scade One models changed: regenerate the wrapper via
-   `setup_wrapper.py` (Lab 3.1) or `generate_python_wrapper.bat` (Lab 3.2) —
+   `setup_wrapper.py` (Lab 3) or `generate_python_wrapper.bat` (Lab 4) —
    requires a local Scade One install — and re-run the corresponding test
    script. Never hand-edit the generated `*_wrapper.py`/`.c`/`.def`/`.dll`
    files (see `project_docs/architecture/scade-projects.md`).
@@ -55,10 +55,10 @@ find it wrong once you actually try it, correct this file.
 
 - Put maintainer/architecture documentation under `docs/` — it's the public
   GitHub Pages root (see `.agents/decisions/0001-canonical-docs-location.md`).
-- Delete `old/`, `docs/lab3_2/lab_old.md`, or root `scade_demo/` as part of a
+- Delete `old/`, `docs/lab4/lab_old.md`, or root `scade_demo/` as part of a
   routine lab update — these are legacy/out-of-scope, flagged for a
   maintainer decision, not something to silently remove.
-- Invent a version pin for `ansys-scadeone-core` in Lab 3.2's
-  `requirements.txt` to "match" Lab 3.1 — the correct pin depends on which
+- Invent a version pin for `ansys-scadeone-core` in Lab 4's
+  `requirements.txt` to "match" Lab 3 — the correct pin depends on which
   Scade One/API version actually produced the shipped `cc_wrapper.*` files,
   which requires maintainer confirmation.

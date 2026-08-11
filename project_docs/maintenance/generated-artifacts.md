@@ -18,30 +18,36 @@ being listed in one of the generator's own manifest files
 
 | File | Lab | Generated? | Evidence |
 |---|---|---|---|
-| `src/lab3_1/solution/counter_wrapper/counter_wrapper.py` | 3.1 | Yes | Banner, line 1 |
-| `src/lab3_1/solution/limiter_wrapper/limiter_wrapper.py` | 3.1 | Yes | Banner, line 1 |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/cc_wrapper.py` | 3.2 | Yes | Banner, line 1 |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/cc_wrapper.c` | 3.2 | Yes | Banner, line 1 |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/cc_wrapper.def` | 3.2 | Yes | Banner, line 1 |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/cc_wrapper.dll` | 3.2 | Yes | Compiled binary, produced alongside the above; not independently inspectable |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/py_wrapper_files.txt` | 3.2 | Yes | Content is a manifest of the wrapper generator's own output filenames |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/swan_cg_files.txt` | 3.2 | Yes | Content is a manifest of the underlying C codegen job's output filenames (listed files are **not themselves checked into this directory**) |
-| `src/lab3_2/solution/CruiseControl/cc_wrapper/swan_config.h` | 3.2 | Vendor-supplied (not generated per-run, but not student/instructor source either) | Ansys copyright header, no student-facing edit activity references it |
-| `src/lab3_2/solution/CruiseControl/resources/main_inputs.sd` | 3.2 | Tool-produced (saved by the Scade One simulator UI) | Binary `SimulationData` resource declared in `CruiseControl.sproj`; not hand-editable text |
+| `src/lab3/starter/counter_wrapper/counter_wrapper.py` | 3 | Yes | Banner, line 1 |
+| `src/lab3/starter/limiter_wrapper/limiter_wrapper.py` | 3 | Yes | Banner, line 1 |
+| `src/lab3/solution/counter_wrapper/counter_wrapper.py` | 3 | Yes | Same content as the `starter/` copy above; Banner, line 1 |
+| `src/lab3/solution/limiter_wrapper/limiter_wrapper.py` | 3 | Yes | Same content as the `starter/` copy above; Banner, line 1 |
+| `src/lab4/starter/CruiseControl/cc_wrapper/cc_wrapper.py` | 4 | Yes | Banner, line 1 |
+| `src/lab4/starter/CruiseControl/cc_wrapper/cc_wrapper.c` | 4 | Yes | Banner, line 1 |
+| `src/lab4/starter/CruiseControl/cc_wrapper/cc_wrapper.def` | 4 | Yes | Banner, line 1 |
+| `src/lab4/starter/CruiseControl/cc_wrapper/cc_wrapper.dll` | 4 | Yes | Compiled binary, produced alongside the above; not independently inspectable |
+| `src/lab4/starter/CruiseControl/cc_wrapper/py_wrapper_files.txt` | 4 | Yes | Content is a manifest of the wrapper generator's own output filenames |
+| `src/lab4/starter/CruiseControl/cc_wrapper/swan_cg_files.txt` | 4 | Yes | Content is a manifest of the underlying C codegen job's output filenames (listed files are **not themselves checked into this directory**) |
+| `src/lab4/starter/CruiseControl/cc_wrapper/swan_config.h` | 4 | Vendor-supplied (not generated per-run, but not student/instructor source either) | Ansys copyright header, no student-facing edit activity references it |
+| `src/lab4/starter/CruiseControl/resources/main_inputs.sd` | 4 | Tool-produced (saved by the Scade One simulator UI) | Binary `SimulationData` resource declared in `CruiseControl.sproj`; not hand-editable text |
 
 ## Regeneration procedure (requires local Scade One — not run this session)
 
-- **Lab 3.1**: `python src/lab3_1/solution/setup_wrapper.py` — calls
+- **Lab 3**: `python src/lab3/solution/setup_wrapper.py` — calls
   `PythonWrapper(prj, "CodeGenerationJob_limiter",
-  output="limiter_wrapper").generate()` and the counter equivalent.
-- **Lab 3.2**: `src/lab3_2/solution/CruiseControl/generate_python_wrapper.bat`
+  output="limiter_wrapper").generate()` and the counter equivalent. **Must be
+  run against `src/lab3/solution/`, not `src/lab3/starter/`** —
+  `starter/`'s `blocks.swan`/`test.swant` are flattened out of `assets/`, so
+  its `demo.sproj` opens empty in Scade One and there is nothing to generate
+  code from (see `.agents/scade-models.md`).
+- **Lab 4**: `src/lab4/starter/CruiseControl/generate_python_wrapper.bat`
   — runs `py -3 -m ansys.scadeone.core.cli pycodewrap --install-dir "..."
   --job "CodeGenerationJob0" --out "cc_wrapper" "...CruiseControl.sproj"`.
 
 Both require: a local Scade One Student Edition install (hardcoded path
 `C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One` in both
 scripts) and `pip install -r requirements.txt` (`ansys-scadeone-core`,
-pinned `==0.8.2` for Lab 3.1, **unpinned** for Lab 3.2).
+pinned `==0.8.2` for Lab 3, **unpinned** for Lab 4).
 
 ## Rule for agents and maintainers
 

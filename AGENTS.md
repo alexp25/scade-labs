@@ -30,8 +30,11 @@ documentation listed below.
 - Make focused changes and preserve the educational objective of each lab.
 - Follow the conventions of the specific lab; do not assume every lab has the
   same structure. Lab 2 is pure Python with a starter/solution split and no
-  `img/`; Lab 3.1/3.2 are Scade One GUI labs with no starter code and no
-  student-facing local Python entry point, only reference `solution/` assets.
+  `img/`. Lab 3 mixes a pure-paper/text requirements deliverable (its own
+  `starter/`+`solution/` split, markdown only) with Scade One GUI modeling
+  (a `starter/` that ships a populated, working reference project — not a
+  fill-in-the-blank stub — with no separate `solution/`). Lab 4 is Scade One
+  GUI modeling only, same populated-`starter/`-no-`solution/` shape.
 - Keep student starter material (`src/lab2/starter/`) separate from
   instructor/reference solutions (`src/*/solution/`).
 - Do not expose solution content from `docs/` (the published site) or from any

@@ -51,7 +51,7 @@ widget, never the lesson text itself.
 Per-lab widget divergence:
 - **Lab 2** adds a live CodeMirror + Skulpt Python editor (`STARTER_CODE`
   literal, "▶ Run" button, PASS/FAIL output pane).
-- **Lab 3.1 / 3.2** add a reflection-quiz widget instead (`#reflection-quiz`,
+- **Lab 3 / 3.2** add a reflection-quiz widget instead (`#reflection-quiz`,
   radio-button questions).
 
 ## Root portfolio page (`docs/index.html`)
@@ -61,12 +61,12 @@ Static HTML, 4 lab cards:
   exists**; do not assume it does when reading older repo docs/comments that
   may still mention it.
 - Lab 2 → `href="./lab2/"`
-- Lab 3.1 → `href="./lab3_1/"`
-- Lab 3.2 → `href="./lab3_2/"`
+- Lab 3 → `href="./lab3/"`
+- Lab 4 → `href="./lab4/"`
 
 All three real cards' titles match each target lab's own `lab.md` H1 (verified
 by direct comparison). There is no numbering mismatch on the portfolio page
-itself (unlike inside `lab3_2/lab.md`'s own prose — see "Corrections made"
+itself (unlike inside `lab4/lab.md`'s own prose — see "Corrections made"
 below).
 
 ## Local preview procedure (verified working this session)
@@ -84,17 +84,17 @@ at the repo root; consistent across `README.md`, `readme.txt`, and
 
 | Pair | Risk | Which one is live |
 |---|---|---|
-| `docs/lab3_2/lab.md` vs `docs/lab3_2/lab_old.md` | An editor could open the wrong file | `lab.md` — `lab_old.md` is fetched by nothing |
+| `docs/lab4/lab.md` vs `docs/lab4/lab_old.md` | An editor could open the wrong file | `lab.md` — `lab_old.md` is fetched by nothing |
 | `src/lab2/starter/lab2_cruise_control_starter.py` vs the `STARTER_CODE` literal in `docs/lab2/index.html` | Editing one without the other desyncs the browser and local-run experience | Both — verified byte-identical (aside from CRLF/LF) this session; **keep them in sync manually, there is no build step that generates one from the other** |
 | `readme.txt` vs `readme_local_setup.txt` (repo root) | Both document the same local-run steps independently | Neither is generated from the other |
 
 ## Corrections made this session (documentation-only, low-risk, unambiguous)
 
-- `docs/lab3_2/lab.md` referred to its prerequisite lab as "Lab 3" and linked
+- `docs/lab4/lab.md` referred to its prerequisite lab as "Lab 3" and linked
   `../lab3/` (a directory that doesn't exist — the real directory is
-  `lab3_1`) in 7 places, including a broken anchor
-  `#part-0--scade-one-orientation` that never existed in `lab3_1/lab.md`.
-  Fixed all 7 to say "Lab 3.1" and link `../lab3_1/`.
+  `lab3`) in 7 places, including a broken anchor
+  `#part-0--scade-one-orientation` that never existed in `lab3/lab.md`.
+  Fixed all 7 to say "Lab 3" and link `../lab3/`.
 - `assets/css/syntax.css` was found sitting at the **repository root**
   (left behind by an earlier restructuring pass that moved the rest of the
   Jekyll site into `docs/` but missed this file). Moved into
@@ -106,14 +106,14 @@ at the repo root; consistent across `README.md`, `readme.txt`, and
 
 - `docs/assets/css/syntax.css` — unreferenced by any page (no
   `docs/_layouts/`, nothing links it).
-- `docs/lab3_1/img/scade_generate_python_wrapper.png` — present, never
-  referenced in `lab3_1/lab.md`.
-- `docs/lab3_2/img/` — 4 images never referenced at all
+- `docs/lab3/img/scade_generate_python_wrapper.png` — present, never
+  referenced in `lab3/lab.md`.
+- `docs/lab4/img/` — 4 images never referenced at all
   (`scade_create_operator.png`, `scade_create_test_harness.png`,
   `scade_test_harness.png`, `scade_testing.png`) plus 2 more referenced only
   inside HTML comments and therefore never actually rendered
   (`scade_system_model.png`, `scade_create_operator_crop.png`).
-- `docs/lab3_2/lab_old.md` — orphaned legacy draft, not deleted (deleting
+- `docs/lab4/lab_old.md` — orphaned legacy draft, not deleted (deleting
   legacy content was not explicitly requested).
 
 ## Adding a new lab (inferred procedure — not written down elsewhere in the repo)
@@ -121,6 +121,6 @@ at the repo root; consistent across `README.md`, `readme.txt`, and
 1. `docs/labN/index.html` (copy an existing lab's shell) + `lab.md` (+`img/`
    if there are screenshots).
 2. `src/labN/solution/` (+ `starter/` only if there's a student code stub, as
-   in Lab 2 — Lab 3.1/3.2 have none).
+   in Lab 2 — Lab 3/3.2 have none).
 3. Add a card to `docs/index.html`.
 4. Update `.agents/lab-map.md` and add a `project_docs/labs/` page.
