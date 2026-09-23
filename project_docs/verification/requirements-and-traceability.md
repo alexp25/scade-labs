@@ -64,7 +64,7 @@ nothing to trace.
 |---|---|---|---|---|
 | TC-01…TC-07 (Lab 2) | full cruise-control state machine | REQ-01…04 | **EXPLICIT** | lab.md prose + `req`/`tid` fields in code |
 | limiter/counter tests (Lab 3) | clamp / increment behavior | — | **N/A** | no REQ IDs exist in Lab 3 |
-| `evaluate_cc.py` scenario checkpoints (Lab 4) | cruise-control scenarios, one CSV file per scenario under `scenarios/` | REQ-01/02/04 | **NAMING-BASED, FILE-BACKED** | `req` column in each scenario CSV, written to `results/summary.csv`; no "verifies" sentence, but (unlike the prior `test_cc_main.py` instructional snippet) both `docs/lab4/lab.md` and `src/lab4/starter/CruiseControl/{scenarios/,evaluate_cc.py}` now exist as real files |
+| `evaluate_cc_full_report.py` scenario checkpoints (Lab 4) | cruise-control scenarios, one CSV file per scenario under `scenarios/` | REQ-01/02/04 | **NAMING-BASED, FILE-BACKED** | `req` column in each scenario CSV, written to `results/summary.csv`; no "verifies" sentence, but (unlike the prior `test_cc_main.py` instructional snippet) both `docs/lab4/lab.md` and `src/lab4/starter/CruiseControl/{scenarios/,evaluate_cc_full_report.py}` now exist as real files |
 | Activity 7A model-element links (Lab 4) | 4 transitions | REQ-01/02/04 | **EXPLICIT instruction, 25% REALIZED** (1 of 4 present) | lab.md Activity 7A vs. `CC_design.swan` pragma |
 | Reflection-quiz "Scenario S-03" (Lab 4) | reactivation requires explicit `res` | REQ-04 (by analogy) | **INFERRED** | quiz answer describes behavior, never states the REQ ID |
 
@@ -76,7 +76,7 @@ nothing to trace.
 - **Lab 3**: no aggregate banner; per-activity expected values plus the
   generated test scripts' own `"ALL PASS"`/`"SOME TESTS FAILED"` print.
 - **Lab 4**: activity-based through Part 5 ("0 errors" build, "`throttle`
-  equals `accel` (0.5)"); Part 6 now ends with `evaluate_cc.py`'s own
+  equals `accel` (0.5)"); Part 6 now ends with `evaluate_cc_full_report.py`'s own
   `"VALIDATION: ALL REQUIREMENTS MET."` / `"...ISSUES FOUND"` banner over the
   checkpoint scenarios (mirroring Lab 2's banner), followed by a manual
   compare-and-discuss step against Lab 2's report.

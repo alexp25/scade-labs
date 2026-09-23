@@ -140,8 +140,8 @@ text from.
     `src/lab3/starter/`, `src/lab3/solution/`, and
     `src/lab4/starter/CruiseControl/` (including the generated
     `counter_wrapper.py`/`limiter_wrapper.py`/`cc_wrapper.py`, and
-    `evaluate_cc.py`) — all parse with no syntax errors.
-  - **Not verified this session:** Lab 4's `evaluate_cc.py` (needs
+    `evaluate_cc_full_report.py`) — all parse with no syntax errors.
+  - **Not verified this session:** Lab 4's `evaluate_cc_full_report.py` (needs
     `matplotlib`, not confirmed installed) and the Scade One model/GUI
     itself (see below) — only Lab 3's already-generated wrapper `.dll`s
     were exercised.
@@ -160,10 +160,10 @@ text from.
     4. `python test_counter.py` / `python test_limiter.py` (Lab 3) — expect
        printed PASS for all cases (hardcoded expected values documented in
        `.agents/python.md`).
-    5. `python evaluate_cc.py` (Lab 4) — reads `scenarios/*.csv`, expects a
+    5. `python evaluate_cc_full_report.py` (Lab 4) — reads `scenarios/*.csv`, expects a
        `"VALIDATION: ALL REQUIREMENTS MET."` banner over the checkpoint
        rows, `results/summary.csv`, and `results/plots/*.png`. `python
-       tester.py` still exists separately — prints a live 1000-cycle trace
+       evaluate_cc_quick_tester.py` still exists separately — prints a live 1000-cycle trace
        with no pass/fail signal, visual inspection only.
 
 ## Scade One model simulation itself
@@ -178,6 +178,28 @@ this session. The `#pragma requirement` traceability links Activities
 cannot be added or verified here — Lab 3 Part 9 and Lab 4 Activity 7A's
 discussion of the `CC_design.swan` excerpt instead uses the file already
 committed to this repo as evidence.
+
+## Lab 6 — no automated test beyond the quiz
+
+- Lab 6's Parts 10–12 deliverable is free-text/diagram markdown — no script
+  or harness to run, same completion model as Lab 3's requirements text and
+  all of Lab 5. The only automated component is the client-side
+  `#architecture-quiz` (self-authored, not from an instructor-supplied
+  answer key — see `project_docs/labs/lab-6-architecture.md`).
+- **Actually run this session (2026-09-23):**
+  `cd docs && bundle exec jekyll build --destination <tmp>` succeeded —
+  same pre-existing Sass deprecation warnings only (`jekyll-theme-cayman`'s
+  own `@import`/`invert()` usage, unrelated to this repo's content). Output
+  tree confirmed to contain `lab6/index.html` and `lab6/lab.md` alongside
+  the existing `lab1`–`lab5` and `account`/`admin` directories. Temp output
+  directory deleted after inspection, not committed.
+- **Link check:** grepped `href="./lab` in `docs/index.html` — six cards
+  (`./lab1/` … `./lab6/`), all resolve to real directories.
+- **Not verified this session:** the page was not opened in an actual
+  browser, so Mermaid.js's CDN-loaded rendering of Lab 6's diagrams (the
+  first use of Mermaid in this repo) was not visually confirmed — only
+  code-reviewed against the working `marked.js`/`highlight.js` pattern the
+  rest of `docs/lab6/index.html` reuses from Lab 5.
 
 ## Manual/visual checks
 

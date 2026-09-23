@@ -34,7 +34,7 @@ Scade One's requirement-traceability mechanism (`#pragma requirement`).
 
 | File | Role |
 |---|---|
-| `docs/lab4/lab.md` | Published lesson (Parts 1–7: orientation, car simulation, project setup, state machine, simulation/verification, Python evaluation script, traceability & reflection). Part 6 rewritten this session to replace Scade One test-harness building with a scenario-file-driven Python script (CSV output, traceability report, charts) |
+| `docs/lab4/lab.md` | Published lesson (Parts 1–7: orientation, car simulation, project setup, state machine, simulation/verification, Python evaluation script, traceability & reflection). Part 6 previously rewritten to replace Scade One test-harness building with a scenario-file-driven Python script (CSV output, traceability report, charts); this session added a "Full script reference" subsection at the end of Part 6 — both `evaluate_cc_full_report.py` and `evaluate_cc_quick_tester.py` (the latter not previously referenced anywhere in the published lesson, only in `.agents/`) are now shown in full inside collapsed `<details>` blocks, styled in `docs/lab4/index.html`. No live/runnable editor was added — the scripts import the generated `cc_wrapper` compiled DLL, which a browser-side Python interpreter (Skulpt, used by Lab 2) cannot load, so this is read-only reference text, not execution |
 | `docs/lab4/lab_old.md` | **Orphaned** — an earlier draft, not fetched by `index.html`, do not edit expecting effect |
 | `docs/lab4/img/` | 15 screenshots — 4 unreferenced anywhere, 2 more referenced only inside HTML comments (never rendered) |
 | `src/lab4/starter/CruiseControl/CruiseControl.sproj` | Project manifest (plain JSON) |
@@ -42,8 +42,8 @@ Scade One's requirement-traceability mechanism (`#pragma requirement`).
 | `src/lab4/starter/CruiseControl/assets/Car_design.swan` | Vehicle plant model |
 | `src/lab4/starter/CruiseControl/assets/Simulation.swan` | Closed-loop (`main`) and open-loop (`main_manual`) wiring |
 | `src/lab4/starter/CruiseControl/{generate_python_wrapper.bat, readme.txt, requirements.txt}` | Wrapper-generation driver docs (requires local Scade One). `requirements.txt` now also lists `matplotlib` (added this session for the chart step) |
-| `src/lab4/starter/CruiseControl/tester.py` | Live console demo (no assertions) — unchanged, kept alongside the new evaluation script |
-| `src/lab4/starter/CruiseControl/evaluate_cc.py` | **New this session** — instructor reference implementing lab.md's Part 6 Activities 6C–6F: reads `scenarios/*.csv`, drives the wrapper cycle-by-cycle, writes `results/<tid>_trace.csv` + `results/summary.csv` + `results/plots/<tid>.png` |
+| `src/lab4/starter/CruiseControl/evaluate_cc_quick_tester.py` | Live console demo (no assertions), kept alongside the main evaluation script. This session: fixed a stale in-file comment still naming the pre-rename `evaluate_cc.py`, and added it to the published lesson's new "Full script reference" section (previously it existed in the tree and in `.agents/`, but `lab.md` never showed or mentioned it) |
+| `src/lab4/starter/CruiseControl/evaluate_cc_full_report.py` | **New this session** — instructor reference implementing lab.md's Part 6 Activities 6C–6F: reads `scenarios/*.csv`, drives the wrapper cycle-by-cycle, writes `results/<tid>_trace.csv` + `results/summary.csv` + `results/plots/<tid>.png` |
 | `src/lab4/starter/CruiseControl/scenarios/*.csv` | **New this session** — 6 example scenario files (`tc01`…`tc06`) covering REQ-01/02/04, mirroring Lab 2's test cases as short multi-cycle sequences |
 | `src/lab4/starter/CruiseControl/cc_wrapper/` | **Generated** ctypes wrapper + compiled `.dll` — do not hand-edit |
 
@@ -63,7 +63,7 @@ desktop app, same shape as Lab 3's Scade One content.
    `set_point` handling.
 6. Simulate manually and trace the state hierarchy by hand.
 7. Generate a Python wrapper; define test scenarios as CSV files under
-   `scenarios/`; run `evaluate_cc.py` to produce per-scenario trace CSVs, a
+   `scenarios/`; run `evaluate_cc_full_report.py` to produce per-scenario trace CSVs, a
    `results/summary.csv` traceability report, and `results/plots/*.png`
    charts; compare the summary to Lab 2's verification report.
 8. **Activity 7A — Traceability in Scade One**: use the Requirements panel
@@ -107,9 +107,9 @@ carries REQ-01/02/04, since REQ-07/08 aren't transition-level.
   `accel` (`0.5`) in the disabled/manual state.
 - **Python wrapper test** (requires local Scade One + unpinned
   `ansys-scadeone-core` + regenerated `cc_wrapper` — **not runnable in this
-  documentation-pass environment**): `tester.py` and the new `evaluate_cc.py`
+  documentation-pass environment**): `evaluate_cc_quick_tester.py` and the new `evaluate_cc_full_report.py`
   were syntax-checked (`python -m py_compile`, passed) but not executed.
-  `tester.py` is a live printout with no pass/fail signal. `evaluate_cc.py`
+  `evaluate_cc_quick_tester.py` is a live printout with no pass/fail signal. `evaluate_cc_full_report.py`
   illustrates the same hypothetical wrapper API as before (`cc.on`,
   `cc.brake`, `cc.cycle()`, `cc.throttle`), which still differs from the real
   generated `cc_wrapper.py` — see
@@ -142,7 +142,7 @@ them).
   `==0.8.2`) — version-drift risk against the shipped `cc_wrapper.*`.
 - No `.swant` test-harness file ships for this model (removed from the tree;
   not part of the lesson flow).
-- `evaluate_cc.py`'s wrapper API is illustrative, not verified against the
+- `evaluate_cc_full_report.py`'s wrapper API is illustrative, not verified against the
   real generated `cc_wrapper.py` (same pre-existing gap as the snippet it
   replaces — see `project_docs/architecture/python-and-simulation.md`).
 - 4 orphaned + 2 comment-only images in `docs/lab4/img/`.

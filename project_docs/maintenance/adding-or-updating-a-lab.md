@@ -23,9 +23,19 @@ find it wrong once you actually try it, correct this file.
      Lab 2 does. Lab 3/3.2 are GUI-modeling exercises with no starter.
 3. Add a card to `docs/index.html` (see the existing 4 `.lab-num` cards for
    the pattern — `href="./labN/"`, matching title).
-4. Update `.agents/lab-map.md` and add a `project_docs/labs/labN-*.md` page
+4. If the instructor supplies a slide deck for the lab: save the source copy
+   as `project_docs/courses/Slides N.pdf` and a published copy at
+   `docs/courses/labN.pdf`, then add the header slot + script include to
+   `docs/labN/index.html` (`<div id="course-slides-slot"
+   data-base="../"></div>` plus `<script
+   src="../assets/js/course-slides.js"></script>` after
+   `window.CURRENT_LAB_ID` is set) — see "Course slides (PDF viewer)" in
+   `project_docs/architecture/site-and-publishing.md`. Without a deck, skip
+   this step; the button only renders if both the slot and a matching PDF
+   exist.
+5. Update `.agents/lab-map.md` and add a `project_docs/labs/labN-*.md` page
    following the shape of the existing 3.
-5. `cd docs && bundle exec jekyll build` (or `serve`) to preview before
+6. `cd docs && bundle exec jekyll build` (or `serve`) to preview before
    pushing.
 
 ## Updating an existing lab

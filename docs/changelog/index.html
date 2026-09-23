@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changelog — SCADE Lab Portfolio</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0D1B3E;
+      --blue: #1565C0;
+      --sky: #1E88E5;
+      --ice: #E3F2FD;
+      --white: #FFFFFF;
+      --off: #F5F7FA;
+      --muted: #78909C;
+      --gray: #455A64;
+      --border: #D0D8E8;
+      --green: #2E7D32;
+      --font: 'Segoe UI', system-ui, sans-serif;
+      --mono: 'Consolas', 'Fira Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font); font-size: 15px; color: var(--gray);
+      background: var(--off); line-height: 1.65; min-height: 100vh;
+    }
+
+    .page-header { background: var(--navy); color: var(--white); padding: 2rem; border-bottom: 4px solid var(--sky); }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--white); }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .8rem; font-weight: 600; color: #90A4AE;
+      border: 1px solid #2A4A7F; border-radius: 5px;
+      padding: .3rem .75rem; text-decoration: none;
+      margin-right: .5rem; margin-bottom: .75rem; transition: color .15s, border-color .15s;
+    }
+    .back-btn:hover { color: var(--white); border-color: var(--sky); }
+
+    .page-content { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    .error { color: #B71C1C; }
+    .muted { color: var(--muted); font-size: .87rem; }
+    .loading { color: var(--muted); font-style: italic; padding: 2rem 0; }
+
+    #changelog-content h1 {
+      font-size: 1.45rem; font-weight: 700; color: var(--navy);
+      margin: 2.5rem 0 .75rem; padding-bottom: .3rem;
+      border-bottom: 3px solid var(--sky);
+    }
+    #changelog-content h1:first-child { margin-top: 0; }
+    #changelog-content h2 {
+      font-size: 1.15rem; font-weight: 700; color: var(--navy);
+      margin: 2rem 0 .65rem; padding-bottom: .25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    #changelog-content h3 { font-size: 1rem; font-weight: 600; color: var(--blue); margin: 1.5rem 0 .45rem; }
+    #changelog-content p  { margin-bottom: .85rem; }
+    #changelog-content ul, #changelog-content ol { padding-left: 1.4rem; margin-bottom: .85rem; }
+    #changelog-content li { margin-bottom: .3rem; }
+    #changelog-content strong { color: var(--navy); }
+    #changelog-content em { color: var(--muted); }
+
+    #changelog-content code {
+      font-family: var(--mono); font-size: .88em;
+      background: #EEF2F7; padding: .1em .35em;
+      border-radius: 3px; color: var(--blue);
+    }
+
+    #changelog-content blockquote {
+      border-left: 4px solid var(--sky); background: var(--ice);
+      padding: .85rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0;
+    }
+    #changelog-content blockquote p { margin-bottom: 0; }
+
+    #changelog-content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <a class="back-btn" href="../">&#8592; All Labs</a>
+  <a class="back-btn" href="../admin/">&#8592; Admin</a>
+  <h1>Changelog</h1>
+</header>
+
+<main class="page-content">
+  <div id="changelog-content"><p class="loading">Loading…</p></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script type="module">
+import { auth, db } from "../assets/js/firebase-client.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderChangelog() {
+  const el = document.getElementById("changelog-content");
+  fetch("changelog.md")
+    .then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.text();
+    })
+    .then((md) => {
+      el.innerHTML = marked.parse(md);
+      el.querySelectorAll("pre code").forEach((code) => hljs.highlightElement(code));
+    })
+    .catch((err) => {
+      el.innerHTML = `<p class="error">Could not load changelog.md: ${escapeHtml(err.message)}</p>`;
+    });
+}
+
+onAuthStateChanged(auth, async (user) => {
+  const el = document.getElementById("changelog-content");
+  if (!user) {
+    window.location.href = "../account/";
+    return;
+  }
+  const snap = await getDoc(doc(db, "profiles", user.uid));
+  if (!snap.exists() || snap.data().isAdmin !== true) {
+    el.innerHTML = '<p class="error">Access denied — this account is not an admin.</p>';
+    return;
+  }
+  renderChangelog();
+});
+</script>
+
+</body>
+</html>

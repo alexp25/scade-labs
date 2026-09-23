@@ -23,9 +23,12 @@ scade-labs/
 │   ├── lab2/{index.html, lab.md}                     Lab 2 page (no img/)
 │   ├── lab3/{index.html, lab.md, img/}               Lab 3 page (requirements + Scade One/Swan intro + Limiter/Counter + traceability)
 │   ├── lab4/{index.html, lab.md, lab_old.md, img/}   Lab 4 page (Cruise Control design/implementation/traceability; lab_old.md is unused/orphaned)
+│   ├── lab5/{index.html, lab.md}                     Lab 5 page (design principles, reading + quiz only, no src/lab5/) — see note below, this tree predates its addition
+│   ├── lab6/{index.html, lab.md}                     Lab 6 page (software architecture, reading + hands-on written exercise + quiz, no src/lab6/; the only lab page loading Mermaid.js)
 │   ├── assets/js/{firebase-config.js, firebase-client.js, auth-header.js}  Firebase bootstrap + shared auth/tracking widget (ADR 0002)
 │   ├── account/index.html                            login/register + "my progress" page
-│   └── admin/index.html                               admin-only progress view (protected by Firestore rules, not by hiding this URL)
+│   ├── admin/index.html                               admin-only progress view (protected by Firestore rules, not by hiding this URL)
+│   └── changelog/{index.html, changelog.md}           admin-only curated changelog (UI-gated only — see note below)
 ├── firestore.rules       Firestore Security Rules source of truth — hand-pasted into the Firebase console, no deploy pipeline (ADR 0002)
 ├── src/                  lab source code — NOT published, not linked from docs/
 │   ├── lab2/{starter, solution, README.md, .gitignore}
@@ -56,6 +59,15 @@ model above; it is an additional runtime dependency loaded by the browser.
   a UX convenience, not the actual security boundary.
 - **Lab content stays public**: login is required only to record progress
   and to view `/admin/`; no lab page redirects anonymous visitors.
+- **`/changelog/` is UI-gated only, not truly secured**: unlike `/admin/`
+  (whose data lives in Firestore and is enforced server-side by
+  `firestore.rules`), `docs/changelog/changelog.md` is a static file under
+  the public `docs/` publishing root. `index.html`'s `isAdmin` check only
+  controls whether the page *renders* it — anyone who fetches
+  `changelog.md`'s raw URL directly gets its contents with no auth check at
+  all. It is deliberately kept to a short, high-level, non-sensitive summary
+  (no solution content, no per-student data) for this reason — never put
+  anything in it that would matter if read without logging in.
 - Full setup/operational detail: `project_docs/integrations/firebase.md`.
 
 ## Publishing architecture
@@ -78,7 +90,7 @@ acts as a static-file build/serve tool, not a templating engine. Full detail:
 
 - **Hand-authored, edit freely:** `.swan`/`.swant` files, `.sproj` (plain JSON
   project manifests), `lab.md`, lab `index.html` shells, `setup_wrapper.py`,
-  `test_counter.py`/`test_limiter.py`/`tester.py`, `generate_python_wrapper.bat`,
+  `test_counter.py`/`test_limiter.py`/`evaluate_cc_quick_tester.py`, `generate_python_wrapper.bat`,
   `readme.txt`, `requirements.txt`.
 - **Tool-generated, do not hand-edit:** `*_wrapper.py` (`counter_wrapper.py`,
   `limiter_wrapper.py`, `cc_wrapper.py`), `cc_wrapper.c`, `cc_wrapper.def`,
@@ -93,8 +105,9 @@ acts as a static-file build/serve tool, not a templating engine. Full detail:
 ## Current vs. legacy boundary
 
 - **Current/active:** `docs/lab2/`, `docs/lab3/`, `docs/lab4/` and their
-  matching `src/lab2/`, `src/lab3/`, `src/lab4/` — linked from
-  `docs/index.html`.
+  matching `src/lab2/`, `src/lab3/`, `src/lab4/`; also `docs/lab1/`,
+  `docs/lab5/`, `docs/lab6/` (all reading/quiz/written-exercise-only, no
+  matching `src/labN/`) — all linked from `docs/index.html`.
 - **Legacy/out of scope:** `old/lab2_old/` and `old/scade_demo/` (tracked,
   superseded), and root `scade_demo/` (untracked local SCADE codegen job
   output). None are referenced from any published page (verified: no

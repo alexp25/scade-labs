@@ -151,6 +151,24 @@
     #lab-content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
     #lab-content img { max-width: 100%; border-radius: 6px; margin: .5rem 0; }
 
+    /* Collapsible full-script listings */
+    #lab-content details {
+      background: var(--navy); border-radius: 8px;
+      margin: .75rem 0 1.25rem; overflow: hidden;
+    }
+    #lab-content details[open] { padding-bottom: .25rem; }
+    #lab-content summary {
+      cursor: pointer; list-style: none; padding: .75rem 1.1rem;
+      color: var(--white); font-size: .92rem; user-select: none;
+    }
+    #lab-content summary::-webkit-details-marker { display: none; }
+    #lab-content summary::before { content: "▶ "; color: var(--sky); }
+    #lab-content details[open] summary::before { content: "▼ "; }
+    #lab-content summary strong { color: var(--white); }
+    #lab-content details pre {
+      margin: 0 1.1rem 1rem; max-height: 480px; overflow: auto;
+    }
+
     .loading { color: var(--muted); font-style: italic; padding: 2rem 0; }
 
     footer { text-align: center; padding: 2rem; font-size: .82rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 3rem; }
@@ -173,7 +191,11 @@
     <span>Scade One · Lesson 4</span>
     <span>2–3 hours</span>
   </div>
-  <div id="auth-slot" data-base="../" style="margin-top:.75rem"></div>
+  <div style="margin-top:.75rem; display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
+    <div id="auth-slot" data-base="../"></div>
+    <a class="slides-btn" style="text-decoration:none; display:inline-block;" href="https://github.com/alexp25/scade-labs/tree/main/src/lab4/starter" target="_blank" rel="noopener">&#128193; Starter Code</a>
+    <div id="course-slides-slot" data-base="../"></div>
+  </div>
 </header>
 
 <div class="page-body">
@@ -193,6 +215,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script>window.CURRENT_LAB_ID = 'lab4';</script>
 <script type="module" src="../assets/js/auth-header.js"></script>
+<script src="../assets/js/course-slides.js"></script>
 <script>
 fetch('lab.md')
   .then(r => {

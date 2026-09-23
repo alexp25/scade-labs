@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 1 – Introduction to Software Engineering</title>
+  <title>Lab 6 – Software Architecture</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <style>
@@ -136,6 +136,41 @@
       display: block; overflow-x: auto;
     }
 
+    /* ── Diagram editor (interactive Mermaid) ── */
+    .diagram-editor {
+      margin: .75rem 0 1.25rem; border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; background: var(--white);
+    }
+    .de-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: .75rem; flex-wrap: wrap;
+      background: var(--navy); color: #B0BEC5;
+      padding: .55rem .85rem; font-size: .8rem;
+    }
+    .de-actions { display: flex; gap: .5rem; flex-shrink: 0; }
+    .de-btn {
+      padding: .32rem .8rem; border-radius: 5px; border: 1px solid #2A4A7F;
+      background: transparent; color: var(--white); font-size: .8rem;
+      font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .de-btn:hover { background: var(--sky); border-color: var(--sky); }
+    .de-source {
+      display: block; width: 100%; box-sizing: border-box;
+      font-family: var(--mono); font-size: .85rem; line-height: 1.5;
+      color: var(--gray); background: #F8FAFC; border: none;
+      border-bottom: 1px solid var(--border);
+      padding: .75rem .85rem; resize: vertical; outline: none;
+    }
+    .de-source:focus { background: var(--white); }
+    .de-preview {
+      padding: 1rem; overflow-x: auto; text-align: center; min-height: 3rem;
+    }
+    .de-error {
+      margin: 0 .85rem .75rem; padding: .5rem .75rem;
+      background: #FFEBEE; color: #B71C1C; border-radius: 5px;
+      font-size: .82rem; font-family: var(--mono); white-space: pre-wrap;
+    }
+
     #lab-content blockquote {
       border-left: 4px solid var(--sky); background: var(--ice);
       padding: .85rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0;
@@ -167,11 +202,11 @@
 
 <header class="page-header">
   <a class="back-btn" href="../">&#8592; All Labs</a>
-  <h1>Lab 1 — Introduction to Software Engineering</h1>
+  <h1>Lab 6 — Software Architecture</h1>
   <div class="meta">
     <span>Software Engineering</span>
-    <span>Intro · Lesson 1</span>
-    <span>1 hour</span>
+    <span>Lesson 6</span>
+    <span>1.5 hours</span>
   </div>
   <div style="margin-top:.75rem; display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
     <div id="auth-slot" data-base="../"></div>
@@ -190,11 +225,12 @@
   </main>
 </div>
 
-<footer>Lab 1 · Software Engineering · Introduction Lesson</footer>
+<footer>Lab 6 · Software Engineering · Software Architecture</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-<script>window.CURRENT_LAB_ID = 'lab1';</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>window.CURRENT_LAB_ID = 'lab6';</script>
 <script type="module" src="../assets/js/auth-header.js"></script>
 <script src="../assets/js/course-slides.js"></script>
 <script>
@@ -205,7 +241,14 @@ fetch('lab.md')
   })
   .then(md => {
     document.getElementById('lab-content').innerHTML = marked.parse(md);
-    document.querySelectorAll('#lab-content pre code').forEach(el => hljs.highlightElement(el));
+    document.querySelectorAll('#lab-content pre code').forEach(el => {
+      if (el.classList.contains('language-mermaid-edit')) return;
+      hljs.highlightElement(el);
+    });
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+    }
+    buildDiagramEditors();
     buildTOC();
     initScrollSpy();
     initQuiz();
@@ -219,13 +262,117 @@ fetch('lab.md')
       </p>`;
   });
 
+/*
+ * Every ```mermaid-edit fence (Parts 1-3's hands-on exercise diagrams)
+ * becomes a live editor: a textarea with the (intentionally incomplete)
+ * diagram source, a Render/Reset toolbar, and a preview pane. Edits are
+ * kept per-block in localStorage (client-side only — nothing is uploaded
+ * or graded automatically).
+ */
+function buildDiagramEditors() {
+  const blocks = Array.from(document.querySelectorAll('#lab-content pre code.language-mermaid-edit'));
+  if (!blocks.length) return;
+  blocks.forEach((code, i) => {
+    const starter = code.textContent;
+    const storageKey = `lab6-diagram-${i}`;
+    const widget = buildDiagramEditorWidget(storageKey, starter, i);
+    code.closest('pre').replaceWith(widget);
+  });
+}
+
+function buildDiagramEditorWidget(storageKey, starter, idx) {
+  const wrap = document.createElement('div');
+  wrap.className = 'diagram-editor';
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'de-toolbar';
+  toolbar.innerHTML =
+    '<span>Editable diagram — edit the Mermaid source, then Render (Ctrl+Enter also works)</span>' +
+    '<span class="de-actions">' +
+      '<button type="button" class="de-btn de-render">&#9654; Render</button>' +
+      '<button type="button" class="de-btn de-reset">&#8635; Reset</button>' +
+    '</span>';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'de-source';
+  textarea.spellcheck = false;
+  const lineCount = starter.split('\n').length;
+  textarea.rows = Math.min(22, Math.max(6, lineCount + 1));
+  let saved = null;
+  try { saved = localStorage.getItem(storageKey); } catch (e) { /* storage unavailable — fall back to starter */ }
+  textarea.value = saved !== null ? saved : starter;
+
+  const preview = document.createElement('div');
+  preview.className = 'de-preview';
+
+  const error = document.createElement('div');
+  error.className = 'de-error';
+  error.style.display = 'none';
+
+  wrap.appendChild(toolbar);
+  wrap.appendChild(textarea);
+  wrap.appendChild(preview);
+  wrap.appendChild(error);
+
+  let debounceTimer = null;
+
+  function save(src) {
+    try { localStorage.setItem(storageKey, src); } catch (e) { /* storage unavailable, edits just won't persist across reloads */ }
+  }
+
+  async function render(src) {
+    if (!window.mermaid) {
+      error.style.display = 'block';
+      error.textContent = 'Mermaid failed to load (offline or CDN blocked) — diagram cannot be rendered.';
+      return;
+    }
+    const svgId = `de-svg-${idx}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+    try {
+      const { svg } = await mermaid.render(svgId, src);
+      preview.innerHTML = svg;
+      error.style.display = 'none';
+      error.textContent = '';
+    } catch (e) {
+      error.style.display = 'block';
+      error.textContent = 'Diagram error: ' + (e && e.message ? e.message : e);
+      const stray = document.getElementById(svgId);
+      if (stray) stray.remove();
+    }
+  }
+
+  toolbar.querySelector('.de-render').addEventListener('click', () => {
+    save(textarea.value);
+    render(textarea.value);
+  });
+  toolbar.querySelector('.de-reset').addEventListener('click', () => {
+    try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
+    textarea.value = starter;
+    render(starter);
+  });
+  textarea.addEventListener('input', () => {
+    save(textarea.value);
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => render(textarea.value), 700);
+  });
+  textarea.addEventListener('keydown', ev => {
+    if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
+      ev.preventDefault();
+      save(textarea.value);
+      render(textarea.value);
+    }
+  });
+
+  render(textarea.value);
+  return wrap;
+}
+
 function initQuiz() {
   const submitBtn = document.getElementById('quiz-submit');
   const resetBtn  = document.getElementById('quiz-reset');
   if (!submitBtn) return;
 
   submitBtn.addEventListener('click', function () {
-    const questions = document.querySelectorAll('#intro-quiz .quiz-q');
+    const questions = document.querySelectorAll('#architecture-quiz .quiz-q');
     let score = 0;
     let unanswered = 0;
 
@@ -261,12 +408,12 @@ function initQuiz() {
     resetBtn.style.display = 'inline-block';
 
     if (window.recordQuizAttempt) {
-      window.recordQuizAttempt('lab1', 'intro-quiz', score, total);
+      window.recordQuizAttempt('lab6', 'architecture-quiz', score, total);
     }
   });
 
   resetBtn.addEventListener('click', function () {
-    document.querySelectorAll('#intro-quiz .quiz-q').forEach(q => {
+    document.querySelectorAll('#architecture-quiz .quiz-q').forEach(q => {
       q.querySelectorAll('.quiz-option').forEach(opt => {
         opt.classList.remove('correct', 'wrong', 'reveal');
         opt.style.pointerEvents = '';

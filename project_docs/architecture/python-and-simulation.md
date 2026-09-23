@@ -71,7 +71,7 @@ C code; a `PythonWrapper` (from `ansys.scadeone.core.svc.pywrapper
   from Activity 2D") checks 3 cases (pass-through, clamp-max, clamp-min,
   tolerance `1e-9`). Both print manual PASS/FAIL text — no assertion
   framework.
-- **Lab 4**: `tester.py` is a **live console demo, not an automated
+- **Lab 4**: `evaluate_cc_quick_tester.py` is a **live console demo, not an automated
   test** — a 1000-cycle loop toggling `accel`/`on`/`res`/`set_point`
   (cruise control engages at cycle 200, `set_point=50.0`), printing
   speed/gear/rpm/state each cycle with `time.sleep(0.05)`. There are no
@@ -79,21 +79,21 @@ C code; a `PythonWrapper` (from `ansys.scadeone.core.svc.pywrapper
   not part of the Part 6 lesson flow.
 - `docs/lab4/lab.md` Part 6 (Activities 6C–6F, rewritten in this session to
   replace Scade One test-harness building with a Python-driven evaluation
-  workflow) now teaches `evaluate_cc.py`: test scenarios are stored as CSV
+  workflow) now teaches `evaluate_cc_full_report.py`: test scenarios are stored as CSV
   files under `scenarios/` (one row per simulation cycle, optional
   `expected_throttle`/`req`/`note` checkpoint columns), the script drives the
   generated wrapper cycle-by-cycle, writes a per-scenario trace CSV plus a
   `results/summary.csv` traceability report, and plots
   `results/plots/<tid>.png` (throttle + `v_speed` vs. cycle on twin axes) via
   `matplotlib`. A matching reference copy —
-  `src/lab4/starter/CruiseControl/evaluate_cc.py` plus six scenario CSVs
+  `src/lab4/starter/CruiseControl/evaluate_cc_full_report.py` plus six scenario CSVs
   under `src/lab4/starter/CruiseControl/scenarios/` — **does exist in the
   repository** (unlike the lab.md's prior `test_cc_main.py` snippet, which
   had no backing file). It still illustrates the same simplified hypothetical
   wrapper API (`cc.on`, `cc.brake`, `cc.cycle()`, `cc.throttle`) as before —
   not the real generated `cc_wrapper.py`'s `.inputs.<name>`/`.outputs.<name>`
   pattern (that wrapper is generated for the closed-loop `main` node, not a
-  standalone `cruise_control` operator) — both `evaluate_cc.py` and lab.md
+  standalone `cruise_control` operator) — both `evaluate_cc_full_report.py` and lab.md
   carry the same "check the generated wrapper file" caveat as before; this
   session did not change which operator the wrapper is generated for.
 
@@ -120,6 +120,6 @@ diffs the results.
 
 ## Simulation controls / timing
 
-Only Lab 4's `tester.py` has a timing element: `time.sleep(0.05)` between
+Only Lab 4's `evaluate_cc_quick_tester.py` has a timing element: `time.sleep(0.05)` between
 printed cycles, purely for human-readable pacing of the console trace — not
 a real-time simulation constraint of the model itself.

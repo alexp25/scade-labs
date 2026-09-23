@@ -80,29 +80,36 @@
   script invoking `py -3 -m ansys.scadeone.core.cli pycodewrap --install-dir
   "...v261..." --job "CodeGenerationJob0" --out "cc_wrapper" "...CruiseControl.sproj"`.
 - `cc_wrapper/cc_wrapper.py`, `cc_wrapper.c`, `cc_wrapper.def` — **generated**
-  (banner on line 1 of each). `cc_wrapper.py` defines `main_CC_design_Inputs`
-  (`brake`,`accel`,`on`,`res`,`set_point`), `main_CC_design_Outputs`
-  (`speed_out`,`gear_out`,`rpm_out`), state enums `SSM_ST_SSM1`/`SSM_ST_SSM2`,
-  and a `main_CC_design` ctypes wrapper class with `reset()`/`cycle()`.
-- `src/lab4/starter/CruiseControl/tester.py` — a **live console demo, not
+  (banner on line 1 of each). `cc_wrapper.py` defines
+  `cruise_control_CC_design_Inputs` (`v_speed`,`brake`,`accel`,`on`,`res`,
+  `set_point`), `cruise_control_CC_design_Outputs` (`throttle` only), state
+  enums `SSM_ST_SSM1`/`SSM_ST_SSM2`, and a `cruise_control_CC_design` ctypes
+  wrapper class with `reset()`/`cycle()`. The exact class/attribute names
+  depend on the Scade One version and codegen job target — check the
+  generated file if regenerating with a different setup, same caveat as
+  `evaluate_cc_full_report.py`'s header comment.
+- `src/lab4/starter/CruiseControl/evaluate_cc_quick_tester.py` — a **live console demo, not
   an automated test**: 1000-cycle loop toggling `accel`/`on`/`res`/`set_point`
   with `time.sleep(0.05)` between prints; no assertions, no PASS/FAIL output.
-  Kept as-is; no longer part of the lab.md lesson flow.
+  Since the generated wrapper only exposes the CC_design controller (no
+  Car_design plant), `v_speed` is driven by a small ad hoc Python integrator
+  in the script for demo purposes only — not the real Car_design.swan model.
+  No longer part of the lab.md lesson flow.
 - `docs/lab4/lab.md` Part 6 (rewritten this session) teaches
-  `evaluate_cc.py` — **and this one does exist in the repo**, at
-  `src/lab4/starter/CruiseControl/evaluate_cc.py`, alongside six example
+  `evaluate_cc_full_report.py` — **and this one does exist in the repo**, at
+  `src/lab4/starter/CruiseControl/evaluate_cc_full_report.py`, alongside six example
   scenario files under `src/lab4/starter/CruiseControl/scenarios/`
   (`tc01`…`tc06`, one CSV per test case, one row per simulation cycle, an
   optional `expected_throttle`/`req`/`note` checkpoint). It illustrates the
   same hypothetical wrapper API as the snippet it replaces (`cc.on`,
   `cc.brake`, `cc.cycle()`, `cc.throttle`), which still differs from the real
   generated `cc_wrapper.py`'s `.inputs.<name>`/`.outputs.<name>` pattern —
-  both lab.md and `evaluate_cc.py` carry the same "check the generated
+  both lab.md and `evaluate_cc_full_report.py` carry the same "check the generated
   wrapper file" caveat as before; this session did not resolve that gap, only
   replaced the un-backed instructional snippet with a real, committed script.
 - **Local run:** requires Scade One installed + `cc_wrapper` generated first,
-  plus `matplotlib`; then `python evaluate_cc.py` (writes `results/*.csv` +
-  `results/plots/*.png`, prints a PASS/FAIL banner) or `python tester.py`
+  plus `matplotlib`; then `python evaluate_cc_full_report.py` (writes `results/*.csv` +
+  `results/plots/*.png`, prints a PASS/FAIL banner) or `python evaluate_cc_quick_tester.py`
   (prints a live trace, does not assert correctness).
 
 ## Correspondence between the Python reference and the Scade models

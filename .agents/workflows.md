@@ -6,7 +6,7 @@ partially documents a step, that's stated explicitly.
 ## Learner: portfolio → lab
 
 1. Open `https://alexp25.github.io/scade-labs/` → `docs/index.html`.
-2. Click a lab card (`Lab 1`, `Lab 2`, `Lab 3`, or `Lab 4` — all active).
+2. Click a lab card (`Lab 1` through `Lab 6` — 6 cards, all linked).
 3. The lab's `index.html` fetches and renders its sibling `lab.md`.
 
 ## Learner: Lab 1 — introduction to software engineering
@@ -72,11 +72,11 @@ partially documents a step, that's stated explicitly.
    `#pragma requirement` mechanism explanation and the real `CC_design.swan`
    excerpt (`reQ2` vs `REQ-02` casing gap, used as a worked lesson), then the
    "From a requirement to a test case" walkthrough (REQ-01 → a
-   scenario-CSV row, in the same shape `evaluate_cc.py` consumes), then
+   scenario-CSV row, in the same shape `evaluate_cc_full_report.py` consumes), then
    sketch a test case for REQ-07 (Activity 9A) — free text, not auto-graded.
 9. Take the 7-question reflection quiz (question topics: EARS pattern
    recognition, the `#pragma requirement` mechanism, the `reQ2`/`REQ-02`
-   gap, and what ties an `evaluate_cc.py` scenario row back to a
+   gap, and what ties an `evaluate_cc_full_report.py` scenario row back to a
    requirement).
 10. The two auto-graded quizzes (Activity 1A, 4 questions; reflection, 7
     questions) are the only automated checks in this lab. The actual
@@ -99,7 +99,7 @@ partially documents a step, that's stated explicitly.
    Lab 3).
 4. Part 5: build/simulate, manual state-hierarchy trace.
 5. Part 6 (Python evaluation script — detailed below): code generation,
-   Python wrapper, scenario CSVs, `evaluate_cc.py`, charts.
+   Python wrapper, scenario CSVs, `evaluate_cc_full_report.py`, charts.
 6. Part 7: link REQ-01/02/04/07/08 to the relevant model elements via the
    Requirements panel (Activity 7A) — the real shipped `CC_design.swan`
    only has one such link (`reQ2` on the top node, casing-mismatched
@@ -117,7 +117,7 @@ partially documents a step, that's stated explicitly.
    Six examples ship in `src/lab4/starter/CruiseControl/scenarios/`
    (`tc01`…`tc06`), each 12-14 cycles with `v_speed` ramped gradually rather
    than jumped between two values.
-3. Run `evaluate_cc.py` — it prints progress per scenario as it runs, drives
+3. Run `evaluate_cc_full_report.py` — it prints progress per scenario as it runs, drives
    the wrapper cycle-by-cycle per scenario, writes `results/<tid>_trace.csv`,
    checks checkpoint rows, and writes `results/summary.csv` (the
    traceability report, REQ-tagged, PASS/FAIL, same banner style as Lab 2)
@@ -127,6 +127,56 @@ partially documents a step, that's stated explicitly.
    bottom. It also prints a final list of every file it generated.
 4. Compare `results/summary.csv` and the charts to Lab 2's verification
    report (Activity 6F).
+
+## Learner: Lab 6 — software architecture
+
+1. Open `docs/lab6/index.html`. No install/prerequisite step — a short
+   recap + hands-on written/diagram exercise + quiz. Recommended: have
+   already seen the Lesson 6 lecture/slides (this lab does not re-teach
+   them — see the "Recap" section, ~7 short bullets, not a slide
+   reproduction) and complete [Lab 4](../lab4/) first, since Parts 1–3
+   analyze its requirement set and Scade One model.
+2. Read the Context, Learning Objectives, and Recap — the Recap is a
+   reminder of vocabulary already covered in the lecture (why architecture
+   matters, the ISO/IEC/IEEE 42010 definition, architecture vs design, the
+   four elements, quality attributes, requirements-driven architecture,
+   and a one-paragraph pointer to the lecture's medical-monitoring
+   example), not new teaching content — nothing to produce here.
+3. **Part 1 (hands-on):** write a component table, an interface table, and
+   a constraints list documenting the *already-existing* architecture of
+   the Lab 4 Cruise Control system (`Car_design`/`CC_design`/`Simulation`
+   packages; `cruise_control`/`regulator`/`limiter`/`car` nodes), then
+   **finish the component diagram directly in the page** — Activity 1D's
+   diagram ships with boxes but no arrows (`%% TODO` comments), edited live
+   in the built-in diagram editor. Instructor-graded, no fixed answer key
+   beyond matching the real model.
+4. **Part 2 (hands-on):** same pattern one level up — an incomplete
+   whole-vehicle, SysML-*style* block diagram (Driver/HMI, sensors, the
+   Part 1 box collapsed into one component, actuators, vehicle dynamics)
+   with the connections left as an exercise, edited in the same widget —
+   explicitly caveated in `lab.md` as a Mermaid stand-in, not real SysML
+   tool output.
+5. **Part 3 (hands-on):** propose an Emergency Braking Controller +
+   Obstacle/Distance Sensor extension on paper — new component/interface
+   table, two proposed EARS requirements (REQ-09/REQ-10, explicitly marked
+   "proposed — not implemented in the shipped model"), a prose description
+   of how it would extend Lab 4's scenario-CSV simulation approach, and
+   (Activity 3D) wiring the two new components into a copy of the Part 1
+   diagram in the editor. **No file under `src/lab4/` is created or
+   modified.**
+6. Read the Summary, then take the 10-question `#architecture-quiz`
+   (self-authored — no instructor quiz file was supplied for this lab,
+   unlike Lab 5's `Lab 5.pdf`), same `initQuiz()` scoring widget pattern as
+   every other lab.
+7. **All three exercise diagrams (Parts 1–3) are live editors** — Mermaid.js
+   (loaded from cdnjs by `docs/lab6/index.html` — the first lab page in
+   this repo to load it) renders a textarea's contents into a preview pane
+   on a Render button click, Ctrl+Enter, or ~700ms after the student stops
+   typing; a Reset button restores the original (deliberately incomplete,
+   `%% TODO`-marked) text. Edits persist per-diagram in the browser's own
+   `localStorage` (`lab6-diagram-<index>`) — never uploaded, never graded
+   automatically. The Recap section has no diagrams at all, by design — it
+   points back at the lecture instead of reproducing its figures.
 
 ## Maintainer: comparing student work against reference
 
@@ -156,8 +206,8 @@ environment (see `.agents/testing.md`).**
    (regenerates `cc_wrapper/`).
 3. Run the corresponding test script: `test_counter.py`/`test_limiter.py`
    for Lab 3 (locally-runnable once wrappers exist); for Lab 4,
-   `evaluate_cc.py` (scenario-CSV-driven, writes `results/summary.csv` +
-   charts) or `tester.py` (still present, a live demo printout, not an
+   `evaluate_cc_full_report.py` (scenario-CSV-driven, writes `results/summary.csv` +
+   charts) or `evaluate_cc_quick_tester.py` (still present, a live demo printout, not an
    assertion-based check).
 
 ## Maintainer: publishing a changed lab
@@ -185,6 +235,17 @@ page, both labs' prerequisite text, Firebase `LAB_TITLES` maps in
 `docs/admin/index.html`/`docs/account/index.html`, every `.agents/` and
 `project_docs/` file that named the old paths).
 
+Lab 6 (reading + hands-on written exercise, no `src/lab6/`) is a worked
+example of this procedure done in full within one session: portfolio card
+in `docs/index.html`, `lab6` added to both `LAB_TITLES` maps, this file,
+`.agents/lab-map.md`, `.agents/architecture.md`, `.agents/domain.md`,
+`.agents/verification.md`, `.agents/testing.md`,
+`project_docs/labs/lab-6-architecture.md`, and
+`project_docs/labs/portfolio-map.md` were all updated together — contrast
+with Lab 5 (created earlier the same day), which still lacks its
+`LAB_TITLES` entries and a `.agents/workflows.md` section as of this
+writing.
+
 ## Incomplete/partially documented workflows
 
 - **Updating requirements/traceability**: Lab 2's process (edit lab.md's
@@ -197,6 +258,6 @@ page, both labs' prerequisite text, Firebase `LAB_TITLES` maps in
 - **Running the cruise-control car simulation end-to-end**: `Simulation.swan`
   wires `Car_design` + `CC_design` together (`node main`), but there is no
   documented command/script that runs this closed-loop simulation
-  automatically outside the Scade One simulator UI — `tester.py` only drives
+  automatically outside the Scade One simulator UI — `evaluate_cc_quick_tester.py` only drives
   the standalone `cruise_control` wrapper, not the combined car+CC
   simulation.

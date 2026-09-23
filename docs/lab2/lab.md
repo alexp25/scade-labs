@@ -12,7 +12,7 @@ By the end of this lab you will be able to:
 - Explain why requirements must be precise and unambiguous
 - Build a decision table as a design artifact and trace it back to requirements
 - Implement a function whose logic is fully driven by a design — not intuition
-- Run a structured V&V test suite and interpret the results
+- Run a structured verification and validation (V&V) test suite and interpret the results
 - Explain how traceability connects requirements, design, code, and tests
 - Reflect on Waterfall, Agile, and V-Cycle in a safety-critical context
 

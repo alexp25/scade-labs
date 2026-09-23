@@ -4,10 +4,12 @@ Published at `https://alexp25.github.io/scade-labs/` (`docs/index.html`).
 
 | Card | Directory | Status | Overview |
 |---|---|---|---|
-| Lab 1 | *(none)* | "Coming soon" — disabled card, no `href`, no content exists anywhere in the repo | — |
+| Lab 1 | `docs/lab1/` (no `src/lab1/` — reading + quiz only) | Active | — |
 | Lab 2 | `docs/lab2/` + `src/lab2/` | Active | [lab-2-sdlc.md](lab-2-sdlc.md) |
 | Lab 3 | `docs/lab3/` + `src/lab3/` | Active — substantially restructured this session | [lab-3-requirements.md](lab-3-requirements.md) |
 | Lab 4 | `docs/lab4/` + `src/lab4/` | Active | [lab-4-cruise-control.md](lab-4-cruise-control.md) |
+| Lab 5 | `docs/lab5/` (no `src/lab5/` — reading + quiz only) | Active — created earlier this session | [lab-5-design-principles.md](lab-5-design-principles.md) |
+| Lab 6 | `docs/lab6/` (no `src/lab6/` — reading + hands-on written exercise + quiz) | Active — created this session, fully registered (portfolio card, both `LAB_TITLES` maps, `.agents/lab-map.md`) | [lab-6-architecture.md](lab-6-architecture.md) |
 
 ## Sequencing
 
@@ -40,5 +42,10 @@ restructures (see `project_docs/changelog.md`'s two newest entries). Both
 `/lab4_1/`, `/lab4_2/` all now 404 — GitHub Pages has no redirect mechanism
 configured in this repo.
 
-The portfolio is now four cards, no decimals: **Lab 1 (disabled) / Lab 2 /
-Lab 3 / Lab 4**.
+The portfolio is now six cards, no decimals: **Lab 1 / Lab 2 / Lab 3 / Lab 4 /
+Lab 5 / Lab 6** (Lab 1 was later filled in and activated; see
+`project_docs/changelog.md`'s "Lab 1: created" entry. Lab 6 — Software
+Architecture — was added this session; unlike Lab 5, its registration
+(portfolio card + both `LAB_TITLES` maps + `.agents/lab-map.md`) was
+completed in the same session it was created, so it does not carry Lab 5's
+"unfinished registration" gap forward).

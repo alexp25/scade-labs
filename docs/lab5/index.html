@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 1 – Introduction to Software Engineering</title>
+  <title>Lab 5 – Software Design Principles in Safety-Critical Software Engineering</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <style>
@@ -167,10 +167,10 @@
 
 <header class="page-header">
   <a class="back-btn" href="../">&#8592; All Labs</a>
-  <h1>Lab 1 — Introduction to Software Engineering</h1>
+  <h1>Lab 5 — Software Design Principles in Safety-Critical Software Engineering</h1>
   <div class="meta">
     <span>Software Engineering</span>
-    <span>Intro · Lesson 1</span>
+    <span>Lesson 5</span>
     <span>1 hour</span>
   </div>
   <div style="margin-top:.75rem; display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
@@ -190,11 +190,11 @@
   </main>
 </div>
 
-<footer>Lab 1 · Software Engineering · Introduction Lesson</footer>
+<footer>Lab 5 · Software Engineering · Design Principles for Safety-Critical Systems</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-<script>window.CURRENT_LAB_ID = 'lab1';</script>
+<script>window.CURRENT_LAB_ID = 'lab5';</script>
 <script type="module" src="../assets/js/auth-header.js"></script>
 <script src="../assets/js/course-slides.js"></script>
 <script>
@@ -225,7 +225,7 @@ function initQuiz() {
   if (!submitBtn) return;
 
   submitBtn.addEventListener('click', function () {
-    const questions = document.querySelectorAll('#intro-quiz .quiz-q');
+    const questions = document.querySelectorAll('#design-quiz .quiz-q');
     let score = 0;
     let unanswered = 0;
 
@@ -261,12 +261,12 @@ function initQuiz() {
     resetBtn.style.display = 'inline-block';
 
     if (window.recordQuizAttempt) {
-      window.recordQuizAttempt('lab1', 'intro-quiz', score, total);
+      window.recordQuizAttempt('lab5', 'design-quiz', score, total);
     }
   });
 
   resetBtn.addEventListener('click', function () {
-    document.querySelectorAll('#intro-quiz .quiz-q').forEach(q => {
+    document.querySelectorAll('#design-quiz .quiz-q').forEach(q => {
       q.querySelectorAll('.quiz-option').forEach(opt => {
         opt.classList.remove('correct', 'wrong', 'reveal');
         opt.style.pointerEvents = '';

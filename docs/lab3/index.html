@@ -229,7 +229,11 @@
     <span>Requirements Engineering &amp; Scade One · Lesson 3</span>
     <span>4–6 hours</span>
   </div>
-  <div id="auth-slot" data-base="../" style="margin-top:.75rem"></div>
+  <div style="margin-top:.75rem; display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
+    <div id="auth-slot" data-base="../"></div>
+    <a class="slides-btn" style="text-decoration:none; display:inline-block;" href="https://github.com/alexp25/scade-labs/tree/main/src/lab3/starter" target="_blank" rel="noopener">&#128193; Starter Code</a>
+    <div id="course-slides-slot" data-base="../"></div>
+  </div>
 </header>
 
 <div class="page-body">
@@ -276,6 +280,7 @@
 <script src="https://skulpt.org/js/skulpt.min.js"></script>
 <script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
 <script type="module" src="../assets/js/auth-header.js"></script>
+<script src="../assets/js/course-slides.js"></script>
 <script>
 fetch('lab.md')
   .then(r => {

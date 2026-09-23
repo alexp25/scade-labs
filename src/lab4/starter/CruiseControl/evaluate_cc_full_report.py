@@ -1,4 +1,4 @@
-# evaluate_cc.py
+# evaluate_cc_full_report.py
 # Instructor reference for Lab 4 Part 6 (Activities 6C-6F).
 # Runs every scenario in scenarios/*.csv against the generated cruise_control
 # wrapper, logs the per-cycle trace to results/<tid>_trace.csv, checks any

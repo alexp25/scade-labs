@@ -248,17 +248,6 @@ Add the following:
 
 ### Activity 2E — Implement the Logic
 
-Implement the following behavior — notice this is exactly REQ-LIM-01..03 from the Requirements section above, expressed graphically instead of in EARS prose:
-
-```python
-if value_in > max_value:
-    value_out = max_value
-elif value_in < min_value:
-    value_out = min_value
-else:
-    value_out = value_in
-```
-
 To implement this in Scade One, use comparison blocks (`>`, `<`), conditional/switch blocks, and direct signal connections. Your completed model should resemble: upper branch → saturation at maximum, lower branch → saturation at minimum, otherwise pass-through.
 
 <img src="img/scade_model_limiter.png" width="100%">
@@ -323,17 +312,17 @@ If there are any errors or warnings, fix type mismatches, unconnected signals, o
 
 Scade One can link a requirement ID directly to a model element via the **Requirements** panel (bottom-left button in the diagram editor — enable traceability editing mode).
 
-1. Select the `limiter` operator (or, more precisely, its diagram-level definition — the `function` declaration) — or, as shown below, an individual diagram element such as the `value_in > max` comparison block, if you want the link to point at the specific equation rather than the whole operator (Scade One supports both; Activity 4F's counter version calls this out explicitly).
+1. Select the `limiter` operator (or, more precisely, its diagram-level definition — the `function` declaration) — or, as shown below, an individual diagram element such as the `value_in > max` comparison block, if you want the link to point at the specific equation rather than the whole operator (Scade One supports both).
 2. Right-click the element and open the **Traceability** panel that appears.
 3. Click **+** and type the requirement ID — for this activity, `REQ-LIM-01`.
 4. Confirm the link — Scade One highlights the association in the panel.
 
-<p float="left">
+<!-- <p float="left">
   <img src="img/scade_traceability_define_requirements.png" width="49%">
   <img src="img/scade_traceability_define_requirements_1.png" width="49%">
-</p>
+</p> -->
 
-> **Note on the screenshots above:** the ID being typed in the second screenshot is `REQ1_Limiter`, not `REQ-LIM-01` — that's an earlier, non-canonical naming this course used before standardizing on `REQ-LIM-01..03` everywhere else (`requirements.md`, this lab.md, the Python tests). Type the canonical `REQ-LIM-01` yourself; the screenshots illustrate the **mechanism** (right-click → Traceability → **+** → type an ID), not the exact string to copy. This is the same lesson Part 9 draws from the `reQ2`/`REQ-02` mismatch in `CC_design.swan`: Scade One never validates the pragma text against your requirements document, so a naming slip here is easy to make and easy to miss.
+  <img src="img/scade_traceability_define_requirements_1.png" width="100%">
 
 You've now created your first real traceability link. Part 9 explains exactly what this action writes into the underlying `.swan` source, and why the *exact spelling* of the ID you type here matters.
 
@@ -838,9 +827,9 @@ Look closely at that real excerpt again: the ID is `reQ2`, not `REQ-02`. **Scade
 
 ## From a requirement to a test case
 
-The second half of traceability is the link forward to a **test**, not just to a design element. "Verified by a script" isn't automatic — someone has to read the requirement and design a concrete input sequence that would fail if the requirement were violated. In [Lab 4](../lab4/), that test artifact is a row (or short run of rows) in a scenario CSV consumed by `evaluate_cc.py`.
+The second half of traceability is the link forward to a **test**, not just to a design element. "Verified by a script" isn't automatic — someone has to read the requirement and design a concrete input sequence that would fail if the requirement were violated. In [Lab 4](../lab4/), that test artifact is a row (or short run of rows) in a scenario CSV consumed by `evaluate_cc_full_report.py`.
 
-`evaluate_cc.py` drives the model cycle-by-cycle from a CSV with columns `cycle, on, set, v_speed, brake, accel, res, set_point, expected_throttle, req, note`. Two of those columns are where a requirement becomes a test:
+`evaluate_cc_full_report.py` drives the model cycle-by-cycle from a CSV with columns `cycle, on, set, v_speed, brake, accel, res, set_point, expected_throttle, req, note`. Two of those columns are where a requirement becomes a test:
 
 - **`req`** — which requirement this row is evidence for. This is the literal traceability link: it's how a results summary can later report "REQ-01: PASS" instead of just "row 3: PASS."
 - **`expected_throttle`** — the value the requirement says must come out, *if* the requirement pins down an exact number. Not every requirement does (REQ-07's "regulate toward `set_point`" is a converging process, not a single value — those rows are left blank and checked visually via a chart instead).
@@ -873,8 +862,8 @@ Sketch (in words or as a short table, like the one above) a scenario that would 
 |---|---|---|---|
 | REQ-LIM-01..03 | `limiter` operator | Activity 2G (you did this already) | `limiter_harness` (Part 3) + `test_limiter.py` (Part 7), coverage CSV + diagram via `test_limiter_advanced.py` (Activity 7G) |
 | REQ-CNT-01..02 | `counter` operator | Activity 4F (you did this already) | `counter_harness` (Part 5) + `test_counter.py` (Part 7), coverage CSV + diagram via `test_counter_advanced.py` (Activity 7G) |
-| REQ-01, REQ-02, REQ-04 | `cruise_control` state machine | [Lab 4, Activity 7A](../lab4/#activity-7a-traceability-in-scade-one) | Lab 4's `evaluate_cc.py` scenario checkpoints (`req` column) |
-| REQ-07, REQ-08 | `regulator` node (reuses `limiter`) | Lab 4, Activity 7A | Lab 4's `evaluate_cc.py`, checked visually via the throttle chart |
+| REQ-01, REQ-02, REQ-04 | `cruise_control` state machine | [Lab 4, Activity 7A](../lab4/#activity-7a-traceability-in-scade-one) | Lab 4's `evaluate_cc_full_report.py` scenario checkpoints (`req` column) |
+| REQ-07, REQ-08 | `regulator` node (reuses `limiter`) | Lab 4, Activity 7A | Lab 4's `evaluate_cc_full_report.py`, checked visually via the throttle chart |
 
 A requirement only becomes traceable once both of those last two columns are filled in for it — not before.
 
@@ -954,11 +943,11 @@ Cause: as shown in Part 9, a typo or casing mismatch between the pragma text and
     <label class="quiz-option"><input type="radio" name="q6" value="d"><span>REQ-08 is non-functional, so it must mirror a functional requirement</span></label>
   </div>
   <div class="quiz-q" data-name="q7" data-correct="b">
-    <strong>7. In Lab 4's <code>evaluate_cc.py</code> scenario CSVs, what actually connects a test case back to a specific requirement?</strong>
+    <strong>7. In Lab 4's <code>evaluate_cc_full_report.py</code> scenario CSVs, what actually connects a test case back to a specific requirement?</strong>
     <label class="quiz-option"><input type="radio" name="q7" value="a"><span>The filename of the scenario CSV (e.g. <code>tc03</code>)</span></label>
     <label class="quiz-option"><input type="radio" name="q7" value="b"><span>The <code>req</code> column value on the row that exercises that requirement's condition</span></label>
     <label class="quiz-option"><input type="radio" name="q7" value="c"><span>The order the scenarios run in</span></label>
-    <label class="quiz-option"><input type="radio" name="q7" value="d"><span>Nothing — <code>evaluate_cc.py</code> only checks throttle values, not requirements</span></label>
+    <label class="quiz-option"><input type="radio" name="q7" value="d"><span>Nothing — <code>evaluate_cc_full_report.py</code> only checks throttle values, not requirements</span></label>
   </div>
   <div>
     <button class="quiz-submit" type="button">Check Answers</button>

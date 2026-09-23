@@ -76,7 +76,7 @@ one. See the table below.
   node + the `regulator` node + the internal `limiter` instances) the
   activity now instructs students to create, and its casing (`reQ2`) doesn't
   match the canonical `REQ-02` spelling used everywhere else (Lab 2, Lab 3,
-  `evaluate_cc.py`'s `req` column). **The shipped reference model only
+  `evaluate_cc_full_report.py`'s `req` column). **The shipped reference model only
   partially demonstrates the mechanism it teaches, and the one pragma it
   does have is a near-miss on the canonical REQ ID string.** This gap
   pre-dates this session; what changed this session is that it's now
@@ -86,14 +86,42 @@ one. See the table below.
 - "Activity 7B" is a pure reflection quiz (DO-178C/ISO 26262 discussion
   questions) — comprehension, not a trace artifact.
 - The Python evaluation script's REQ tags (a `req` column in each
-  `scenarios/*.csv` file, read by `evaluate_cc.py` and written into
+  `scenarios/*.csv` file, read by `evaluate_cc_full_report.py` and written into
   `results/summary.csv`) are **naming-based**: a label field, with no "this
   verifies REQ-X" sentence and no link to the in-tool Requirements panel.
-  `evaluate_cc.py` and its `scenarios/*.csv` are real, committed files under
+  `evaluate_cc_full_report.py` and its `scenarios/*.csv` are real, committed files under
   `src/lab4/starter/CruiseControl/`. Lab 3 Part 9 now walks through exactly
   how a requirement becomes one of these scenario rows (worked example:
   REQ-01 → `tc03_brake_suspends.csv`-equivalent), so this is no longer an
   implicit convention students have to reverse-engineer.
+
+## Lab 6 — proposed requirements only, explicitly not implemented or checked
+
+- Lab 6 does not modify REQ-01–REQ-08 (`src/lab3/solution/requirements.md`)
+  and does not touch `CC_design.swan`'s existing `#pragma requirement reQ2`
+  link.
+- Part 3 (Activity 3B) has students author two **new, proposed** REQ IDs
+  — REQ-09/REQ-10, for an Automatic Emergency Braking extension — in EARS
+  syntax, directly in `docs/lab6/lab.md`. These are explicitly and
+  repeatedly labeled "proposed — not implemented in the shipped model":
+  they are not added to `src/lab3/solution/requirements.md`, not linked via
+  `#pragma requirement` anywhere, and not referenced by any
+  `scenarios/*.csv` row or Python script.
+- Activity 3C describes (in prose only) how Lab 4's existing scenario-CSV
+  approach *would* be extended to exercise REQ-09 (a new
+  `obstacle_distance` column, checkpoint rows tagged `req = REQ-09`,
+  checked by trend rather than a single value — the same style already
+  used for REQ-07 in `tc02_cc_active_regulates.csv`). No such column, CSV
+  row, or script change actually exists in `src/lab4/`.
+- **Verdict: REQ-09/REQ-10 are PROPOSED, PAPER-ONLY — not implemented, not
+  traced, not automatically checked.** Do not treat their appearance in
+  `docs/lab6/lab.md` as evidence they exist anywhere in the Lab 4 model or
+  scripts.
+- Parts 1–2's component/interface/constraint tables and diagrams *describe*
+  the existing REQ-01–08-driven Lab 4 architecture; they don't add new
+  trace links to it, and aren't themselves automatically checked
+  (instructor-graded against the real model, same as Lab 3's free-text
+  requirements deliverable).
 
 ## Test → requirement classification table
 
@@ -103,9 +131,10 @@ one. See the table below.
 | `limiter_harness`/`counter_harness` (Lab 3) | clamp / increment behavior | REQ-LIM-01..03, REQ-CNT-01..02 (via Activities 2G/4F pragma links; `src/lab3/solution/assets/blocks.swan` carries these as the completed reference — see below) | **EXPLICIT instruction, student-performed; reference answer committed** | `docs/lab3/lab.md` Activities 2G/4F/3E/5C |
 | `test_limiter.py`/`test_counter.py` (Lab 3, Part 7) | cycle the generated operator, per-test-case PASS/FAIL | REQ-LIM-01..03, REQ-CNT-01..02 | **EXPLICIT** — `req` field per test tuple, printed with each result; no `blocks.swan` parsing | `src/lab3/solution/test_limiter.py`, `test_counter.py`; `docs/lab3/lab.md` Activities 7C/7D |
 | `test_limiter_advanced.py`/`test_counter_advanced.py` (Lab 3, Part 7) | same, plus static traceability + coverage reporting | REQ-LIM-01..03, REQ-CNT-01..02 | **EXPLICIT, machine-checked** — each script parses `blocks.swan` for `#pragma requirement <ID> #end` and prints which diagram node(s) each REQ ID resolves to (or `NOT TRACED` if missing); after the cycle-by-cycle assertions it also writes `<project-dir>/results/<operator>_traceability.csv` (tid/req/nodes/inputs/expected/actual/status per test case) and a `matplotlib` diagram of the model colored green/red by per-requirement pass/fail (Activity 7G) — this repo's own stand-in for the requirement-coverage view Scade One Student Edition doesn't provide. Both the simple and advanced scripts accept `--project-dir` (Activity 7F) so a student can point them at a project generated/copied elsewhere instead of only the one shipped in this repo | `src/lab3/solution/test_limiter_advanced.py`, `test_counter_advanced.py`; `docs/lab3/lab.md` Activity 7G |
-| `evaluate_cc.py` scenario checkpoints (Lab 4) | cruise-control scenarios | REQ-01/02/04 | **NAMING-BASED** | `req` column in each `scenarios/*.csv`, written to `results/summary.csv`; no "verifies" statement, but file-backed |
+| `evaluate_cc_full_report.py` scenario checkpoints (Lab 4) | cruise-control scenarios | REQ-01/02/04 | **NAMING-BASED** | `req` column in each `scenarios/*.csv`, written to `results/summary.csv`; no "verifies" statement, but file-backed |
 | Activity 7A model-element links (Lab 4) | top node, 4 transitions, `regulator`, `limiter` instances | REQ-01/02/04/07/08 | **EXPLICIT instruction, PARTIALLY REALIZED** (1 of 7 present, and that 1 has a casing mismatch) | `lab.md` Activity 7A vs. `CC_design.swan:2` |
 | Scenario "S-03" (Lab 4 reflection quiz) | reactivation requires explicit `res` | REQ-04 (by analogy) | **INFERRED** — quiz answer describes behavior, never states the REQ ID | reflection quiz text only |
+| Lab 6 Activity 3B (proposed REQ-09/REQ-10) | Emergency Braking Controller | REQ-09/REQ-10 (new, proposed) | **PROPOSED, PAPER-ONLY — not implemented, not traced, not checked** | `docs/lab6/lab.md` Part 3 text only; no `.swan`, `requirements.md`, or `scenarios/*.csv` entry |
 
 ## Completion criteria per lab
 
@@ -120,10 +149,16 @@ one. See the table below.
   (`#ears-pattern-quiz`, `#reflection-quiz`).
 - **Lab 4:** completion is activity-based through Part 5 ("A successful
   build shows 0 errors...", "Confirm throttle equals accel (0.5)"); Part 6
-  ends with `evaluate_cc.py`'s own "VALIDATION: ALL REQUIREMENTS MET." /
+  ends with `evaluate_cc_full_report.py`'s own "VALIDATION: ALL REQUIREMENTS MET." /
   "...ISSUES FOUND" banner over the checkpoint scenarios; Part 7 adds the
   Requirements-panel linking activity (no automated check) and a reflection
   quiz.
+- **Lab 6:** no single automated "done" banner — completion is a composite
+  of: (a) Parts 1–3's written/diagram deliverable (instructor-graded, no
+  fixed answer key beyond matching the real Lab 4 model); (b) the
+  `#architecture-quiz` score. Nothing in this lab is machine-checked against
+  the student's own written content, same completion model as Lab 3's
+  requirements text and Lab 5's whole lesson.
 
 ## Safety-standard mentions — never a compliance claim
 

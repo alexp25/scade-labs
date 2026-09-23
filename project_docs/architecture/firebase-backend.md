@@ -19,6 +19,12 @@ Every page that needs it loads the Firebase Web SDK directly from
   `docs/assets/js/auth-header.js`).
 - A secured admin view (`docs/admin/index.html`) listing every student's
   progress.
+- An admin-only curated changelog (`docs/changelog/index.html` +
+  `changelog.md`), linked from `/admin/`. Note: unlike the admin view above,
+  this is **not** actually secured — `changelog.md` is a static file under
+  the public `docs/` root, so the `isAdmin` check only gates whether the
+  page renders it, not whether the raw file can be fetched directly. Keep
+  its content short and non-sensitive for that reason.
 
 Lab content itself is never gated — anonymous visitors can still read every
 lab and take every quiz; only the recording of that activity requires login.

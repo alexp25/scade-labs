@@ -80,6 +80,32 @@ Then open `http://localhost:4000/`. Documented in `readme_local_setup.txt`
 at the repo root; consistent across `README.md`, `readme.txt`, and
 `readme_local_setup.txt`.
 
+## Course slides (PDF viewer)
+
+Each `docs/labN/index.html` header now includes a "Course Slides" button,
+implemented by the shared `docs/assets/js/course-slides.js` script. It
+follows the same header-slot convention `auth-header.js` established for
+`#auth-slot`: the page provides `<div id="course-slides-slot"
+data-base="../"></div>`, and the script reads `window.CURRENT_LAB_ID`
+(already set on every lab page for progress tracking) to resolve the PDF at
+`{base}courses/{labId}.pdf`. The button opens a modal `<iframe>` PDF viewer
+with a `download` link — no external PDF-rendering library, just the
+browser's built-in viewer.
+
+- Published, servable copies: `docs/courses/lab1.pdf` … `docs/courses/lab6.pdf`.
+- Source copies (instructor's original filenames): `project_docs/courses/Slides 1.pdf`
+  … `Slides 6.pdf`. `project_docs/` is outside the GitHub Pages publishing
+  root, so these are not reachable by students — the `docs/courses/` copies
+  are what actually gets served, and must be updated by hand whenever a
+  deck changes (no generation step links the two).
+
+For labs with starter code (Lab 2, 3, 4), a "Starter Code" link sits in the
+same header row next to the "Course Slides" button (styled with the shared
+`.slides-btn` class from `course-slides.js`), linking directly to
+`github.com/alexp25/scade-labs/tree/main/src/labN/starter`. This link used to
+live on the portfolio cards in `docs/index.html`; it was moved into each lab
+page's header so students land on it without leaving the lab.
+
 ## Duplicate/at-risk sources of truth
 
 | Pair | Risk | Which one is live |
@@ -87,6 +113,7 @@ at the repo root; consistent across `README.md`, `readme.txt`, and
 | `docs/lab4/lab.md` vs `docs/lab4/lab_old.md` | An editor could open the wrong file | `lab.md` — `lab_old.md` is fetched by nothing |
 | `src/lab2/starter/lab2_cruise_control_starter.py` vs the `STARTER_CODE` literal in `docs/lab2/index.html` | Editing one without the other desyncs the browser and local-run experience | Both — verified byte-identical (aside from CRLF/LF) this session; **keep them in sync manually, there is no build step that generates one from the other** |
 | `readme.txt` vs `readme_local_setup.txt` (repo root) | Both document the same local-run steps independently | Neither is generated from the other |
+| `docs/courses/labN.pdf` vs `project_docs/courses/Slides N.pdf` | Same slide deck, two copies | `docs/courses/labN.pdf` — the one actually served; see "Course slides (PDF viewer)" above |
 
 ## Corrections made this session (documentation-only, low-risk, unambiguous)
 

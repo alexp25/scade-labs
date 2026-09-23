@@ -20,7 +20,7 @@ In this lab you implement the **same system** in **Scade One** — the industria
 | Traceability matrix as comments | Built-in requirement tracing |
 | `pass` → implement | Code generation (certified C) |
 
-> **Lab 3 connection:** Lab 3 introduced Scade One from scratch (installation, Swan basics, combinatorial vs sequential logic, typed operator declarations, the simulator, Python test scripts) and had you write REQ-01–REQ-08 for this exact system in EARS syntax (reusing Lab 2's REQ-01/02/04 IDs, plus new REQ-07/08 for the regulator and throttle limiter that only exist in this Scade One model). This lab applies those same tool skills to a realistic safety-critical system. Keep your Lab 3 requirement set open — Activity 7A below asks you to trace model elements back to those REQ IDs, and Part 6's `evaluate_cc.py` scenarios tag each checkpoint with the same IDs. Refer back to [Lab 3](../lab3/) if any tool concept is unfamiliar.
+> **Lab 3 connection:** Lab 3 introduced Scade One from scratch (installation, Swan basics, combinatorial vs sequential logic, typed operator declarations, the simulator, Python test scripts) and had you write REQ-01–REQ-08 for this exact system in EARS syntax (reusing Lab 2's REQ-01/02/04 IDs, plus new REQ-07/08 for the regulator and throttle limiter that only exist in this Scade One model). This lab applies those same tool skills to a realistic safety-critical system. Keep your Lab 3 requirement set open — Activity 7A below asks you to trace model elements back to those REQ IDs, and Part 6's `evaluate_cc_full_report.py` scenarios tag each checkpoint with the same IDs. Refer back to [Lab 3](../lab3/) if any tool concept is unfamiliar.
 
 ---
 
@@ -48,7 +48,7 @@ By the end of this lab you will be able to:
 |------|-------|------|
 | 1 | Scade One orientation | 15 min |
 | 2 | Car model simulation (plant exploration) | 20 min |
-| 3 | Project setup & operator interface | 20 min |
+| 3 | Project setup & Cruise Control interface design | 20 min |
 | 4 | State machine design | 30 min |
 | 5 | Simulation & manual verification | 20 min |
 | 6 | Python evaluation script (scenarios, CSV, charts) | 45 min |
@@ -206,7 +206,7 @@ accel ──┐
 
 ---
 
-## Part 3 — Project Setup & Operator Interface
+## Part 3 — Project setup & Cruise Control interface design
 
 ### Activity 3A — Create the project
 
@@ -520,8 +520,9 @@ CruiseControl/
 │   ├── tc04_set_without_res_stays_suspended.csv
 │   ├── tc05_res_resumes.csv
 │   └── tc06_cc_off.csv
-├── results/              <- created by evaluate_cc.py: trace CSVs, summary.csv, plots/
-└── evaluate_cc.py
+├── results/              <- created by evaluate_cc_full_report.py: trace CSVs, summary.csv, plots/
+├── evaluate_cc_full_report.py
+└── evaluate_cc_quick_tester.py   <- optional lightweight console demo, see Activity 6F
 ```
 
 Example — `tc04_set_without_res_stays_suspended.csv`, the graphical equivalent of TC-05's trap in Lab 2 (REQ-04: `set` alone must not resume regulation, only explicit `res`):
@@ -555,10 +556,10 @@ Inputs and outputs are grouped under `.inputs.<name>` / `.outputs.<name>` on the
 
 Each scenario CSV's `set_point` column already encodes the Activity 4E "rising edge of `on` locks `set_point = v_speed`" rule (worked out once when the scenario was authored — see Activity 6C), so `run_cycle()` just feeds that column straight into `cc.inputs.set_point` every cycle; no derivation logic is needed here. The scenario CSVs' `set` column is a separate thing: it is not part of this model's interface — only `on` and `res` affect `set_point`/state — and is accepted by `run_cycle()` purely to keep the call site self-documenting.
 
-Create `evaluate_cc.py`:
+Create `evaluate_cc_full_report.py`:
 
 ```python
-# evaluate_cc.py
+# evaluate_cc_full_report.py
 # Runs every scenario in scenarios/*.csv against the generated cruise_control
 # wrapper, logs the per-cycle trace to results/<tid>_trace.csv, checks any
 # expected_throttle checkpoints, and writes a traceability summary to
@@ -845,12 +846,319 @@ if __name__ == "__main__":
 Run:
 
 ```text
-python evaluate_cc.py
+python evaluate_cc_full_report.py
 ```
 
 <img src="img/python_run_eval.png" width="100%">
 
 The script's own **GENERATED FILES** printout lists every trace CSV, plot PNG, and `results/summary.csv` it just wrote — use it to jump straight to the right file instead of browsing `results/` by hand. Inspect `results/summary.csv` (the PASS/FAIL traceability report) and the charts in `results/plots/`. Compare the summary to Lab 2's verification report. Write 2–3 sentences: what is the same, and what is different about testing via generated C plus scenario files vs. testing your Python implementation directly?
+
+### Full script reference
+
+The activities above built `evaluate_cc_full_report.py` up in pieces across Activities 6D-6F. The complete file is collapsed below for reference -- expand it to read the whole script in one place.
+
+> **Why there's no live editor here (unlike Lab 2):** both scripts below import `cc_wrapper` -- a compiled native DLL produced by Scade One's code generator (Activities 6A/6B) -- and `evaluate_cc_full_report.py` additionally needs a local Scade One install (`ansys.scadeone.core`) and `matplotlib`. Running them means loading and calling into that DLL on your machine. A browser-based Python editor like Lab 2's (which runs Skulpt, a pure-Python-in-browser interpreter with no ability to load native DLLs or drive a local Scade One install) cannot do that, so these are shown as **read-only reference text** -- to actually run them, install Scade One, generate the wrapper (Activities 6A/6B), and run them locally as described above.
+
+<details>
+<summary><strong>evaluate_cc_full_report.py</strong> -- full script (click to expand)</summary>
+
+<pre><code class="language-python"># evaluate_cc_full_report.py
+# Instructor reference for Lab 4 Part 6 (Activities 6C-6F).
+# Runs every scenario in scenarios/*.csv against the generated cruise_control
+# wrapper, logs the per-cycle trace to results/&lt;tid&gt;_trace.csv, checks any
+# expected_throttle checkpoints, writes a traceability summary to
+# results/summary.csv, and plots each scenario&#x27;s dynamic behaviour to
+# results/plots/&lt;tid&gt;.png.
+#
+# NOTE: the generated wrapper (cc_wrapper/cc_wrapper.py) exposes the
+# cruise_control operator as a class named after the root operator and the
+# design file it was generated from (cruise_control_CC_design here), with
+# inputs/outputs grouped under .inputs / .outputs rather than as direct
+# attributes. The exact class name and grouping depend on your Scade One
+# version and the operator you target for code generation - check the
+# generated wrapper file and adjust the import/instantiation below and
+# run_cycle() accordingly, same caveat as lab.md&#x27;s Activity 6D.
+#
+# The cruise_control node takes set_point as a plain input rather than
+# computing it internally (see assets/CC_design.swan). Each scenario CSV&#x27;s
+# &quot;set_point&quot; column already encodes Activity 4E&#x27;s &quot;rising edge of on locks
+# set_point = v_speed&quot; rule (worked out once when the scenario was authored),
+# so this script just feeds that column straight into cc.inputs.set_point
+# every cycle - no derivation logic needed here. The CSVs&#x27; &quot;set&quot; column is
+# a separate thing: it is not part of this model&#x27;s interface (only &quot;on&quot; and
+# &quot;res&quot; affect set_point/state) and is kept only for traceability/logging.
+#
+# The wrapper only exposes &quot;throttle&quot; as an output - the automaton&#x27;s actual
+# state (cc_disabled/cc_active/cc_standby) is internal to the generated
+# model and not observable through cc.outputs. The &quot;state&quot; column in the
+# trace/plot is therefore NOT read from the model: it is a Python-side
+# re-derivation of the state, driven off the same on/brake/accel/res guards
+# as the Activity 7A transition table, kept only so the chart can show
+# roughly where the automaton should be. Treat it as a plotting aid, not a
+# verified model output - it can drift from the model&#x27;s real state if the
+# guards above are ever changed in CC_design.swan without updating this file.
+#
+# Requires a local Scade One install + a regenerated wrapper; cannot be run
+# in an environment without Scade One (see .agents/testing.md).
+
+import csv
+import glob
+import os
+import sys
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+
+from ansys.scadeone.core import ScadeOne
+from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
+
+SCADE_INSTALL = r&quot;C:\Program Files\Ansys Inc\v261\Scade One Student\Scade One&quot;
+PROJECT_DIR = r&quot;CruiseControl.sproj&quot;
+WRAPPER_NAME = &quot;cc_wrapper&quot;
+
+app = ScadeOne(install_dir=SCADE_INSTALL)
+prj = app.load_project(PROJECT_DIR)
+prj.load_jobs()
+JOB_NAME = &quot;CodeGenerationJob_CC&quot;
+gen = PythonWrapper(prj, JOB_NAME, output=WRAPPER_NAME)
+gen.generate()
+
+# Instantiate generated operator class - check cc_wrapper/cc_wrapper.py if
+# the class name differs for your Scade One version/project (pattern is
+# &lt;operator&gt;_&lt;design&gt;, same convention as Lab 3&#x27;s wrapper classes).
+sys.path.insert(0, str(Path(__file__).parent / WRAPPER_NAME))
+from cc_wrapper import cruise_control_CC_design  # noqa: E402
+
+cc = cruise_control_CC_design()
+
+SCENARIOS_DIR, RESULTS_DIR, TOLERANCE = &quot;scenarios&quot;, &quot;results&quot;, 1e-3
+PLOTS_DIR = os.path.join(RESULTS_DIR, &quot;plots&quot;)
+
+_prev_on, _cc_state = False, &quot;active&quot;
+
+
+def run_cycle(on, _set_flag, v_speed, brake, accel, res, set_point):
+    &quot;&quot;&quot;Set inputs, run one cycle, return (throttle, state).
+
+    _set_flag (the scenario CSV&#x27;s &quot;set&quot; column) is not part of this model&#x27;s
+    interface - see the NOTE at the top of this file - and is accepted only
+    to keep the call site in run_scenario() self-documenting.
+
+    state is re-derived in Python from the same guards as the Activity 7A
+    transition table (on; brake &gt; 10.0 or accel &gt; 10.0; res and brake &lt;
+    10.0) - see the NOTE at the top of this file for why this is a display
+    aid, not a value read from the model.
+    &quot;&quot;&quot;
+    global _prev_on, _cc_state
+    if on and not _prev_on:
+        _cc_state = &quot;active&quot;  # entering cc_enabled resets the inner state
+    _prev_on = on
+
+    if on:
+        if brake &gt; 10.0 or accel &gt; 10.0:
+            _cc_state = &quot;standby&quot;
+        elif res and brake &lt; 10.0:
+            _cc_state = &quot;active&quot;
+        state = _cc_state
+    else:
+        state = &quot;disabled&quot;
+
+    cc.inputs.on, cc.inputs.v_speed = on, v_speed
+    cc.inputs.brake, cc.inputs.accel, cc.inputs.res = brake, accel, res
+    cc.inputs.set_point = set_point
+    cc.cycle()
+    return cc.outputs.throttle, state
+
+
+_STATE_LEVELS = [&quot;disabled&quot;, &quot;standby&quot;, &quot;active&quot;]
+
+
+def plot_scenario(tid, trace):
+    cycles = [int(r[&quot;cycle&quot;]) for r in trace]
+    throttle = [float(r[&quot;throttle&quot;]) for r in trace]
+    v_speed = [float(r[&quot;v_speed&quot;]) for r in trace]
+    set_point = [float(r[&quot;set_point&quot;]) for r in trace]
+    brake = [float(r[&quot;brake&quot;]) for r in trace]
+    on = [1 if r[&quot;on&quot;] == &quot;True&quot; else 0 for r in trace]
+    set_flag = [1 if r[&quot;set&quot;] == &quot;True&quot; else 0 for r in trace]
+    res = [1 if r[&quot;res&quot;] == &quot;True&quot; else 0 for r in trace]
+    state = [_STATE_LEVELS.index(r[&quot;state&quot;]) for r in trace]
+
+    fig, (ax1, ax3) = plt.subplots(2, 1, sharex=True, figsize=(7, 6))
+
+    # Top: throttle, v_speed / set_point (same units, same axis), and brake.
+    ax1.plot(cycles, throttle, color=&quot;tab:blue&quot;, label=&quot;throttle&quot;)
+    ax1.set_ylabel(&quot;throttle&quot;, color=&quot;tab:blue&quot;)
+    ax1.set_title(tid)
+
+    ax2 = ax1.twinx()
+    ax2.plot(cycles, v_speed, color=&quot;tab:orange&quot;, label=&quot;v_speed&quot;)
+    ax2.plot(cycles, set_point, color=&quot;tab:orange&quot;, linestyle=&quot;--&quot;, label=&quot;set_point&quot;)
+    ax2.set_ylabel(&quot;v_speed / set_point&quot;, color=&quot;tab:orange&quot;)
+    ax2.legend(loc=&quot;upper left&quot;, fontsize=8)
+
+    ax6 = ax1.twinx()
+    ax6.spines[&quot;right&quot;].set_position((&quot;outward&quot;, 60))
+    ax6.plot(cycles, brake, color=&quot;tab:brown&quot;, label=&quot;brake&quot;)
+    ax6.set_ylabel(&quot;brake&quot;, color=&quot;tab:brown&quot;)
+
+    # Bottom: boolean inputs (on/set/res) plus the derived cc state.
+    ax3.step(cycles, on, where=&quot;post&quot;, color=&quot;tab:green&quot;, label=&quot;on&quot;)
+    ax3.step(cycles, set_flag, where=&quot;post&quot;, color=&quot;tab:purple&quot;, label=&quot;set&quot;)
+    ax3.step(cycles, res, where=&quot;post&quot;, color=&quot;tab:red&quot;, label=&quot;res&quot;)
+    ax3.set_ylim(-0.2, 1.2)
+    ax3.set_yticks([0, 1])
+    ax3.set_ylabel(&quot;inputs (bool)&quot;)
+    ax3.set_xlabel(&quot;cycle&quot;)
+    ax3.legend(loc=&quot;upper left&quot;, fontsize=8)
+
+    ax4 = ax3.twinx()
+    ax4.step(cycles, state, where=&quot;post&quot;, color=&quot;tab:gray&quot;,
+              linestyle=&quot;--&quot;, label=&quot;cc state&quot;)
+    ax4.set_ylim(-0.2, len(_STATE_LEVELS) - 0.8)
+    ax4.set_yticks(range(len(_STATE_LEVELS)))
+    ax4.set_yticklabels(_STATE_LEVELS)
+    ax4.set_ylabel(&quot;cc state (derived)&quot;)
+
+    fig.tight_layout()
+    plot_path = os.path.join(PLOTS_DIR, f&quot;{tid}.png&quot;)
+    fig.savefig(plot_path)
+    plt.close(fig)
+    return plot_path
+
+
+def run_scenario(path, index=None, total=None):
+    global _prev_on, _cc_state
+    tid = os.path.splitext(os.path.basename(path))[0]
+    prefix = f&quot;[{index}/{total}] &quot; if index else &quot;&quot;
+    print(f&quot;{prefix}Running {tid} ...&quot;)
+
+    cc.reset()
+    _prev_on, _cc_state = False, &quot;active&quot;
+    trace, checks = [], []
+
+    with open(path, newline=&quot;&quot;) as f:
+        for row in csv.DictReader(f):
+            throttle, state = run_cycle(
+                row[&quot;on&quot;] == &quot;True&quot;, row[&quot;set&quot;] == &quot;True&quot;, float(row[&quot;v_speed&quot;]),
+                float(row[&quot;brake&quot;]), float(row[&quot;accel&quot;]), row[&quot;res&quot;] == &quot;True&quot;,
+                float(row[&quot;set_point&quot;]),
+            )
+            trace.append({**row, &quot;throttle&quot;: f&quot;{throttle:.3f}&quot;, &quot;state&quot;: state})
+            if row[&quot;expected_throttle&quot;]:
+                expected = float(row[&quot;expected_throttle&quot;])
+                passed = abs(throttle - expected) &lt;= TOLERANCE
+                checks.append({
+                    &quot;tid&quot;: tid, &quot;cycle&quot;: row[&quot;cycle&quot;], &quot;req&quot;: row[&quot;req&quot;],
+                    &quot;note&quot;: row[&quot;note&quot;], &quot;expected&quot;: expected,
+                    &quot;actual&quot;: throttle, &quot;status&quot;: &quot;PASS&quot; if passed else &quot;FAIL&quot;,
+                })
+
+    trace_path = os.path.join(RESULTS_DIR, f&quot;{tid}_trace.csv&quot;)
+    with open(trace_path, &quot;w&quot;, newline=&quot;&quot;) as f:
+        writer = csv.DictWriter(f, fieldnames=trace[0].keys())
+        writer.writeheader()
+        writer.writerows(trace)
+
+    plot_path = plot_scenario(tid, trace)
+
+    if checks:
+        n_fail = sum(1 for c in checks if c[&quot;status&quot;] == &quot;FAIL&quot;)
+        print(f&quot;    {len(trace)} cycles, {len(checks)} checkpoint(s): &quot;
+              f&quot;{len(checks) - n_fail} passed, {n_fail} failed&quot;)
+    else:
+        print(f&quot;    {len(trace)} cycles, no checkpoints - see chart for regulator behaviour&quot;)
+
+    return checks, [trace_path, plot_path]
+
+
+if __name__ == &quot;__main__&quot;:
+    os.makedirs(PLOTS_DIR, exist_ok=True)
+    all_checks = []
+    generated_files = []
+
+    scenario_paths = sorted(glob.glob(os.path.join(SCENARIOS_DIR, &quot;*.csv&quot;)))
+    for i, path in enumerate(scenario_paths, start=1):
+        checks, files = run_scenario(path, i, len(scenario_paths))
+        all_checks.extend(checks)
+        generated_files.extend(files)
+
+    summary_path = os.path.join(RESULTS_DIR, &quot;summary.csv&quot;)
+    with open(summary_path, &quot;w&quot;, newline=&quot;&quot;) as f:
+        fields = [&quot;tid&quot;, &quot;cycle&quot;, &quot;req&quot;, &quot;note&quot;, &quot;expected&quot;, &quot;actual&quot;, &quot;status&quot;]
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(all_checks)
+    generated_files.append(summary_path)
+
+    print(&quot;=&quot; * 70)
+    print(&quot;  VERIFICATION REPORT -- cruise_control (Scade One, scenario files)&quot;)
+    print(&quot;=&quot; * 70)
+    for c in all_checks:
+        print(f&quot;  [{c[&#x27;req&#x27;]:8s}] {c[&#x27;tid&#x27;]:38s} | expected={c[&#x27;expected&#x27;]:.3f} &quot;
+              f&quot;actual={c[&#x27;actual&#x27;]:.3f} | {c[&#x27;status&#x27;]}&quot;)
+    n_fail = sum(1 for c in all_checks if c[&quot;status&quot;] == &quot;FAIL&quot;)
+    print(&quot;=&quot; * 70)
+    print(&quot;VALIDATION: ALL REQUIREMENTS MET.&quot; if n_fail == 0
+          else f&quot;VALIDATION: ISSUES FOUND ({n_fail} failing).&quot;)
+
+    print(&quot;=&quot; * 70)
+    print(&quot;  GENERATED FILES -- inspect these for details&quot;)
+    print(&quot;=&quot; * 70)
+    for f in generated_files:
+        print(f&quot;  {f}&quot;)
+</code></pre>
+
+</details>
+
+A lighter alternative ships alongside it: `evaluate_cc_quick_tester.py` drives the same generated `cc_wrapper` for 1000 cycles, using a small ad hoc Python integrator to stand in for `v_speed` (not the real `Car_design` plant), and just prints a live trace to the console -- no scenario files, no CSVs, no charts, no PASS/FAIL assertions. Useful as a quick sanity check right after code generation, before writing the scenario-driven evaluation above.
+
+<details>
+<summary><strong>evaluate_cc_quick_tester.py</strong> -- full script (click to expand)</summary>
+
+<pre><code class="language-python">import time
+from cc_wrapper.cc_wrapper import cruise_control_CC_design
+
+# cc_wrapper.cc_wrapper only exposes the CC_design controller (class
+# cruise_control_CC_design, inputs v_speed/brake/accel/on/res/set_point,
+# output throttle) - it does not include the Car_design plant, so there is
+# no generated vehicle to close the loop against. v_speed is therefore
+# driven here by a small ad hoc Python integrator for demo purposes only;
+# it is not the real Car_design.swan model (see evaluate_cc_full_report.py, which
+# instead replays pre-computed v_speed traces from scenarios/*.csv).
+m = cruise_control_CC_design()
+
+t_switch = 200
+v_speed = 0.0
+
+for cycle in range(1000):
+
+    m.inputs.accel = 70.0 if cycle &lt; t_switch else 0.0
+    m.inputs.brake = 0.0
+
+    # activate cruise control 110 km/h
+    m.inputs.on = cycle &gt;= t_switch
+    m.inputs.res = cycle == t_switch
+
+    m.inputs.set_point = 110.0
+    m.inputs.v_speed = v_speed
+
+    m.cycle()
+
+    # simplified plant: throttle accelerates, drag decelerates
+    v_speed = max(0.0, v_speed + 0.02 * m.outputs.throttle - 0.01 * v_speed)
+
+    print(
+        cycle,
+        &quot;speed:&quot;, str(int(v_speed)),
+        &quot;throttle:&quot;, str(int(m.outputs.throttle)),
+        &quot;cc:&quot;, str(m.inputs.on)
+    )
+
+    time.sleep(0.05)
+</code></pre>
+
+</details>
 
 ---
 
@@ -878,7 +1186,7 @@ In Lab 2 you maintained a traceability matrix as a Python comment. In Scade One,
 node #pragma requirement reQ2 #end cruise_control (v_speed:float32; ...)
 ```
 
-Look closely: this reads `reQ2`, not `REQ-02`. That's a real casing/spelling mismatch against this course's own canonical ID (`REQ-02`, used everywhere else — Lab 2, Lab 3, the `evaluate_cc.py` scenario CSVs' `req` column). Scade One doesn't validate pragma text, so this link *looks* present in the Requirements panel but won't match a search — or a script — looking for `REQ-02`. **Don't repeat this mistake in your own model:** after linking each requirement above, re-open the Requirements panel (or inspect the generated `.swan`) and confirm the ID text matches your Lab 3 spelling exactly, including the hyphen and the two-digit zero-padding (`REQ-02`, not `REQ2`, `Req-02`, or `reQ2`).
+Look closely: this reads `reQ2`, not `REQ-02`. That's a real casing/spelling mismatch against this course's own canonical ID (`REQ-02`, used everywhere else — Lab 2, Lab 3, the `evaluate_cc_full_report.py` scenario CSVs' `req` column). Scade One doesn't validate pragma text, so this link *looks* present in the Requirements panel but won't match a search — or a script — looking for `REQ-02`. **Don't repeat this mistake in your own model:** after linking each requirement above, re-open the Requirements panel (or inspect the generated `.swan`) and confirm the ID text matches your Lab 3 spelling exactly, including the hyphen and the two-digit zero-padding (`REQ-02`, not `REQ2`, `Req-02`, or `reQ2`).
 
 ### Activity 7B — Reflection Quiz
 

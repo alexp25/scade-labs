@@ -60,6 +60,29 @@ Per-lab widget divergence (not a bug, just different content per lab):
 - Lab 4 embeds a single reflection-quiz widget (same underlying pattern,
   single container).
 
+## Course slides (PDF viewer)
+
+Every lab page (`docs/lab1/index.html` … `docs/lab6/index.html`) now has a
+"Course Slides" button in its header, wired via the shared
+`docs/assets/js/course-slides.js` script — same slot pattern as
+`auth-header.js`'s `#auth-slot`: each page's header has a
+`<div id="course-slides-slot" data-base="../"></div>`, and
+`window.CURRENT_LAB_ID` (already set for the progress-tracking feature)
+doubles as the PDF filename lookup key. Clicking the button opens a modal
+with an `<iframe>` PDF viewer plus a `download` link; no library dependency,
+just the browser's native PDF rendering.
+
+- **Published PDFs:** `docs/courses/lab1.pdf` … `docs/courses/lab6.pdf` —
+  these are what the button actually links to and must exist for the widget
+  to work.
+- **Source/canonical copies:** `project_docs/courses/Slides 1.pdf` …
+  `Slides 6.pdf` (original instructor filenames, spaces included). These are
+  **not** served by GitHub Pages (`project_docs/` is outside the publishing
+  root — see `.agents/decisions/0001-canonical-docs-location.md`), so the
+  `docs/courses/labN.pdf` copies must be kept in sync by hand whenever a
+  slide deck changes; there is no build step that generates one from the
+  other.
+
 ## Duplicate/at-risk sources of truth
 
 - `docs/lab4/lab_old.md` — an old draft of `lab.md`, **not fetched by any
@@ -78,6 +101,20 @@ Per-lab widget divergence (not a bug, just different content per lab):
   names/IDs live, separate from `docs/index.html`'s cards and each lab's own
   `CURRENT_LAB_ID`. All three must agree on the `labId` strings (`lab2`,
   `lab3`, `lab4`).
+- `docs/changelog/index.html` and `changelog.md` — an admin-only curated
+  changelog, linked from `docs/admin/index.html`. Gated the same way as
+  `/admin/` (redirect if logged out, `isAdmin` check against the caller's
+  own `profiles` doc) but **not actually protected**, because
+  `changelog.md` is a plain static file under the public `docs/` root —
+  the gate only controls whether the page renders it, not who can fetch it
+  directly. Keep its content to a short, high-level summary; never put
+  solution content or per-student data in it. This is a deliberate,
+  narrow exception to ADR 0001 (`.agents/decisions/0001-canonical-docs-location.md`)
+  — it's a curated, purpose-written summary for in-site display, not a copy
+  of `project_docs/changelog.md`, so it does not leak maintainer-only detail.
+- `docs/courses/labN.pdf` vs `project_docs/courses/Slides N.pdf` — same
+  slide deck, two copies (published vs. source-named). Update both when a
+  deck changes; see "Course slides (PDF viewer)" above.
 
 ## Adding a new lab (inferred safe procedure, based on the existing labs' shared shape — not separately documented anywhere in the repo)
 

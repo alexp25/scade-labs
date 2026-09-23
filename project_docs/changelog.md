@@ -5,6 +5,408 @@ maintainer documentation. One entry per work session. Newest first.
 
 ---
 
+## 2026-09-23 — New admin-only changelog page
+
+### Summary for reporting
+
+Added a curated, in-site changelog viewable only by admin accounts, per
+user request ("add a changelog page, like a separate lab but only viewable
+to admin"). Two open questions were resolved with the user first: (1) a
+static file under `docs/` cannot be truly access-controlled the way
+`docs/admin/index.html` is (that page's real security boundary is
+Firestore rules, not its client-side check) — the user accepted a
+UI-only gate; (2) content source and granularity — the user chose a
+**curated static file** (not a Firestore-backed collection, not a mirror of
+this maintainer changelog) with **high-level entries only** (no validation
+notes, file lists, or session narration).
+
+Created `docs/changelog/index.html` (same `isAdmin` redirect/check pattern
+as `docs/admin/index.html`, reusing `firebase-client.js`) and
+`docs/changelog/changelog.md` (hand-written summary of this repo's history,
+condensed from this file's existing entries). Linked from
+`docs/admin/index.html` via a new "Changelog →" button in its header.
+
+Documented the new page and its security caveat in `.agents/architecture.md`
+(repo-structure tree + a new bullet under "Backend (Firebase)" explicitly
+warning that `changelog.md` is fetchable by anyone who has its URL, gate or
+no gate), `.agents/publishing.md` ("Duplicate/at-risk sources of truth",
+noting this is a deliberate narrow exception to ADR 0001 since the content
+is purpose-written for in-site display, not a copy of this maintainer
+changelog), and `project_docs/architecture/firebase-backend.md` (added to
+the feature list with the same caveat).
+
+### Validation performed
+
+- `bundle exec jekyll build --destination <tmp>` from `docs/` — succeeded,
+  same pre-existing Sass deprecation warnings only; confirmed
+  `changelog/index.html` and `changelog/changelog.md` present in the output
+  tree. Temp output deleted, not committed.
+- Not opened in a real browser — the Firebase auth redirect/`isAdmin` check
+  and markdown render were code-reviewed against the working
+  `docs/admin/index.html` and lab-page patterns they reuse, not executed
+  against a live Firebase project.
+
+### Not addressed / carried over as open items
+
+- `docs/changelog/changelog.md`'s entries were hand-condensed from this
+  file's existing history as of this session; it will not update itself —
+  future sessions adding a changelog entry here should also add a
+  short, high-level line to `docs/changelog/changelog.md` if it's worth
+  surfacing to admins in-site.
+- No mechanism exists to actually restrict `docs/changelog/changelog.md` at
+  the file level (GitHub Pages serves static files with no access control);
+  this is a known, accepted limitation, not a bug to fix later.
+
+---
+
+## 2026-09-23 — Lab 5: cut the full slide reproduction down to a condensed Recap
+
+### Summary for reporting
+
+Per explicit user feedback — "the parts that are already in the course
+slides should not be repeated, only summarized eventually... the lab should
+not repeat the course" — `docs/lab5/lab.md` was rewritten. The original
+version (this session's earlier "Lab 5: created" entry, below) had fully
+reproduced the lecture: all 8 principle sections plus the Emergency
+Braking, Ariane 5, and Brake Controller worked examples from
+`Slides 5 with notes.pdf`.
+
+That was replaced with a short **Recap** section (one line per principle,
+explicitly framed as "not a replacement for the slides") plus the
+already-available **Course Slides** in-page viewer button
+(`course-slides-slot` / `docs/assets/js/course-slides.js`, pointing at
+`docs/courses/lab5.pdf`) for students who need the full explanation. The
+lab's actual content — Part 1's reading, the Hackenbeck et al. (2025)
+citation and LPD summary, the principle→paper connection table, and the
+10-question quiz — is unchanged, since none of that exists in the slides.
+This mirrors the condensed-recap pattern already established by Lab 6
+(see that entry below).
+
+Updated `project_docs/labs/lab-5-design-principles.md` to describe the
+revised structure and why it changed. No changes to `docs/index.html`,
+`.agents/lab-map.md`, or the quiz's questions/answer key — only `lab.md`'s
+theory content was cut down.
+
+---
+
+## 2026-09-23 — Lab 4: full-script reference (collapsible), no in-browser execution
+
+### Summary for reporting
+
+Investigated running Lab 4's Python scripts in-browser the way Lab 2's live
+CodeMirror+Skulpt editor does, per a user request. Both
+`evaluate_cc_full_report.py` and `evaluate_cc_quick_tester.py` import the
+generated `cc_wrapper` — a compiled native DLL from Scade One's code
+generator — which Skulpt (a pure-Python-in-browser interpreter) cannot load;
+the full-report script additionally needs a local Scade One install
+(`ansys.scadeone.core`) and `matplotlib`. Confirmed with the user this makes
+a live/runnable in-browser editor infeasible for these two scripts, and
+that the intended fix is read-only: make the full scripts expandable rather
+than always visible.
+
+Added a "Full script reference" subsection at the end of `docs/lab4/lab.md`
+Part 6, after Activity 6F: both scripts' complete source, each inside a
+collapsed `<details>`/`<summary>` block (collapsed by default, expandable on
+click), styled via new CSS in `docs/lab4/index.html`
+(`#lab-content details`/`summary`/`details pre`, dark box matching the
+site's navy/sky palette, reusing the existing `#lab-content pre code`
+highlight.js pass so expanded code still gets syntax highlighting).
+`evaluate_cc_quick_tester.py` was previously never shown or mentioned
+anywhere in the published lesson (only in `.agents/testing.md` and
+`.agents/workflows.md`) — this closes that gap. Added a one-line mention of
+`evaluate_cc_quick_tester.py` to Activity 6C's project-layout tree too.
+
+While assembling the escaped script text, found and fixed a stale
+self-referential comment in both `src/lab4/starter/CruiseControl/
+evaluate_cc_full_report.py` (header still said `# evaluate_cc.py`, left over
+from an earlier session's rename) and `evaluate_cc_quick_tester.py`
+(a comment pointing at `evaluate_cc.py` instead of the renamed
+`evaluate_cc_full_report.py`) — both now say the correct current filename.
+
+### Validation performed
+
+- `python -m py_compile` on both edited `.py` files — no syntax errors.
+- `bundle exec jekyll build --destination <tmp>` from `docs/` — succeeded,
+  same pre-existing Sass deprecation warnings as prior sessions, `lab4/`
+  output tree confirmed present. Temp output deleted, not committed.
+- Not opened in an actual browser this session — the `<details>` rendering
+  and collapse/expand behavior were not visually confirmed, only reasoned
+  about from the CSS and the existing `marked.js`/`hljs` render pipeline.
+
+Updated `.agents/lab-map.md` (Lab 4's Test/validation mechanism row) and
+`project_docs/labs/lab-4-cruise-control.md` (repository-files table) to
+match.
+
+---
+
+## 2026-09-23 — Lab 6: created and fully registered (Software Architecture)
+
+### Summary for reporting
+
+Added a sixth lab, following the "reading + hands-on written exercise +
+quiz" shape (no `src/lab6/`). Built from one instructor-supplied file (not
+committed to the repo): `Slides 6 with notes.pdf` (lecture on From
+Requirements to System Structure, Why Software Architecture, the ISO/IEC/
+IEEE 42010 definition, Architecture vs Design, Main Elements of Embedded
+Software Architecture, Quality Attributes Drive Architecture,
+Requirements-Driven Architecture, Mapping Requirements to Architecture, a
+worked medical-monitoring-system example, and Benefits/Summary). Unlike
+Lab 5, no instructor quiz/answer-key file was supplied for Lab 6 — the
+10-question `#architecture-quiz` is self-authored from this lab's content,
+stated explicitly in `docs/lab6/lab.md`'s maintainer doc so it's never
+mistaken for a transcribed answer key.
+
+Created `docs/lab6/lab.md` and `docs/lab6/index.html`. `lab.md` synthesizes
+the slide content into 9 theory parts (ending with the fully worked
+medical-monitoring example, reproduced from the slides) plus three
+hands-on parts that anchor on the repo's own Cruise Control system (Lab 4):
+Part 10 has students document the CC model's existing architecture
+(components/interfaces/constraints + a component diagram) using facts
+already in `project_docs/architecture/scade-projects.md`; Part 11 asks for
+a whole-vehicle, SysML-*style* block diagram broadening past the embedded-
+software boundary (explicitly caveated as a Mermaid stand-in, not real
+SysML tool output — this repo has none); Part 12 is a paper-only Automatic
+Emergency Braking extension, proposing new REQ-09/REQ-10 (explicitly marked
+"proposed — not implemented in the shipped model") and describing, in
+prose only, how it would extend Lab 4's scenario-CSV simulation approach.
+No file under `src/lab4/` is created or modified by this lab.
+
+Diagrams use Mermaid — **the first lab page in this repo to load
+Mermaid.js** (cdnjs `mermaid@10.9.1`), since `marked.js` alone renders
+fenced code blocks as plain text, not diagrams. `docs/lab6/index.html`
+converts `pre code.language-mermaid` blocks into `.mermaid` divs and calls
+`mermaid.run()` after `marked.parse()`, same fetch/render/TOC/quiz pattern
+as every other lab's page otherwise.
+
+Added a 6th card to `docs/index.html` (`href="./lab6/"`, reusing existing
+`.tag.intro`/`.tag.sdlc` CSS — no new styling). Unlike Lab 5 (created
+earlier the same day, still missing its `LAB_TITLES` entries and a
+`.agents/workflows.md` section), **Lab 6's registration was completed in
+full in this session**: added `lab6` to both `docs/admin/index.html` and
+`docs/account/index.html`'s `LAB_TITLES` maps; updated `.agents/lab-map.md`
+(new Lab 6 column, portfolio card-count line), `.agents/workflows.md` (new
+"Learner: Lab 6" section, "adding a new lab" note contrasting Lab 6's full
+registration against Lab 5's partial one), `.agents/architecture.md`
+(repository-structure tree), `.agents/domain.md` (component/connector/
+interface/constraint/SysML-style-diagram vocabulary), `.agents/
+verification.md` (new Lab 6 section classifying REQ-09/REQ-10 as
+proposed/paper-only, plus a classification-table row and completion
+criterion), `.agents/scade-models.md` (Lab 6 reads but never modifies the
+Lab 4 `.swan` files), and `.agents/testing.md` (Lab 6 entry). Added
+`project_docs/labs/lab-6-architecture.md` and a new
+`project_docs/labs/portfolio-map.md` row.
+
+Lab 5's own incomplete registration (missing `LAB_TITLES` entries, no
+`.agents/workflows.md` section) was **not** touched this session — left
+exactly as found, per explicit instruction to scope this session's work to
+Lab 6 only.
+
+### Files touched
+
+```
+docs/lab6/lab.md                              (new)
+docs/lab6/index.html                          (new)
+docs/index.html                               (added Lab 6 card)
+docs/admin/index.html                         (added lab6 to LAB_TITLES)
+docs/account/index.html                       (added lab6 to LAB_TITLES)
+project_docs/labs/lab-6-architecture.md       (new)
+project_docs/labs/portfolio-map.md            (added Lab 6 row)
+.agents/lab-map.md                            (added Lab 6 column)
+.agents/workflows.md                          (added Lab 6 learner workflow + maintainer note)
+.agents/architecture.md                       (repo-structure tree + current/legacy boundary)
+.agents/domain.md                             (architecture vocabulary entry)
+.agents/verification.md                       (Lab 6 section, table row, completion criterion)
+.agents/scade-models.md                       (Lab 6 read-only-reference note)
+.agents/testing.md                            (Lab 6 test entry)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- `cd docs && bundle exec jekyll build --destination <tmp>` — succeeded,
+  only pre-existing `jekyll-theme-cayman` Sass deprecation warnings; output
+  tree confirmed to contain `lab6/index.html` + `lab6/lab.md`. Temp output
+  deleted after inspection, not committed.
+- Grepped `href="./lab` in `docs/index.html` — all six cards
+  (`./lab1/` … `./lab6/`) resolve to real directories.
+- Confirmed by grep that no other `docs/**` file referenced `mermaid`
+  before this session — Lab 6 is genuinely the first to need it.
+- Confirmed `git status` shows no changes under `src/lab4/` from this
+  session's work (Parts 10/12 are read-only analysis/proposals, not model
+  edits).
+
+### Not addressed / carried over as open items
+
+- Not opened in an actual browser — Mermaid.js's CDN-loaded diagram
+  rendering was not visually confirmed, only code-reviewed against the
+  working `marked.js`/`highlight.js` pattern it extends.
+- Quiz is self-authored, not instructor-supplied — flagged explicitly in
+  `project_docs/labs/lab-6-architecture.md` so it isn't later mistaken for
+  a transcribed answer key.
+- Lab 5's pre-existing incomplete registration (LAB_TITLES,
+  `.agents/workflows.md`) remains unaddressed, out of scope for this
+  session.
+
+### Follow-up in this same session — made every diagram a live, editable widget
+
+Initial delivery rendered Mermaid diagrams statically (read-only). Per
+explicit follow-up feedback ("it should be interactive, the students
+should edit the diagrams"), reworked `docs/lab6/index.html` so every
+` ```mermaid ` fence becomes a **live editor**: a textarea holding the
+diagram source, a **Render**/**Reset** toolbar, and a preview pane that
+re-renders via `mermaid.render()` on click, Ctrl+Enter, or ~700ms after the
+student stops typing. Edits persist per-diagram in `localStorage`
+(`lab6-diagram-<index>`, keyed by the diagram's position in the page) —
+client-side only, nothing uploaded, nothing auto-graded.
+
+Also rewrote the three hands-on diagrams in `docs/lab6/lab.md` (Parts 10,
+11, and a new Part 12 Activity 12D) from finished answers into
+intentionally incomplete skeletons — component boxes present, connecting
+arrows replaced with `%% TODO` comments pointing at the table/activity
+that answers them — so editing the diagram *is* the deliverable instead of
+an optional way to view a diagram that was already correct. Parts 1, 7,
+and 9 (the theory/worked-example diagrams) stay complete and correct by
+default but are editable too, framed as "experiment if you want, not
+graded." Added a short callout right before Part 1 explaining the editor
+(Render/Reset, `localStorage`-only persistence, which diagrams are
+exercises vs. references).
+
+Updated `project_docs/labs/lab-6-architecture.md` (workflow description,
+new "Known limitations" entries: index-based `localStorage` keys shift if
+`lab.md`'s diagram order/count ever changes; no server-side save),
+`.agents/workflows.md`'s Lab 6 section, `.agents/lab-map.md`'s Lab 6 "Main
+tech" cell, and the `docs/index.html` card description.
+
+**Validation:** re-ran `bundle exec jekyll build --destination <tmp>` —
+succeeded, same pre-existing Sass warnings only; confirmed `lab6/index.html`
+still built. Not opened in a real browser — the editor's actual DOM
+behavior (render-on-input, error display for invalid Mermaid syntax,
+`localStorage` round-trip) was code-reviewed, not executed.
+
+**Correction, same session:** the first pass made *every* diagram
+(including Parts 1/7/9's worked-example reference diagrams) editable.
+Follow-up feedback ("the reference diagrams should not be editable")
+corrected this: `lab.md` now uses two fence languages —
+` ```mermaid ` for Parts 1/7/9 (rendered once, statically, via a new
+`renderStaticDiagrams()`, not editable) and ` ```mermaid-edit ` for Parts
+10–12 (the exercise diagrams, via `buildDiagramEditors()`). Verified
+`marked@9.1.6` actually emits `class="language-mermaid-edit"` for a
+` ```mermaid-edit ` fence (`npx marked@9.1.6` against a sample fence, exact
+version pinned in `docs/lab6/index.html`'s CDN script tag) before relying
+on that selector in the DOM code. Re-ran the Jekyll build again after the
+fix — succeeded; confirmed 3 static + 3 editable fences by grep count.
+Updated `project_docs/labs/lab-6-architecture.md`, `.agents/workflows.md`,
+and `.agents/lab-map.md` to describe the two-path behavior instead of the
+initial "every diagram is editable" version.
+
+### Second correction, same session — condensed the lecture recap instead of repeating the course
+
+Follow-up feedback: "the parts that are already in the course slides
+should not be repeated, only summarized eventually, to provide context for
+the lab, but the lab should not repeat the course." The first two passes
+had reproduced `Slides 6 with notes.pdf` in close-to-full detail across 9
+parts (tables, all three static diagrams, the full medical-monitoring
+worked example) before ever reaching the hands-on content.
+
+Rewrote `docs/lab6/lab.md`: the 9 theory parts collapsed into one short
+**Recap** section (~7 bullets: why architecture matters, the ISO/IEC/IEEE
+42010 definition, architecture vs design, the four elements, quality
+attributes, requirements-driven architecture, and a one-paragraph pointer
+to the lecture's medical-monitoring example instead of reproducing its
+diagram/table) — framed explicitly as "a quick reminder of the lecture,
+not a replacement for it." The three hands-on parts (formerly Part
+10/11/12) were renumbered to **Part 1/2/3** and are now the bulk of the
+lab; their activity numbering (10A→1A, 11A→2A, 12A–12D→3A–3D) and internal
+cross-references were updated to match. The quiz's Q7/Q8/Q9 references to
+"Part 10/11/12" were updated to "Part 1/2/3"; question content itself was
+unchanged since the underlying concepts didn't change, only their
+placement in the lesson.
+
+Since the Recap has no diagrams at all (by design — it points back at the
+lecture instead of reproducing its figures), all three remaining Mermaid
+diagrams in the lab are now the ` ```mermaid-edit ` exercise diagrams from
+Parts 1–3. This made the "static vs. editable" distinction in
+`docs/lab6/index.html` (added in the previous correction) unnecessary —
+removed `renderStaticDiagrams()` and the plain-`mermaid` code path
+entirely, since no plain ` ```mermaid ` fence remains in `lab.md`; the page
+now only builds diagram-editor widgets.
+
+Header duration updated from "1.5 hours" to "1 hour" to reflect the
+shorter reading load. Updated `project_docs/labs/lab-6-architecture.md`
+(rewritten to match, with a "deliberately not reproduced in full" note
+under Source material), `.agents/workflows.md`'s Lab 6 section,
+`.agents/lab-map.md` (Main tech, Starter materials, Solution/reference,
+Test/validation mechanism, Status cells), `.agents/verification.md` and
+`.agents/scade-models.md` (Part 12→Part 3, Activity 12B→3B, Activity
+12C→3C references), and `docs/index.html`'s card description.
+
+**Validation:** re-ran `bundle exec jekyll build --destination <tmp>` —
+succeeded, same pre-existing Sass warnings only. Grepped `lab.md` and
+confirmed 0 plain ` ```mermaid ` fences and 3 ` ```mermaid-edit ` fences
+remain (Parts 1D, 2A, 3D). Confirmed `git status` shows no `src/lab4/`
+diffs beyond the pre-existing, unrelated set from before this session's
+Lab 6 work.
+
+---
+
+## 2026-09-23 — Lab 5: created (Software Design Principles in Safety-Critical Software Engineering)
+
+### Summary for reporting
+
+Added a new fifth lab, following Lab 1's "reading + quiz only" shape (no
+`src/lab5/`). Built from three instructor-supplied files (not committed to
+the repo): `Slides 5 with notes.pdf` (lecture on Top-Down Design, Modularity/
+Information Hiding, Traceability by Design, Strong Typing & Deterministic
+Design incl. the Ariane 5 failure, SOLID, DRY/KISS, and Model-Based Design),
+`Article for lesson 5.pdf` (Hackenbeck et al. 2025, *Semantic Interface
+Modeling for Automotive Architectures Using a Domain-Driven Approach*,
+IFAC-PapersOnLine 59(25), DOI 10.1016/j.ifacol.2025.11.936), and `Lab 5.pdf`
+(the connection table plus a 10-question quiz and answer key).
+
+Created `docs/lab5/lab.md` and `docs/lab5/index.html`. `lab.md` synthesizes
+the lecture into 10 theory parts plus a reading section (Part 11) that cites
+the article and reproduces `Lab 5.pdf`'s principle → paper connection table
+verbatim. The quiz reproduces `Lab 5.pdf`'s 10 questions verbatim (same
+wording and option order) with `data-correct` values matching its answer key
+exactly, reusing Lab 1's `initQuiz()` scoring pattern under `#design-quiz`.
+
+Added a 5th card to `docs/index.html` (`href="./lab5/"`, reusing existing
+`.tag.intro`/`.tag.sdlc` CSS — no new styling). Updated `.agents/lab-map.md`
+(new Lab 5 column) and `project_docs/labs/portfolio-map.md` (new Lab 5 row;
+also corrected a stale claim there that Lab 1 was still a disabled/empty
+card — it was activated in an earlier session but the map was never
+updated). Added `project_docs/labs/lab-5-design-principles.md` with full
+source/validation detail.
+
+Not run through Jekyll or opened in a browser this session — reviewed by
+code inspection against the working Lab 1 implementation it was modeled on,
+not by execution.
+
+---
+
+## 2026-08-18 — Lab 4: renamed the two `CruiseControl` Python scripts for clarity
+
+### Summary for reporting
+
+Renamed, content otherwise unchanged:
+- `src/lab4/starter/CruiseControl/tester.py` → `evaluate_cc_quick_tester.py`
+  (the live console demo, no assertions).
+- `src/lab4/starter/CruiseControl/evaluate_cc.py` → `evaluate_cc_full_report.py`
+  (the instructor reference implementing lab.md Part 6 Activities 6C–6F —
+  scenario CSVs in, `results/*.csv` + plots out).
+
+Updated every reference to the old filenames across `docs/lab3/lab.md`,
+`docs/lab4/lab.md`, `.agents/{architecture,domain,lab-map,python,testing,
+verification,workflows}.md`, and `project_docs/{architecture/scade-projects,
+architecture/python-and-simulation,labs/lab-3-requirements,
+labs/lab-4-cruise-control,verification/requirements-and-traceability,
+verification/testing-and-simulation}.md`. Pure rename — no behavior, test
+expectations, or requirement content changed. This changelog's own prior
+entries were left untouched (they describe what the files were named at the
+time each entry was written, per this file's standing convention).
+
+---
+
 ## 2026-08-11 — Lab 1: created (Introduction to Software Engineering)
 
 ### Summary for reporting

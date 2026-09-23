@@ -40,7 +40,7 @@ now the *only* place in the portfolio Scade One gets installed).
 - Explain, precisely, how a REQ ID stays traceable from requirement → design
   element → test case
 - Turn a single requirement into a concrete test case (input sequence +
-  expected result), in the same shape Lab 4's `evaluate_cc.py` consumes
+  expected result), in the same shape Lab 4's `evaluate_cc_full_report.py` consumes
 
 ## Repository files
 
