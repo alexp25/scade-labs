@@ -174,14 +174,16 @@ published page) and were only skimmed, not deeply analyzed:
 
 ## Lab 6 — read-only reference, no changes
 
-Lab 6 (`docs/lab6/lab.md` Part 1) documents the architecture of
-`CC_design.swan`/`Car_design.swan`/`Simulation.swan` (packages, node
-signatures, the `[0,100]` throttle clamp, the closed-loop `pre` delay) as a
-written/diagram exercise. It **reads** these facts (already summarized in
-`project_docs/architecture/scade-projects.md`) but does not open, edit,
-regenerate, or add any `#pragma requirement` link to any file under
-`src/lab4/`. Part 3's proposed REQ-09/REQ-10 Emergency Braking extension is
-paper-only for the same reason — see `.agents/verification.md`.
+Lab 6 (`docs/lab6/lab.md`) references the Lab 4 Cruise Control system only
+at the level of its already-known external interface (`on`/`res`/`accel`/
+`brake` in, `throttle` out, needs `v_speed`) — it treats the system as a
+single "ECU" box in a whole-vehicle diagram rather than opening or
+re-documenting `CC_design.swan`'s internal nodes (an earlier revision did
+inspect the `.swan` internals directly for a since-removed internal-
+component-breakdown part; see `project_docs/changelog.md`). It does not
+open, edit, regenerate, or add any `#pragma requirement` link to any file
+under `src/lab4/`. Part 2's proposed REQ-09/REQ-10 Emergency Braking
+extension is paper-only for the same reason — see `.agents/verification.md`.
 
 ## Do not hand-edit
 

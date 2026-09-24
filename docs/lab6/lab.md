@@ -2,26 +2,27 @@
 
 **Course:** Software Engineering
 **Lesson:** Software Architecture
-**Duration:** 1 hour
-**Tool:** None — a short recap, then the page's editable Mermaid diagram tool for three hands-on exercises
+**Duration:** 45–60 minutes
+**Tool:** None — a short recap, then the page's interactive, auto-graded diagram canvas for two hands-on exercises
 **Work mode:** Individual, written deliverable
-**Recommended prerequisite:** the Lesson 6 lecture/slides on Software Architecture (this lab assumes you've already seen that material) and [Lab 4](../lab4/) (you need the Cruise Control system's requirements and Scade One model to complete Parts 1–3)
+**Recommended prerequisite:** the Lesson 6 lecture/slides on Software Architecture (this lab assumes you've already seen that material) and [Lab 4](../lab4/) (you need to already know the Cruise Control system's interface — what it takes in, what it outputs — to complete Parts 1–2)
 
 ---
 
 # Context
 
-Lab 4 asked you to go straight from a requirement set (REQ-01–REQ-08,
-written in Lab 3) to a Scade One model: a state machine, a PI regulator, a
-car plant. That worked — but it skipped a step that real safety-critical
-projects do not skip: **deciding the system's structure before deciding
-its design.**
+Lab 4 built the Cruise Control system's software in Scade One — but only
+the software. It was never placed in a documented picture of the whole
+vehicle it actually has to work inside: the driver who operates it, the
+sensors it depends on, the signal bus its data travels over, the actuator
+it commands. **Deciding a system's structure before deciding its design**
+is what real safety-critical projects do; Lab 4 skipped straight to
+design. This lab builds the missing system-level picture — starting from
+what you already know about the Cruise Control system, not by
+re-deriving its internal design — then extends it with a new safety
+feature.
 
 The Recap below brings the key vocabulary back to mind before you start.
-The core of this lab is three hands-on exercises: you document the
-architecture the Cruise Control system *already has* (nobody wrote it down
-before Lab 4's design work began), zoom out to a whole-vehicle view, and
-extend it with a new safety feature.
 
 ---
 
@@ -34,11 +35,10 @@ By the end of this lab you will be able to:
   interfaces, constraints) it's made of
 - Apply the requirements-driven architecture pattern from the lecture to a
   system you already know
-- Produce your own component/interface/constraint description of the
-  Cruise Control system's architecture
-- Sketch a system-level (SysML-style) view of the *whole* vehicle system,
-  not just its embedded software
-- Extend that architecture with a new safety feature (automatic emergency
+- Place a known component (the Cruise Control system from Lab 4) correctly
+  inside a system-level (SysML-style) view of the *whole* vehicle, not
+  just its embedded software
+- Extend that system view with a new safety feature (automatic emergency
   braking), including proposed requirements and a description of how it
   would be simulated
 
@@ -81,185 +81,135 @@ By the end of this lab you will be able to:
   *specific* architectural decision — edge sensor + gateway + ingestion;
   an optimized stream/alarm pipeline; TLS + encrypted storage + key
   management; load balancer + replication + failover — no single component
-  does everything. **Part 1 asks you to do that same mapping yourself, for
-  a system you already know.**
+  does everything. **Part 1 asks you to place a system you already know
+  into a similar system-level picture.**
 
 ---
 
-> **Parts 1–3's diagrams are live editors, not pictures.** Each one renders
-> below a text box holding its (deliberately incomplete) Mermaid source —
-> boxes without their arrows, marked `%% TODO`. Edit the text and click
-> **▶ Render** (or just stop typing — it re-renders automatically after
-> about a second) to see your change; **↺ Reset** throws away your edits
-> and restores the incomplete starting version. Edits are kept only in
-> your own browser (`localStorage`) — nothing is uploaded or graded
-> automatically; use the tables in each activity to work out what the
-> missing arrows should be.
+> **Parts 1–2's diagrams are an interactive canvas, not a picture.** Each
+> one gives you the component boxes already placed — no connections yet.
+> Drag from the small dot on a box's right edge to a dot on another box's
+> left edge to draw a connection between them (click a connection line and
+> press Delete to remove it; drag a box to reposition it). Click
+> **✓ Check** at any point to see how many of the expected connections
+> you've found so far — this is auto-graded, not a hint, so use the bullet
+> list in each activity to work out what should connect to what. If you're
+> signed in, each Check also records your score for that diagram to your
+> account, the same way a quiz score is recorded — if you're not signed
+> in, Check still works, it just isn't tracked anywhere. **↺ Reset** clears
+> your connections and puts the boxes back where they started. Use
+> **−** / **+** to zoom, or click the percentage to reset it; the small
+> overview box in the bottom-right corner shows the whole diagram at once
+> — click, or click-and-drag, anywhere on it to pan the main view there in
+> real time. Your in-progress layout itself is always kept only in your
+> own browser (`localStorage`), signed in or not.
 
-# Part 1 — Hands-On: The Architecture of the Cruise Control System
+# Part 1 — Hands-On: System-Level View (SysML-Style)
 
-**Deliverable — write this down** (in a text file, or on paper, as your
-instructor requires): a component table, an interface table, a constraints
-list, and one diagram, all for the Lab 4 Cruise Control system.
+You already know the Cruise Control system's interface from Lab 2 and
+Lab 4: it's turned on/off and resumed by driver controls (`on`, `res`,
+`accel`, `brake`), it needs the current vehicle speed (`v_speed`), and it
+produces a `throttle` command. You don't need to re-derive any of its
+internals here — treat it as a single, known component (the **Cruise
+Control ECU**) and place it in the physical system it actually lives
+inside: the driver, the sensors that feed it, the bus its signals travel
+over, and the actuator that receives its output.
 
-## Activity 1A — Identify the components
+> **Caveat:** the diagram below is a **SysML-style** block diagram —
+> boxes for parts, arrows for connections/flows — because this repo has no
+> SysML modeling tool installed. It is not output from a real SysML tool
+> (e.g. a `.sysml`/Capella/Papyrus export), and should not be read as one.
 
-Lab 4's Scade One project (`src/lab4/starter/CruiseControl/`) has never had
-its architecture written down separately from its design — you're about to
-be the first to do that. It has three packages, which map directly onto
-architectural components:
+## Activity 1A — Draw the whole-system block diagram
 
-| Component | Package / node | Responsibility |
-|---|---|---|
-| **Vehicle Plant** | `Car_design` → `node car(throttle_percent, brake) returns (speed, rpm, gear)` | Simulates the physical vehicle's response to throttle/brake input — stands in for the real car, never a code-generation target |
-| **Cruise Control Controller** | `CC_design` → `node cruise_control(v_speed, brake, accel, on, res, set_point) returns (throttle)` | Nested state machine deciding *when* cruise control should be active (`cc_disabled`/`cc_enabled` outer, `cc_active`/`cc_standby` inner) |
-| **Regulator** | `CC_design` → `node regulator(set_point, speed) returns (throttle)` | PI controller: computes the throttle needed to bring `speed` toward `set_point` |
-| **Limiter** | `CC_design` → `node limiter(input, upper_limit, lower_limit) returns (output)` | Clamp/saturation block, instantiated twice inside `regulator` |
-| **Simulation Harness** | `Simulation` → `node main(...)` / `node main_manual(...)` | Wires Vehicle Plant + Cruise Control Controller into a closed loop (`main`) or drives the plant directly, open-loop (`main_manual`) — never shipped/deployed, exists only for simulation |
+Here is exactly how signals flow through this system — turning this list
+into connections is the exercise:
 
-## Activity 1B — Identify the interfaces
+- **Driver → HMI** — the driver presses buttons and pedals on the
+  dashboard.
+- **HMI → Vehicle Signal Bus** — the HMI publishes the driver's requests
+  (`on`, `res`, `set_point`) onto the shared bus.
+- **Wheel-Speed Sensor → Bus**, **Brake Pedal Sensor → Bus**,
+  **Accelerator Pedal Sensor → Bus** — each sensor publishes its own
+  reading onto the same bus, rather than wiring straight to the ECU.
+- **Bus → Cruise Control ECU** — the ECU reads whatever signals it needs
+  off the bus.
+- **Cruise Control ECU → Bus** — the ECU publishes its `throttle` command
+  back onto the bus.
+- **Bus → Throttle/Powertrain Actuator** — the actuator reads the
+  throttle command off the bus.
+- **Throttle/Powertrain Actuator → Vehicle Dynamics** — the actuator
+  applies torque to the vehicle.
+- **Vehicle Dynamics → Wheel-Speed Sensor** — the vehicle's resulting
+  speed is what the sensor measures next, closing the loop.
+- **HMI → Driver** — the HMI reports status back to the driver.
 
-Each node's typed signature *is* its interface — this is exactly what the
-Recap's "provided services" / "required services" distinction means in
-practice:
+**This is the deliverable for Part 1.** The boxes below are the parts of
+the whole vehicle system — driver, HMI, three sensors, the signal bus, the
+Cruise Control ECU, the throttle actuator, and the vehicle itself. None of
+them are connected yet. Draw the 11 connections listed above, then click
+**✓ Check**.
 
-| Component | Provided interface (outputs) | Required interface (inputs) |
-|---|---|---|
-| Vehicle Plant (`car`) | `speed`, `rpm`, `gear` | `throttle_percent`, `brake` |
-| Cruise Control Controller (`cruise_control`) | `throttle` | `v_speed`, `brake`, `accel`, `on`, `res`, `set_point` |
-| Regulator (`regulator`) | `throttle` | `set_point`, `speed` |
-| Limiter (`limiter`) | `output` | `input`, `upper_limit`, `lower_limit` |
-
-## Activity 1C — Identify the constraints
-
-- **Real-time / deterministic:** every node is a synchronous Swan operator —
-  same inputs always produce the same outputs, no hidden state beyond
-  explicit `pre` (see `.agents/domain.md`'s "Synchronous operator" entry).
-- **Output range:** `regulator`'s `throttle` is clamped to `[0, 100]` by an
-  internal `limiter` instance (an earlier, wider clamp of `[-100, 100]` is
-  applied to the intermediate PI sum first).
-- **No dynamic memory / static structure:** the Swan model has a fixed set
-  of nodes and connections — nothing is created or destroyed at runtime.
-- **One-cycle feedback delay:** `Simulation.swan`'s closed-loop `main` node
-  feeds `cruise_control`'s `throttle` output back into `car`'s
-  `throttle_percent` input through a `pre` — the loop is delayed by exactly
-  one simulation cycle, not instantaneous.
-
-## Activity 1D — Draw the component diagram
-
-**This is the deliverable for Part 1.** The diagram below only has the
-five components from Activity 1A as boxes — no arrows yet. Using the
-interface table from Activity 1B (who provides what, who requires what)
-and the constraints from Activity 1C (the one-cycle feedback delay, the
-two `limiter` clamp stages), edit the box below and replace every `%% TODO`
-line with the real connector(s) it describes. Click **▶ Render** to see
-your diagram; use **↺ Reset** if you want to start over.
-
-```mermaid-edit
-flowchart LR
-    subgraph SimHarness["Simulation Harness (Simulation.swan · main)"]
-        direction LR
-        CC["Cruise Control Controller<br/>(cruise_control)"]
-        Pre["pre<br/>(1-cycle delay)"]
-        Car["Vehicle Plant<br/>(car)"]
-        Reg["Regulator<br/>(regulator)"]
-        Lim1["Limiter<br/>[-100,100]"]
-        Lim2["Limiter<br/>[0,100]"]
-        %% TODO: connect CC's throttle output into the 1-cycle delay
-        %% TODO: connect the delayed throttle into the Vehicle Plant's throttle_percent input
-        %% TODO: connect the Vehicle Plant's speed output back into CC (closing the loop)
-        %% TODO: connect CC's set_point/speed into the Regulator, and the Regulator's throttle back into CC
-        %% TODO: connect the Regulator through both Limiter stages (wide clamp first, then [0,100])
-    end
-    Driver["Driver inputs<br/>(on, res, accel, brake)"]
-    %% TODO: connect Driver into CC
+```flowgraph
+{
+  "height": 500,
+  "nodes": [
+    { "key": "Driver", "label": "Driver", "x": 20, "y": 40 },
+    { "key": "HMI", "label": "HMI / Dashboard", "x": 20, "y": 240 },
+    { "key": "WheelSensor", "label": "Wheel-Speed Sensor", "x": 300, "y": 20 },
+    { "key": "BrakeSensor", "label": "Brake Pedal Sensor", "x": 300, "y": 140 },
+    { "key": "AccelSensor", "label": "Accelerator Pedal Sensor", "x": 300, "y": 260 },
+    { "key": "Bus", "label": "Vehicle Signal Bus\n(CAN-style)", "x": 560, "y": 140 },
+    { "key": "ECU", "label": "Cruise Control ECU\n(the system you built in Lab 4)", "x": 800, "y": 40 },
+    { "key": "Powertrain", "label": "Throttle / Powertrain Actuator", "x": 800, "y": 220 },
+    { "key": "Vehicle", "label": "Vehicle Dynamics\n(the physical car)", "x": 800, "y": 380 }
+  ],
+  "expected": [
+    ["Driver", "HMI"],
+    ["HMI", "Bus"],
+    ["WheelSensor", "Bus"],
+    ["BrakeSensor", "Bus"],
+    ["AccelSensor", "Bus"],
+    ["Bus", "ECU"],
+    ["ECU", "Bus"],
+    ["Bus", "Powertrain"],
+    ["Powertrain", "Vehicle"],
+    ["Vehicle", "WheelSensor"],
+    ["HMI", "Driver"]
+  ]
+}
 ```
 
 ## Reflection
 
-This diagram and these tables describe an architecture that already exists
-in code — nobody designed it top-down as architecture-first. That's the
-point: **architecture-first is what should have happened before Lab 4's
-Part 3 ("create the cruise_control operator interface")**. Doing it
-retroactively here still gives you the same artifact — a documented,
-traceable structure — just later than the standards discussed in Lab 5
-(DO-178C, ISO 26262, etc. — mentioned only as educational context, not a
-compliance claim) would recommend.
+The **Cruise Control ECU** box stands in for everything you actually built
+in Lab 4 — the state machine, the PI regulator, the clamping logic — none
+of which needs to appear here. That's what "architecture manages
+complexity" means in practice: each level of an architecture hides the
+detail of the level below it. You don't need to see the regulator's
+internals to reason about how the ECU fits into the vehicle; you don't
+need to see the wheel-speed sensor's electrical interface either.
 
 ---
 
-# Part 2 — Hands-On: System-Level View (SysML-Style)
+# Part 2 — Hands-On: Extending the Architecture — Automatic Emergency Braking
 
-Part 1 stayed inside the embedded-software boundary — the four Swan
-packages. A real vehicle's cruise control system is bigger than its
-software: it includes the driver, physical sensors and actuators, and a
-communication bus. This activity asks you to zoom out.
-
-## Activity 2A — Draw the whole-system block diagram
-
-> **Caveat:** the diagram below is a **SysML-style** block diagram —
-> boxes for parts, arrows for connections/flows — drawn in Mermaid, because
-> this repo has no SysML modeling tool installed. It is not output from a
-> real SysML tool (e.g. a `.sysml`/Capella/Papyrus export), and should not
-> be read as one.
-
-**This is the deliverable for Part 2.** The boxes below are the parts of
-the whole vehicle system — driver, HMI, three sensors, the signal bus, the
-Cruise Control ECU (collapse Part 1's entire diagram into this one box),
-the throttle actuator, and the vehicle itself. None of them are connected
-yet. Replace the `%% TODO` lines with arrows showing which signal flows
-where — think about which sensors feed the bus, what the ECU needs as
-input and produces as output, and how the actuator's effect eventually
-loops back to the sensors.
-
-```mermaid-edit
-flowchart TB
-    Driver["Driver"]
-    HMI["HMI / Dashboard"]
-    Bus["Vehicle Signal Bus (CAN-style)"]
-    WheelSensor["Wheel-Speed Sensor"]
-    BrakeSensor["Brake Pedal Sensor"]
-    AccelSensor["Accelerator Pedal Sensor"]
-    ECU["Cruise Control ECU<br/>(embedded software — Part 1's box)"]
-    Powertrain["Throttle / Powertrain Actuator"]
-    Vehicle["Vehicle Dynamics<br/>(physical car — Part 1 models this as 'car')"]
-    %% TODO: Driver -> HMI (on / res / set / brake pedal / accelerator pedal)
-    %% TODO: HMI -> Bus (on, res, set_point request)
-    %% TODO: each sensor -> Bus (v_speed, brake, accel)
-    %% TODO: Bus -> ECU (all sensor + HMI signals the ECU needs)
-    %% TODO: ECU -> Bus -> Powertrain (throttle command)
-    %% TODO: Powertrain -> Vehicle (applies torque)
-    %% TODO: Vehicle -> WheelSensor (actual speed, closing the loop)
-    %% TODO: HMI -> Driver (status display)
-```
-
-Compare your finished diagram to Part 1's: the **Cruise Control ECU** box
-here is the *entire* Part 1 diagram, collapsed into one box — each level of
-an architecture hides the detail of the level below it, which is exactly
-how architecture manages complexity in practice: at the vehicle level, you
-don't need to see `regulator`'s internal `limiter` instances; at the
-software level, you don't need to see the wheel-speed sensor's electrical
-interface.
-
----
-
-# Part 3 — Hands-On: Extending the Architecture — Automatic Emergency Braking
-
-This is a **paper design exercise**. Nothing here is implemented in
+This is a **paper design exercise** that extends Part 1's diagram — it
+does not touch Lab 4's Scade model. Nothing here is implemented in
 `src/lab4/starter/CruiseControl/` — the shipped Scade One model, its
 generated wrapper, and its scenario CSVs are **not** modified by this lab.
 You are practicing requirements-driven architecture on a *new* feature, the
 same way the Recap's medical-monitoring example was worked for you.
 
-## Activity 3A — Propose the new component
+## Activity 2A — Propose the new component
 
 Add an **Emergency Braking Controller** and an **Obstacle/Distance Sensor**
-to the architecture from Parts 1–2:
+to the architecture from Part 1:
 
 | Component | Responsibility |
 |---|---|
 | Obstacle/Distance Sensor | Measures `distance` to the nearest obstacle ahead and `relative_speed` toward it |
-| Emergency Braking Controller | If a collision risk is detected, outputs a `brake_override` command that takes priority over both the driver's brake pedal and the Cruise Control Controller's `throttle` output |
+| Emergency Braking Controller | If a collision risk is detected, outputs a `brake_override` command that takes priority over both the driver's brake pedal and the Cruise Control ECU's `throttle` output |
 
 **Interface:**
 
@@ -268,13 +218,19 @@ to the architecture from Parts 1–2:
 | Obstacle/Distance Sensor | `distance`, `relative_speed` | (physical sensing hardware — outside the software boundary) |
 | Emergency Braking Controller | `brake_override` (bool/float) | `distance`, `relative_speed`, `v_speed` |
 
-**Connector / arbitration:** the Emergency Braking Controller's
-`brake_override` and the driver's manual `brake` both feed into the same
-actuator; when `brake_override` is active it takes priority over the
-Cruise Control Controller's `throttle` command — i.e. it is a new connector
-into the *existing* architecture from Part 1, not a replacement for it.
+**Connector / arbitration:** both new components join the system the same
+way every existing one already does — as participants on the shared
+signal bus, not through a special new kind of wire. The Obstacle/Distance
+Sensor publishes `distance`/`relative_speed` onto the bus exactly like the
+three existing sensors publish theirs. The Emergency Braking Controller
+reads whatever it needs off the bus and publishes `brake_override` back
+onto it, exactly like the ECU publishes its `throttle` command.
+Arbitration — `brake_override` taking priority over the ECU's `throttle`
+whenever both are present — happens where the two commands are actually
+consumed, at the Powertrain Actuator, not through a dedicated override
+wire.
 
-## Activity 3B — Propose requirements (EARS)
+## Activity 2B — Propose requirements (EARS)
 
 The requirement IDs already in use across this repo are REQ-01 through
 REQ-08 (REQ-01–06 from Lab 2, REQ-07/08 added in Lab 3/4 for the
@@ -285,13 +241,13 @@ the same style taught in Lab 3 Part 1:
 > Obstacle/Distance Sensor reports a collision risk (e.g. `distance` below
 > a safety threshold given the current `relative_speed`), THEN the
 > Emergency Braking Controller shall set `brake_override` to override both
-> the driver's brake input and the Cruise Control Controller's `throttle`
+> the driver's brake input and the Cruise Control ECU's `throttle`
 > output.
 >
 > **REQ-10 (proposed — not implemented in the shipped model)** — WHILE
-> `brake_override` is active, the Cruise Control Controller shall remain in
-> `cc_standby` (or `cc_disabled`) and shall not resume regulation until
-> `brake_override` clears and the driver issues `res`.
+> `brake_override` is active, the Cruise Control system shall remain
+> suspended and shall not resume regulation until `brake_override` clears
+> and the driver issues `res`.
 
 These two IDs are explicitly marked **proposed** — this lab does not add
 them to `src/lab3/solution/requirements.md` or to `CC_design.swan`. That
@@ -299,7 +255,7 @@ would require a real maintainer/instructor decision and a Scade One
 session, exactly the same boundary Lab 4's Activity 7A draws around its own
 unfinished traceability links.
 
-## Activity 3C — How would you simulate it?
+## Activity 2C — How would you simulate it?
 
 You don't need to write code for this — describe the approach in a
 sentence or two, using the mechanism Lab 4 Part 6 already built:
@@ -316,42 +272,65 @@ should engage and `throttle` should fall, rather than asserting one exact
 value. This is a description of an extension, not a new script — no file
 under `src/lab4/` is created or changed by this lab.
 
-## Activity 3D — Draw the extended architecture
+## Activity 2D — Draw the extended architecture
 
-**This is the deliverable for Part 3.** The diagram below starts from your
-finished Part 1 diagram (already wired — copy your own version in if you
-changed anything) plus two new, unconnected boxes: the Obstacle/Distance
-Sensor and the Emergency Braking Controller from Activity 3A. Wire them
-in: both new boxes need connections, and the existing `brake`/`throttle`
-paths need to show the arbitration rule from Activity 3A (an emergency
-override takes priority over both the driver's brake and the regulator's
-throttle command).
+**This is the deliverable for Part 2.** The canvas below has the same
+nine boxes from Part 1, plus two new ones: the Obstacle/Distance Sensor
+and the Emergency Braking Controller from Activity 2A. Re-draw Part 1's
+11 connections, then add:
 
-```mermaid-edit
-flowchart LR
-    subgraph SimHarness["Simulation Harness (Simulation.swan · main)"]
-        direction LR
-        CC["Cruise Control Controller<br/>(cruise_control)"] -->|throttle| Pre["pre<br/>(1-cycle delay)"]
-        Pre -->|throttle_percent| Car["Vehicle Plant<br/>(car)"]
-        Car -->|speed| CC
-        CC -->|set_point, speed| Reg["Regulator<br/>(regulator)"]
-        Reg -->|throttle| CC
-        Reg --> Lim1["Limiter<br/>[-100,100]"]
-        Lim1 --> Lim2["Limiter<br/>[0,100]"]
-        Lim2 -->|throttle| Reg
-    end
-    Driver["Driver inputs<br/>(on, res, accel, brake)"] --> CC
-    Obstacle["Obstacle/Distance Sensor<br/>(distance, relative_speed)"]
-    Emergency["Emergency Braking Controller<br/>(brake_override)"]
-    %% TODO: connect Obstacle -> Emergency (distance, relative_speed)
-    %% TODO: connect CC's v_speed into Emergency as well (it needs v_speed per Activity 3A's interface table)
-    %% TODO: show Emergency's brake_override overriding both Driver's brake and CC's throttle command
+- **Obstacle/Distance Sensor → Bus** — publishes `distance`/
+  `relative_speed`, the same way the existing sensors do.
+- **Bus → Emergency Braking Controller** — it reads `distance`,
+  `relative_speed`, and `v_speed` off the bus.
+- **Emergency Braking Controller → Bus** — it publishes `brake_override`
+  back onto the bus, for the Powertrain Actuator to prioritize over the
+  ECU's `throttle` command.
+
+Click **✓ Check** to see how many of the 14 expected connections you've
+found.
+
+```flowgraph
+{
+  "height": 620,
+  "nodes": [
+    { "key": "Driver", "label": "Driver", "x": 20, "y": 40 },
+    { "key": "HMI", "label": "HMI / Dashboard", "x": 20, "y": 280 },
+    { "key": "WheelSensor", "label": "Wheel-Speed Sensor", "x": 300, "y": 20 },
+    { "key": "BrakeSensor", "label": "Brake Pedal Sensor", "x": 300, "y": 140 },
+    { "key": "AccelSensor", "label": "Accelerator Pedal Sensor", "x": 300, "y": 260 },
+    { "key": "Obstacle", "label": "Obstacle/Distance Sensor", "x": 300, "y": 380 },
+    { "key": "Bus", "label": "Vehicle Signal Bus\n(CAN-style)", "x": 560, "y": 200 },
+    { "key": "ECU", "label": "Cruise Control ECU\n(the system you built in Lab 4)", "x": 800, "y": 40 },
+    { "key": "Powertrain", "label": "Throttle / Powertrain Actuator", "x": 800, "y": 220 },
+    { "key": "Emergency", "label": "Emergency Braking Controller", "x": 800, "y": 380 },
+    { "key": "Vehicle", "label": "Vehicle Dynamics\n(the physical car)", "x": 800, "y": 540 }
+  ],
+  "expected": [
+    ["Driver", "HMI"],
+    ["HMI", "Bus"],
+    ["WheelSensor", "Bus"],
+    ["BrakeSensor", "Bus"],
+    ["AccelSensor", "Bus"],
+    ["Bus", "ECU"],
+    ["ECU", "Bus"],
+    ["Bus", "Powertrain"],
+    ["Powertrain", "Vehicle"],
+    ["Vehicle", "WheelSensor"],
+    ["HMI", "Driver"],
+    ["Obstacle", "Bus"],
+    ["Bus", "Emergency"],
+    ["Emergency", "Bus"]
+  ]
+}
 ```
 
 ## Reflection
 
 Notice this activity re-used Part 1's diagram as a starting point instead
-of starting from nothing — that's what "architecture is driven by
+of starting from nothing, and that the two new components join the system
+the *same way* every existing one does (as bus participants) instead of
+needing a special-case connector — that's what "architecture is driven by
 requirements, and requirements evolve" looks like in practice: a new
 requirement (REQ-09/REQ-10) extends an existing architecture, it doesn't
 replace it.
@@ -364,14 +343,15 @@ replace it.
   system's high-level structure, major components, interfaces, and
   interactions *before* implementation begins, and it should be driven by
   requirements rather than technology choices.
-- **Architecture and design are different activities** — Lab 4 built a
-  correct Cruise Control design without ever writing its architecture down
-  first; Part 1 of this lab shows that the architecture was there all
-  along, just undocumented, and that documenting it after the fact is
-  still useful, even if doing it *before* design is the better order.
-- **Architecture scales across levels** — Part 1's software-only view and
-  Part 2's whole-vehicle view describe the same system at two different
-  levels of abstraction, each hiding the detail of the level below it.
+- **Architecture and design are different activities** — Lab 4 built and
+  validated the Cruise Control software without ever placing it in a
+  documented picture of the whole vehicle system around it; Part 1 of this
+  lab builds that missing picture, using what Lab 4 already established as
+  the ECU's interface, rather than re-deriving its internals.
+- **Architecture evolves without being replaced** — Part 2 extends Part
+  1's system view with a new safety feature by adding new participants
+  onto the same shared bus every existing component already uses, not by
+  redesigning what was already there.
 - **A well-documented architecture pays off downstream** — better
   traceability, easier validation, better maintainability, more
   predictable quality, less redesign effort, and (mentioned only as
@@ -447,21 +427,21 @@ material.
     <label class="quiz-option"><input type="radio" name="q6" value="d"><span>Maintainability — it drives the choice of variable naming conventions</span></label>
   </div>
   <div class="quiz-q" data-correct="a">
-    <strong>Q7 — In the Lab 4 Cruise Control system's architecture (Part 1), which pairing is correct?</strong>
-    <label class="quiz-option"><input type="radio" name="q7" value="a"><span>The Vehicle Plant (`car`) is a component whose required interface includes `throttle_percent` and `brake`</span></label>
-    <label class="quiz-option"><input type="radio" name="q7" value="b"><span>The `limiter` node is a communication bus, not a component</span></label>
-    <label class="quiz-option"><input type="radio" name="q7" value="c"><span>The Cruise Control Controller's provided interface includes `v_speed` as an output</span></label>
-    <label class="quiz-option"><input type="radio" name="q7" value="d"><span>`Simulation.swan` is part of the shipped/deployed production architecture</span></label>
+    <strong>Q7 — In Part 1's whole-vehicle diagram, which pairing is correct?</strong>
+    <label class="quiz-option"><input type="radio" name="q7" value="a"><span>The Vehicle Signal Bus is a connector, not a component</span></label>
+    <label class="quiz-option"><input type="radio" name="q7" value="b"><span>The Wheel-Speed Sensor publishes directly to the ECU, bypassing the bus</span></label>
+    <label class="quiz-option"><input type="radio" name="q7" value="c"><span>The HMI has no connection back to the Driver</span></label>
+    <label class="quiz-option"><input type="radio" name="q7" value="d"><span>The Powertrain Actuator is the source of the vehicle's speed signal</span></label>
   </div>
   <div class="quiz-q" data-correct="d">
-    <strong>Q8 — Why does Part 2's whole-vehicle diagram collapse the entire Part 1 software architecture into a single "Cruise Control ECU" box?</strong>
-    <label class="quiz-option"><input type="radio" name="q8" value="a"><span>Because the software architecture is irrelevant at the vehicle level</span></label>
-    <label class="quiz-option"><input type="radio" name="q8" value="b"><span>Because SysML tools cannot represent embedded software</span></label>
-    <label class="quiz-option"><input type="radio" name="q8" value="c"><span>Because the regulator and limiter nodes no longer exist at that level</span></label>
-    <label class="quiz-option"><input type="radio" name="q8" value="d"><span>Because each level of architecture hides the detail of the level below it, managing complexity</span></label>
+    <strong>Q8 — Why does Part 1's whole-vehicle diagram treat the Cruise Control system as a single "ECU" box instead of showing its internal state machine and regulator separately?</strong>
+    <label class="quiz-option"><input type="radio" name="q8" value="a"><span>Because that internal design doesn't actually exist</span></label>
+    <label class="quiz-option"><input type="radio" name="q8" value="b"><span>Because SysML-style diagrams cannot represent embedded software</span></label>
+    <label class="quiz-option"><input type="radio" name="q8" value="c"><span>Because Lab 4 never built that internal design</span></label>
+    <label class="quiz-option"><input type="radio" name="q8" value="d"><span>Because each level of architecture hides the detail of the level below it — you already built and understand that detail from Lab 4, so this view doesn't need to repeat it</span></label>
   </div>
   <div class="quiz-q" data-correct="b">
-    <strong>Q9 — Part 3 proposes REQ-09/REQ-10 for an Automatic Emergency Braking extension. What is the correct status of this proposal in this repository?</strong>
+    <strong>Q9 — Part 2 proposes REQ-09/REQ-10 for an Automatic Emergency Braking extension. What is the correct status of this proposal in this repository?</strong>
     <label class="quiz-option"><input type="radio" name="q9" value="a"><span>REQ-09/REQ-10 are implemented and traced inside the shipped `CC_design.swan`</span></label>
     <label class="quiz-option"><input type="radio" name="q9" value="b"><span>REQ-09/REQ-10 are a proposed, paper-only extension — not implemented in the shipped model or scenarios</span></label>
     <label class="quiz-option"><input type="radio" name="q9" value="c"><span>REQ-09/REQ-10 replace REQ-01 and REQ-02</span></label>
@@ -469,9 +449,9 @@ material.
   </div>
   <div class="quiz-q" data-correct="c">
     <strong>Q10 — Which best summarizes this lab's central lesson about Lab 4?</strong>
-    <label class="quiz-option"><input type="radio" name="q10" value="a"><span>Lab 4's design was incorrect because no architecture existed</span></label>
+    <label class="quiz-option"><input type="radio" name="q10" value="a"><span>Lab 4's software was incorrect because no system-level view existed</span></label>
     <label class="quiz-option"><input type="radio" name="q10" value="b"><span>Architecture and design are the same activity, so Lab 4 lost nothing by skipping it</span></label>
-    <label class="quiz-option"><input type="radio" name="q10" value="c"><span>Lab 4's design worked, but its architecture was never written down first — documenting it afterward is still useful, though doing it beforehand is the better practice</span></label>
+    <label class="quiz-option"><input type="radio" name="q10" value="c"><span>Lab 4's software worked, but it was never placed in a documented system-level picture until this lab built one — doing that before implementation is the better practice, but doing it afterward is still valuable</span></label>
     <label class="quiz-option"><input type="radio" name="q10" value="d"><span>Requirements are unnecessary once an architecture exists</span></label>
   </div>
   <div>

@@ -48,8 +48,10 @@ model above; it is an additional runtime dependency loaded by the browser.
 - **Auth**: Firebase Authentication, email/password only.
 - **Data** (Firestore): three collections — `profiles/{uid}` (email,
   `isAdmin` flag), `labOpens/{uid}_{labId}` (per-user, per-lab open counts),
-  `quizAttempts/{autoId}` (append-only score log for quizzes and Lab 2's
-  code-run "test" results).
+  `quizAttempts/{autoId}` (append-only score log for quizzes, Lab 2's
+  code-run "test" results, and — as of Lab 6 — each diagram canvas's
+  `✓ Check` click, `quizId: "diagram-1"`/`"diagram-2"`, same shape and same
+  `window.recordQuizAttempt()` call as an actual quiz).
 - **Admin model**: `isAdmin` can only be set to `true` via a maintainer
   manually editing the document in the Firebase console — no application
   code path can set it, so a client can never self-promote. Every read of

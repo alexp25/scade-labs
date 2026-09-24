@@ -105,12 +105,12 @@ being harmed by extreme temperatures). It identifies **bounded contexts**
 interface between them by direction, temporal coupling, data-interaction
 type, **criticality**, implementation binding, and change tolerance.
 
-## How the studied principles show up in the paper
+## Principles applied in the paper
 
-| Studied Principle | Connection to the paper |
+| Principle | Applied in the paper |
 |---|---|
-| Top-Down Design | Architecture is developed across abstraction levels (logical → software → technical / domain → application → infrastructure) |
-| Modularity | System is decomposed into bounded contexts and components (Body, Connection, Backend, …) |
+| Top-Down Design | Architecture is developed across abstraction levels (logical, software, technical / domain, application, infrastructure) |
+| Modularity | System is decomposed into bounded contexts and components (Body, Connection, Backend, etc.) |
 | Information Hiding | Clear separation of responsibilities and layers between domain, application, and infrastructure |
 | Explicit Interfaces | One of the central subjects of the paper — the semantic interface characterization table |
 | Traceability | Supports cross-domain traceability between functional model, architecture, and interfaces |
@@ -124,14 +124,13 @@ type, **criticality**, implementation binding, and change tolerance.
 
 # Summary
 
-- This lab did not repeat the lecture — it applied it. The eight design
-  principles from Lesson 5 are not classroom abstractions: Hackenbeck et
+- This lab studies the principles from the paper Hackenbeck et
   al. (2025) uses Top-Down Design, Modularity, Information Hiding,
   Traceability, and SOLID-style separation of responsibility to structure a
   real, safety-critical automotive Software-Defined Vehicle architecture.
 - The paper's **semantic interface characterization** (direction, temporal
   coupling, criticality, binding, change tolerance) is a concrete,
-  research-grade instance of the lecture's Traceability-by-Design and
+  research-based instance of the lecture's Traceability-by-Design and
   Deterministic-Design ideas, applied one level up at the architecture
   stage rather than inside a single component.
 - If any of the Recap's vocabulary was unfamiliar while reading the paper,

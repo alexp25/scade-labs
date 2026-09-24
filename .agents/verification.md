@@ -100,14 +100,14 @@ one. See the table below.
 - Lab 6 does not modify REQ-01–REQ-08 (`src/lab3/solution/requirements.md`)
   and does not touch `CC_design.swan`'s existing `#pragma requirement reQ2`
   link.
-- Part 3 (Activity 3B) has students author two **new, proposed** REQ IDs
+- Part 2 (Activity 2B) has students author two **new, proposed** REQ IDs
   — REQ-09/REQ-10, for an Automatic Emergency Braking extension — in EARS
   syntax, directly in `docs/lab6/lab.md`. These are explicitly and
   repeatedly labeled "proposed — not implemented in the shipped model":
   they are not added to `src/lab3/solution/requirements.md`, not linked via
   `#pragma requirement` anywhere, and not referenced by any
   `scenarios/*.csv` row or Python script.
-- Activity 3C describes (in prose only) how Lab 4's existing scenario-CSV
+- Activity 2C describes (in prose only) how Lab 4's existing scenario-CSV
   approach *would* be extended to exercise REQ-09 (a new
   `obstacle_distance` column, checkpoint rows tagged `req = REQ-09`,
   checked by trend rather than a single value — the same style already
@@ -117,11 +117,14 @@ one. See the table below.
   traced, not automatically checked.** Do not treat their appearance in
   `docs/lab6/lab.md` as evidence they exist anywhere in the Lab 4 model or
   scripts.
-- Parts 1–2's component/interface/constraint tables and diagrams *describe*
-  the existing REQ-01–08-driven Lab 4 architecture; they don't add new
-  trace links to it, and aren't themselves automatically checked
+- Part 1's diagram places the already-established REQ-01–08-driven Lab 4
+  Cruise Control system into a whole-vehicle view; Part 2's written tables
+  *describe* the proposed extension. Neither adds new trace links to the
+  existing REQ set, and the written tables aren't automatically checked
   (instructor-graded against the real model, same as Lab 3's free-text
-  requirements deliverable).
+  requirements deliverable) — only the diagrams' *connections* are
+  auto-graded (against each `flowgraph` fence's own `expected` list, not
+  against REQ IDs).
 
 ## Test → requirement classification table
 
@@ -134,7 +137,7 @@ one. See the table below.
 | `evaluate_cc_full_report.py` scenario checkpoints (Lab 4) | cruise-control scenarios | REQ-01/02/04 | **NAMING-BASED** | `req` column in each `scenarios/*.csv`, written to `results/summary.csv`; no "verifies" statement, but file-backed |
 | Activity 7A model-element links (Lab 4) | top node, 4 transitions, `regulator`, `limiter` instances | REQ-01/02/04/07/08 | **EXPLICIT instruction, PARTIALLY REALIZED** (1 of 7 present, and that 1 has a casing mismatch) | `lab.md` Activity 7A vs. `CC_design.swan:2` |
 | Scenario "S-03" (Lab 4 reflection quiz) | reactivation requires explicit `res` | REQ-04 (by analogy) | **INFERRED** — quiz answer describes behavior, never states the REQ ID | reflection quiz text only |
-| Lab 6 Activity 3B (proposed REQ-09/REQ-10) | Emergency Braking Controller | REQ-09/REQ-10 (new, proposed) | **PROPOSED, PAPER-ONLY — not implemented, not traced, not checked** | `docs/lab6/lab.md` Part 3 text only; no `.swan`, `requirements.md`, or `scenarios/*.csv` entry |
+| Lab 6 Activity 2B (proposed REQ-09/REQ-10) | Emergency Braking Controller | REQ-09/REQ-10 (new, proposed) | **PROPOSED, PAPER-ONLY — not implemented, not traced, not checked** | `docs/lab6/lab.md` Part 2 text only; no `.swan`, `requirements.md`, or `scenarios/*.csv` entry |
 
 ## Completion criteria per lab
 
@@ -154,11 +157,14 @@ one. See the table below.
   Requirements-panel linking activity (no automated check) and a reflection
   quiz.
 - **Lab 6:** no single automated "done" banner — completion is a composite
-  of: (a) Parts 1–3's written/diagram deliverable (instructor-graded, no
-  fixed answer key beyond matching the real Lab 4 model); (b) the
-  `#architecture-quiz` score. Nothing in this lab is machine-checked against
-  the student's own written content, same completion model as Lab 3's
-  requirements text and Lab 5's whole lesson.
+  of: (a) the two diagrams' connections, which **are** auto-graded (a
+  "✓ Check" button per canvas, against each `flowgraph` fence's own
+  `expected` list — a partial exception to this table's usual
+  "instructor-graded only" pattern); (b) Part 2's written component/
+  interface tables, which are **not** machine-checked (instructor-graded,
+  no fixed answer key beyond matching the real Lab 4 model, same
+  completion model as Lab 3's requirements text and Lab 5's whole lesson);
+  (c) the `#architecture-quiz` score.
 
 ## Safety-standard mentions — never a compliance claim
 

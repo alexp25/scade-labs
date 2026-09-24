@@ -5,6 +5,540 @@ maintainer documentation. One entry per work session. Newest first.
 
 ---
 
+## 2026-09-24 — Lab 6: diagram checks now tracked to user progress, same as quiz answers
+
+### Summary for reporting
+
+Follow-up request: "the diagrams should be counted just like quiz answers
+(how many connections they got right) and tracked to the user progress."
+This directly reverses an earlier deliberate decision from this same
+session (see the "Drawflow revision" entry below) that kept diagram
+checks *out* of the site's Firebase tracking, on the reasoning that
+`lab.md` told students nothing was uploaded automatically. That reasoning
+no longer holds — the user explicitly wants this tracked — so both the
+code and the student-facing claim were changed together, not just one of
+them.
+
+Every diagram canvas's **✓ Check** button now calls
+`window.recordQuizAttempt('lab6', 'diagram-1' | 'diagram-2', correctCount,
+expectedPairs.length)` inside `buildFlowEditorWidget()`'s `check()`
+function — the exact same function, call shape, and Firestore
+`quizAttempts` collection the `#architecture-quiz` already uses
+(`docs/assets/js/auth-header.js`), reusing existing site infrastructure
+rather than inventing a parallel tracking mechanism. Like the quiz, it's
+a no-op when nobody is signed in (`recordQuizAttempt` returns early if
+`!currentUser`). Recorded on **every** Check click, not just a final
+passing one, mirroring how a student can click "Check Answers"/"Try
+Again" on the quiz repeatedly — this gives whoever reviews `/admin/` a
+progression over time, not just a single snapshot. `diagramIndex` is now
+threaded through from `buildFlowEditors()`'s loop into
+`buildFlowEditorWidget()` to build the `diagram-<N>` id (1-based, matching
+which `flowgraph` fence a student is looking at).
+
+Rewrote `docs/lab6/lab.md`'s diagram-instructions callout, which
+previously promised "nothing is uploaded to an account or reported to
+your instructor automatically" — now explicitly says Check records a
+score to the student's account when signed in, same as a quiz, while the
+diagram's actual layout/connections (for resuming later) still stay
+`localStorage`-only either way. Updated
+`project_docs/labs/lab-6-architecture.md` (Test/validation procedure,
+Known limitations), `.agents/workflows.md`, and `.agents/architecture.md`
+(Firebase `quizAttempts` collection description) to match — all of them
+previously stated the diagram-check-is-untracked decision explicitly and
+needed to be flipped, not just left stale.
+
+### Files touched
+
+```
+docs/lab6/index.html                          (buildFlowEditors()/buildFlowEditorWidget() thread diagramIndex through; check() calls window.recordQuizAttempt())
+docs/lab6/lab.md                              (diagram-instructions callout no longer claims nothing is uploaded)
+project_docs/labs/lab-6-architecture.md       (Test/validation procedure and Known limitations sections corrected)
+.agents/workflows.md                          (Lab 6 workflow step 6 corrected)
+.agents/architecture.md                       (Firebase quizAttempts collection description mentions Lab 6 diagram checks)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Extracted both inline `<script>` blocks from `docs/lab6/index.html` and
+  syntax-checked them with `new Function(...)` — both parse.
+- Re-ran the Node script validating both `flowgraph` JSON blocks in
+  `lab.md` — still 2 blocks, 9/11 nodes, 11/14 expected edges, unaffected
+  (this change touched grading/reporting code, not the diagram configs).
+- `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass warnings only.
+- Read `docs/assets/js/auth-header.js`'s actual `recordQuizAttempt`
+  implementation before calling it, to confirm the exact signature
+  (`labId, quizId, score, total`), the Firestore collection/field names
+  (`quizAttempts`, `userId`/`labId`/`quizId`/`score`/`total`/
+  `submittedAt`), and that it already no-ops safely when signed out —
+  not assumed from the existing `#architecture-quiz` call site alone.
+- **Not verified:** actually clicking Check while signed in and confirming
+  a new `quizAttempts` document appears, or that it renders correctly in
+  `/account/`/`/admin/` — no live Firebase session in this environment.
+
+---
+
+## 2026-09-24 — Lab 6: removed the internal-component part entirely, restructured to two system-level parts
+
+### Summary for reporting
+
+Follow-up feedback, three points at once: (1) remove Part 1 (the Cruise
+Control Controller/Regulator/Limiter internal breakdown) — "it's too
+confusing"; (2) start the lab with the former Part 2 (whole-vehicle
+system view) instead, "considering the background of the system"; (3)
+describe each diagram's expected connections as a bullet list, not prose,
+so it's unambiguous which connections the student should make.
+
+This is a bigger structural change than the previous session's content
+tweak (adding a prose walkthrough to the now-removed Part 1) — that
+walkthrough was a genuine attempt to fix the confusion by explaining
+*why* the Controller/Regulator/Limiter split exists; this feedback says
+the split shouldn't be a separate diagram exercise for students at all,
+since Lab 4 already builds and explains it. Rather than iterate on
+explaining it better, removed it.
+
+**Removed entirely:** the former Part 1 (Activities 1A–1D: component
+table, interface table, constraints list, and a 5-node/6-edge diagram of
+Cruise Control Controller/Regulator/2×Limiter/Driver) and its Reflection.
+
+**Renumbered:** the former Part 2 (whole-vehicle SysML-style view) is now
+**Part 1** — the lab's first and only entry point into hands-on work,
+opening directly with the system view instead of an internal breakdown.
+The former Part 3 (Emergency Braking extension) is now **Part 2**, with
+its activities renumbered 3A–3D → 2A–2D.
+
+**Part 2's diagram had to be redesigned, not just renumbered:** it
+previously extended the (now-removed) internal-component diagram, with
+the Emergency Braking Controller's override wired as `Emergency → CC`
+directly into the Cruise Control Controller node. With no internal
+CC diagram left to extend, Part 2 now extends **Part 1's system-level
+diagram** instead — the Obstacle/Distance Sensor and Emergency Braking
+Controller join the system the same way every other component in Part 1
+already does: as participants on the shared signal bus (`Obstacle→Bus`,
+`Bus→Emergency`, `Emergency→Bus`), not through a dedicated override wire.
+Activity 2A's "Connector / arbitration" prose was rewritten accordingly:
+arbitration (`brake_override` taking priority over the ECU's `throttle`)
+now happens at the Powertrain Actuator, where both commands are actually
+consumed. Part 1: 9 nodes/11 expected edges (unchanged from the former
+Part 2). Part 2: 11 nodes/14 expected edges (was 7/9).
+
+**Every diagram activity now opens with an explicit bullet list of every
+expected connection**, worded as plain data-flow statements ("Driver →
+HMI — the driver presses buttons and pedals on the dashboard"), replacing
+the previous flowing-paragraph descriptions ("Here's how signals actually
+flow through this system: the Driver operates the HMI..."). This was
+distinct feedback from the part-removal — the goal is that a student can
+read the list and directly transcribe it into connections without having
+to parse prose for the actual edges.
+
+Context, Learning Objectives, the Recap's closing sentence, the Summary,
+and Quiz Q7/Q8/Q10 were all rewritten to match the new two-part shape and
+stop referencing the removed internal-architecture framing (e.g. Q7
+previously tested the Regulator's interface; now tests the system view's
+Bus-as-connector distinction). Header duration dropped from "1 hour" to
+"45–60 minutes" to reflect the smaller lab.
+
+Updated `project_docs/labs/lab-6-architecture.md` (rewritten: new "Scope
+and structure" section explaining the removal and the Part 2 diagram
+redesign in one place, corrected node/edge counts and activity numbering
+throughout), `.agents/lab-map.md`, `.agents/workflows.md`,
+`.agents/verification.md`, `.agents/scade-models.md`, and
+`.agents/testing.md` (old dated log entries left as a historical record
+of what was run against the *previous* 3-part structure, not rewritten to
+match the new one — a new dated entry added instead) to match.
+
+### Files touched
+
+```
+docs/lab6/lab.md                              (Part 1 removed entirely; former Part 2→Part 1, Part 3→Part 2; Part 2's diagram redesigned around the bus; bullet-list connection descriptions; Context/Objectives/Recap/Summary/Quiz rewritten)
+docs/lab6/index.html                          (one stale "Parts 1-3" code comment corrected to "Parts 1-2")
+docs/index.html                               (Lab 6 card description updated to two exercises)
+project_docs/labs/lab-6-architecture.md       (substantially rewritten for the new structure)
+.agents/lab-map.md                            (Main tech, Starter materials, Solution/reference, Test/validation mechanism, Objective, Status cells)
+.agents/workflows.md                          (Lab 6 learner workflow rewritten for two parts; note on the removed part added)
+.agents/verification.md                       (Lab 6 section, table row, completion criterion — Part 3→Part 2 throughout)
+.agents/scade-models.md                       (Lab 6 note rewritten — no longer describes reading .swan internals)
+.agents/testing.md                            (header + new dated entry; old entries kept as historical record of the prior structure)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Re-ran the Node script that extracts and validates all `flowgraph` JSON
+  blocks from `lab.md` — now 2 blocks (was 3): 9/11 nodes, 11/14 expected
+  edges, all `expected` pairs resolving to real node keys.
+- Grepped the repo for `Part 3`/`Activity 3[A-D]` tied to Lab 6 — only
+  remaining hit is `project_docs/labs/lab-6-architecture.md`'s own
+  intentional "(was 'Part 3')" historical annotation.
+- Extracted both inline `<script>` blocks from `docs/lab6/index.html` and
+  syntax-checked them with `new Function(...)` — both parse.
+- `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass warnings only.
+- **Not verified:** actually opening the page in a browser to confirm the
+  redesigned Part 2 diagram (bus-based Emergency Braking wiring) renders
+  and grades correctly — code-reviewed and JSON-validated, not executed.
+
+---
+
+## 2026-09-24 — Lab 6: explained the architecture in words before asking students to draw it
+
+### Summary for reporting
+
+Follow-up question/feedback: why are the Cruise Control Controller and
+Regulator separate components (aren't they conceptually overlapping)?
+Why two Limiter boxes? And: the student should only have to *make the
+connections* on the diagram, not derive the whole architecture from
+scratch.
+
+Answered the conceptual questions first, then fixed the actual gap they
+exposed — Activity 1D asked students to wire up 6 connections using only
+the interface table (Activity 1B) and constraints list (Activity 1C),
+with no explanation of *why* the system is shaped the way it is. That
+made the exercise implicitly require reverse-engineering control-system
+design reasoning (state machine vs. control law, anti-windup clamping)
+from raw signatures — never the intent; the intent was practicing
+architecture *notation* (turning a described interaction into boxes and
+arrows), the same skill Part 2 and Part 3 already exercise.
+
+Added an explicit prose walkthrough to the start of Activity 1D in
+`docs/lab6/lab.md`, answering both questions directly:
+
+- **Controller vs. Regulator:** two different jobs, not overlapping — the
+  Controller is a *state machine* deciding *whether* cruise control should
+  be regulating right now; the Regulator is a *PI control law* deciding
+  *how much* throttle to apply once it's told to. The Controller only
+  consults the Regulator while active, passing `set_point`/`speed` and
+  using whatever `throttle` comes back — the same single-responsibility
+  split Lab 5 already taught.
+- **Two Limiter boxes:** the *same* Limiter component, instantiated twice
+  with different bounds and chained one after another, not two separate
+  designs — first a wide `[-100,100]` clamp on the Regulator's internal
+  P+I sum (anti-windup), then the actuator's real `[0,100]` range.
+
+The activity's instructions now read "drag a connection for every
+interaction described above" instead of asking the student to infer the
+wiring purely from tables. Added a matching short data-flow paragraph to
+Part 2's Activity 2A (Driver→HMI→bus→ECU→actuator→vehicle→sensor loop,
+in one sentence) for the same reason, applied consistently — Part 3's
+Activity 3D already leaned on Activity 3A's existing explanation plus
+Part 1's (now-explained) flow, so it didn't need a separate rewrite.
+
+Updated `project_docs/labs/lab-6-architecture.md`'s Student workflow
+step 2 to describe the walkthrough's presence and purpose.
+
+### Files touched
+
+```
+docs/lab6/lab.md                              (Activity 1D gets a "how these components interact" walkthrough before the connect task; Activity 2A gets a short data-flow paragraph)
+project_docs/labs/lab-6-architecture.md       (Student workflow step 2 updated)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Re-ran the Node script that extracts and validates all `flowgraph` JSON
+  blocks from `lab.md` — still 3 blocks, 5/9/7 nodes, 6/11/9 expected
+  edges, unchanged (this was a text-only change, no diagram config
+  touched).
+- `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass warnings only.
+
+---
+
+## 2026-09-24 — Lab 6: made the minimap draggable for smooth, real-time panning
+
+### Summary for reporting
+
+Follow-up request: "I'd like the zoomed out window to be responsive
+(moving the zoom area freely, smoothly, in real time)." The previous
+revision's minimap only supported click-to-jump (a single `click`
+listener); this replaces that with continuous drag-panning.
+
+Replaced the minimap's `click` handler in `docs/lab6/index.html` with
+Pointer Events (`pointerdown`/`pointermove`/`pointerup`/`pointercancel`):
+pressing down pans immediately (so a plain click/tap still works exactly
+as before), then dragging keeps re-panning in real time as the pointer
+moves, as long as a button/finger is held (`ev.buttons !== 0`).
+`minimap.setPointerCapture()` on press keeps the drag tracking even if the
+cursor briefly leaves the small 150×110px minimap box mid-gesture — without
+it, a fast drag would drop out of "dragging" the moment the pointer
+crossed the minimap's edge. Movement is batched through a single
+`requestAnimationFrame` callback (`schedulePan()`/`flushPan()` — keeps
+only the *latest* pending point and processes it once per animation
+frame) so a fast mousemove/touchmove stream can't queue more pan+redraw
+cycles than the browser can actually paint, which is what "smoothly"
+requires in practice, not just "responds to more than one click." Added
+`touch-action: none` and `user-select: none` to the minimap so dragging
+doesn't also scroll the page or select surrounding text on touch devices,
+and a `grab`/`grabbing` cursor swap for visual feedback while dragging.
+
+Updated `docs/lab6/lab.md`'s diagram-instructions callout ("click, or
+click-and-drag... in real time") and
+`project_docs/labs/lab-6-architecture.md`'s "Zoom and minimap" section to
+describe the drag mechanism precisely instead of the earlier click-only
+one.
+
+### Files touched
+
+```
+docs/lab6/index.html                          (minimap click handler replaced with pointer-drag handling + rAF batching; CSS cursor/touch-action additions)
+docs/lab6/lab.md                              (diagram-instructions callout wording)
+project_docs/labs/lab-6-architecture.md       ("Zoom and minimap" section rewritten for drag panning)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Extracted both inline `<script>` blocks from `docs/lab6/index.html` and
+  syntax-checked them with `new Function(...)` — both parse.
+- `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass warnings only.
+- **Not verified:** actually dragging the minimap in a live browser to
+  confirm the panning feels smooth and the rAF batching behaves as
+  intended under a real, fast pointermove stream — this is inherently hard
+  to fully verify without a live UI session; the logic was code-reviewed
+  against documented Pointer Events / requestAnimationFrame semantics.
+
+---
+
+## 2026-09-24 — Lab 6: added zoom controls and a minimap overview to each diagram canvas
+
+### Summary for reporting
+
+Follow-up request: "there should be a zoom in / out control on each
+diagram, and a zoomed out window at one corner to see the whole diagram
+overview." Drawflow ships zoom (`zoom_in()`/`zoom_out()`/`zoom_reset()`,
+`0.5`–`1.6` range) but no minimap — confirmed by fetching Drawflow
+0.0.60's own tagged source before building one, rather than assuming.
+
+Added a zoom control group to each canvas's toolbar (`−` / `100%` /
+`+`, the `%` label resets zoom on click, wired straight to Drawflow's own
+API) and a custom minimap in the canvas's bottom-right corner. The minimap
+is fully derived from Drawflow's own live state on every relevant event
+(`zoom`, `translate`, `nodeMoved`, `connectionCreated`,
+`connectionRemoved`) rather than a separately tracked copy: node dots come
+from `editor.export()`'s live `pos_x`/`pos_y` (so dragging a node moves
+its dot too), and the viewport rectangle is computed by inverting
+Drawflow's own `precanvas.style.transform = "translate(canvas_x px,
+canvas_y px) scale(zoom)"` (quoted verbatim from the pinned tag's
+`zoom_refresh()` — not guessed). Clicking the minimap re-centers the main
+view by writing to `editor.canvas_x`/`canvas_y` and reapplying that same
+transform string, since Drawflow has no public "pan to" method; this is
+explicitly scoped to the pinned `drawflow@0.0.60` and flagged as needing
+re-verification if that version is ever bumped.
+
+The diagram "↺ Reset" button now also resets zoom/pan to 100%/centered
+(previously only cleared connections and repositioned nodes). Zoom/pan
+state itself is intentionally **not** persisted to `localStorage` — only
+the diagram content (`editor.export()`'s node/connection data) is, same as
+before — so a reloaded page always starts at 100%/centered even though a
+student's actual connections and node positions survive.
+
+Updated `project_docs/labs/lab-6-architecture.md` (new "Zoom and minimap"
+section explaining the exact math and its version coupling, updated
+Repository-files row and two new Known-limitations bullets) and
+`docs/lab6/lab.md`'s diagram-instructions callout to mention the new
+controls.
+
+### Files touched
+
+```
+docs/lab6/index.html                          (zoom buttons + minimap DOM/CSS/logic in buildFlowEditorWidget(); Reset now also resets zoom/pan)
+docs/lab6/lab.md                              (diagram-instructions callout mentions zoom/minimap)
+project_docs/labs/lab-6-architecture.md       (new Zoom and minimap section; Repository files row; two new Known limitations bullets)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Fetched Drawflow's `zoom_in`/`zoom_out`/`zoom_reset`/`zoom_refresh`
+  method bodies and constructor zoom defaults from the **exact pinned tag**
+  (`0.0.60`, not `master`) on GitHub before writing against them — confirms
+  the `translate(...)scale(...)` transform string and the `canvas_x`/
+  `canvas_y`/`zoom` property semantics used by the minimap math.
+- Confirmed (same fetch) that Drawflow has no built-in minimap — the
+  overview widget is fully custom, not a misremembered library feature.
+- Extracted both inline `<script>` blocks from `docs/lab6/index.html` and
+  syntax-checked them with `new Function(...)` — both parse.
+- `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass warnings only.
+- **Not verified:** actually opening the page and confirming the minimap
+  redraws correctly during a live drag/zoom/pan, or that click-to-pan lands
+  where expected — the math was derived and cross-checked against
+  Drawflow's real source, not exercised in a browser.
+
+---
+
+## 2026-09-24 — Lab 6: removed Scade-simulation-only components from the diagrams
+
+### Summary for reporting
+
+Follow-up feedback: "they should be simplified, there should not be
+components that are purely scade oriented (like the pre block), and
+simulation components, just the main blocks to be connected."
+
+Simplified `docs/lab6/lab.md`'s Part 1 diagram (Activity 1D) and its reuse
+in Part 3 (Activity 3D) down to the `CC_design` package's real,
+shippable nodes only:
+
+- **Removed** the Swan `pre` operator node (the 1-cycle feedback-delay
+  block from `Simulation.swan`'s closed loop) — a Scade/Swan language
+  construct, not an architectural component.
+- **Removed** the `car`/Vehicle Plant node and its "Simulation Harness"
+  framing — per Lab 4's own component table, `Car_design`'s `car` node is
+  "never a code-generation target" and `Simulation`'s nodes are "never
+  shipped/deployed." Both exist only so Scade One can simulate a vehicle
+  for testing; neither belongs in a diagram of the real architecture.
+- **Kept**: Cruise Control Controller, Regulator, Limiter (×2 stages), and
+  the Driver as an external actor.
+
+Part 1's node/edge count dropped from 7 nodes/9 expected connections to 5
+nodes/6; Part 3's dropped from 9/12 to 7/9. Since there's no vehicle-plant
+node left in Part 3 for the Emergency Braking Controller's override to act
+on, its `expected` edge changed from `Emergency → Car` to
+`Emergency → CC` — the override now connects directly into the Cruise
+Control Controller, taking priority over its own regulated throttle;
+Activity 3A's "Connector / arbitration" prose was reworded to match.
+Activity 1A/1B's component/interface tables were trimmed to match (no more
+Vehicle Plant row), and Activity 1C's "one-cycle feedback delay" constraint
+bullet was removed along with it. Quiz Q7 was reworded (it previously
+tested knowledge of the now-excluded Vehicle Plant's interface; now tests
+the Regulator's interface instead, keeping the same "component vs.
+interface vs. connector" learning objective).
+
+**Explicitly not touched:** Part 2's whole-vehicle SysML-style view — at
+that abstraction level "Vehicle Dynamics" is the real physical vehicle,
+not a Scade simulation stand-in, so it correctly stays in the diagram.
+
+Updated `project_docs/labs/lab-6-architecture.md` (new "Scope of the
+diagrams" section explaining the exclusion rule and its Emergency→CC
+knock-on effect, corrected node/edge counts throughout) and
+`.agents/workflows.md`'s Lab 6 Part 1/3 steps.
+
+### Files touched
+
+```
+docs/lab6/lab.md                              (Activities 1A-1D trimmed/rewired; Activity 3A arbitration text + 3D diagram updated; quiz Q7 reworded)
+project_docs/labs/lab-6-architecture.md       (new Scope-of-the-diagrams section; workflow/counts corrected)
+.agents/workflows.md                          (Lab 6 Part 1/3 steps corrected)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Re-ran the Node script that extracts all `flowgraph` JSON blocks from
+  `lab.md`, parses each, and cross-checks every `expected` pair's node
+  keys against that block's own `nodes` array — 3 blocks, now 5/9/7 nodes
+  and 6/11/9 expected edges, all valid.
+- `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass warnings only.
+- Grepped the whole repo for `Vehicle Plant`, `Simulation Harness`,
+  `one-cycle`/`1-cycle` delay wording tied to Part 1's diagram — none
+  remain outside this changelog's own history and
+  `project_docs/architecture/scade-projects.md` (which correctly still
+  documents the real Scade project's `Car_design`/`Simulation` packages —
+  those weren't removed from the *codebase*, only from this lab's
+  simplified diagrams).
+- **Not verified:** actually opening the page in a browser to drag the new
+  connection layout — same limitation as the previous entry.
+
+---
+
+## 2026-09-24 — Lab 6: replaced the Mermaid diagram editors with an interactive, auto-graded Drawflow canvas
+
+### Summary for reporting
+
+Follow-up request: "instead of mermaid, make an interactive react flow (or
+similar) canvas, with auto grading (evaluate correct connections)." React
+Flow itself has no plain `<script>`/CDN build — it's npm/bundler-only —
+and this repo has no build step anywhere (`.agents/architecture.md`), so
+using it as asked would mean loading React + ReactDOM + `@xyflow/react`
+from an ESM CDN at runtime, a real architectural outlier versus every
+other page in this repo. Asked the user to choose between that literal
+approach, a vanilla-JS alternative (**Drawflow**), or a canvas-based
+vanilla-JS alternative (LiteGraph.js); **Drawflow** was chosen, matching
+this repo's existing no-build-step, CDN-`<script>` pattern (same shape as
+`marked.js`/`highlight.js`).
+
+Replaced all three `docs/lab6/lab.md` diagram exercises (Activities 1D,
+2A, 3D) with ```` ```flowgraph ```` fenced JSON blocks — a `nodes` array
+(key/label/x/y) and an `expected` array of `[fromKey, toKey]` pairs — in
+place of the previous ```` ```mermaid-edit ```` fences with hand-typed
+`%% TODO` comments. `docs/lab6/index.html` now loads Drawflow (jsdelivr
+`drawflow@0.0.60`, version confirmed to exist and ship
+`dist/drawflow.min.{js,css}` via the jsdelivr package-data API before
+pinning it) instead of Mermaid.js, and `buildFlowEditors()`/
+`buildFlowEditorWidget()` replace the old `buildDiagramEditors()`/
+`buildDiagramEditorWidget()`: each canvas places the fence's nodes with
+zero connections (this *is* the incomplete starting state now — no more
+hand-authored `%% TODO` comments needed), lets the student drag
+connections between them, and a **✓ Check** button auto-grades the result
+by diffing the student's connections (resolved back to semantic node
+`key`s stashed in each node's Drawflow `data` field at creation time, not
+Drawflow's own numeric ids — verified against Drawflow's actual
+`addConnection`/export code, fetched from its GitHub source, to get the
+`outputs[...].connections[].node` field semantics right) against the
+fence's `expected` list, reporting missing/unexpected pairs by name. A
+**↺ Reset** button clears back to the unconnected layout. State persists
+per-diagram in `localStorage` (`lab6-flow-<index>`).
+
+**Deliberately not wired into `recordQuizAttempt`/Firestore**, even though
+the mechanism would have supported it trivially (same call shape as the
+quiz) — `lab.md`'s own instructions tell students nothing is uploaded
+automatically, so the implementation was written to actually match that
+claim rather than silently contradict it.
+
+Rewrote `project_docs/labs/lab-6-architecture.md` (new "Auto-grading"
+section explaining the grading mechanism precisely, updated file/workflow/
+limitations sections) and `.agents/lab-map.md`/`.agents/workflows.md`'s
+Lab 6 entries to describe Drawflow instead of Mermaid and to correct the
+"instructor-graded only, no automated check" claim about the diagrams —
+that was true for the Mermaid version, it is no longer true now that Check
+exists.
+
+### Files touched
+
+```
+docs/lab6/lab.md                              (three flowgraph JSON blocks replace mermaid-edit fences; instructional text updated)
+docs/lab6/index.html                          (Drawflow CDN CSS+JS replaces Mermaid; buildFlowEditors()/buildFlowEditorWidget() replace the Mermaid editor code; new .flow-* CSS)
+project_docs/labs/lab-6-architecture.md       (rewritten: Auto-grading section, updated file/workflow/limitations)
+.agents/lab-map.md                            (Main tech, Student entry point, Solution/reference, Test/validation mechanism cells)
+.agents/workflows.md                          (Lab 6 learner workflow steps 3-5, 7)
+project_docs/changelog.md                     (this entry)
+```
+
+### Validation performed
+
+- Confirmed `drawflow@0.0.60` exists and ships `dist/drawflow.min.js` +
+  `dist/drawflow.min.css` via the jsdelivr package-data API before pinning
+  the CDN URLs.
+- Fetched Drawflow's actual `addNode`/`addConnection`/export source from
+  its GitHub repo to confirm exact API shapes used in
+  `buildFlowEditorWidget()` (parameter order, the `{node, output}` /
+  `{node, input}` connection-object field names, `connectionCreated`/
+  `connectionRemoved` event payload shape, `.import()`/`.clear()` method
+  names) — not implemented from memory/assumption.
+- `npx marked@9.1.6` against a sample ` ```flowgraph ` fence — confirmed it
+  emits `class="language-flowgraph"`, matching the DOM selector used in
+  `index.html`.
+- Wrote and ran a Node script that extracts all three `flowgraph` JSON
+  blocks from `docs/lab6/lab.md`, parses each as JSON, and cross-checks
+  every `expected` pair's node keys against that block's own `nodes` array
+  — all 3 blocks valid (7/9/9 nodes, 9/11/12 expected edges).
+- Extracted both inline `<script>` blocks from `docs/lab6/index.html` and
+  syntax-checked them with `new Function(...)` — both parse.
+- Re-ran `bundle exec jekyll build --destination <tmp>` — succeeded, same
+  pre-existing Sass deprecation warnings only; confirmed `lab6/index.html`
+  + `lab6/lab.md` still built.
+- **Not verified:** actually opening the page in a browser and dragging a
+  connection — the runtime drag-and-connect interaction, the Check/Reset
+  button behavior, and the `localStorage` round-trip via
+  `editor.import()`/`export()` were code-reviewed and API-verified against
+  Drawflow's real source, not executed in a live browser.
+
+---
+
 ## 2026-09-23 — New admin-only changelog page
 
 ### Summary for reporting

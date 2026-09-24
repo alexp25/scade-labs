@@ -1,4 +1,4 @@
 24.09.2026
-Lab 5 (Design Principles): Trimmed to a short Recap + link to course slides, per feedback not to repeat lecture content in the lab.
-Lab 4 (Cruise Control): Added a collapsible "full script reference" so students can inspect the two Python evaluation scripts (live execution isn't feasible — they depend on a compiled DLL and, for one script, a local Scade One install).
-Lab 6 (Software Architecture) — new lab: Built end-to-end with reading, live-editable Mermaid architecture diagrams, and a quiz, using the Lab 4 Cruise Control model as the hands-on subject. Fully registered across the site and docs. Went through three refinement passes same session (static → editable diagrams → condensed recap) based on user feedback.
+Lab 5 (Design Principles): short Recap + link to course slides, quiz.
+Lab 4 (Cruise Control): Added a collapsible "full script reference" so students can inspect the two Python evaluation scripts (live execution isn't feasible as they depend on a compiled DLL and a local Scade One install).
+Lab 6 (Software Architecture) new lab: Built end-to-end with reading, live-editable architecture diagrams, and a quiz, using the Lab 4 Cruise Control model as the hands-on subject.

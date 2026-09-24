@@ -6,6 +6,7 @@
   <title>Lab 6 – Software Architecture</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.60/dist/drawflow.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -136,39 +137,68 @@
       display: block; overflow-x: auto;
     }
 
-    /* ── Diagram editor (interactive Mermaid) ── */
-    .diagram-editor {
+    /* ── Diagram editor (interactive Drawflow canvas) ── */
+    .flow-editor {
       margin: .75rem 0 1.25rem; border: 1px solid var(--border);
       border-radius: 8px; overflow: hidden; background: var(--white);
     }
-    .de-toolbar {
+    .flow-toolbar {
       display: flex; align-items: center; justify-content: space-between;
       gap: .75rem; flex-wrap: wrap;
       background: var(--navy); color: #B0BEC5;
       padding: .55rem .85rem; font-size: .8rem;
     }
-    .de-actions { display: flex; gap: .5rem; flex-shrink: 0; }
-    .de-btn {
+    .flow-actions, .flow-zoom { display: flex; gap: .5rem; flex-shrink: 0; align-items: center; }
+    .flow-btn {
       padding: .32rem .8rem; border-radius: 5px; border: 1px solid #2A4A7F;
       background: transparent; color: var(--white); font-size: .8rem;
       font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s;
     }
-    .de-btn:hover { background: var(--sky); border-color: var(--sky); }
-    .de-source {
-      display: block; width: 100%; box-sizing: border-box;
-      font-family: var(--mono); font-size: .85rem; line-height: 1.5;
-      color: var(--gray); background: #F8FAFC; border: none;
-      border-bottom: 1px solid var(--border);
-      padding: .75rem .85rem; resize: vertical; outline: none;
+    .flow-btn:hover { background: var(--sky); border-color: var(--sky); }
+    .flow-zoom-label { min-width: 3.4rem; }
+    .flow-canvas-wrap { position: relative; width: 100%; background: #F8FAFC; }
+    .flow-canvas { width: 100%; height: 100%; }
+
+    /* Minimap overview, bottom-right corner of the canvas */
+    .flow-minimap {
+      position: absolute; right: 10px; bottom: 10px; width: 150px; height: 110px;
+      background: rgba(255,255,255,.92); border: 1px solid var(--border); border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(13,27,62,.18); overflow: hidden; z-index: 5;
+      cursor: grab; touch-action: none; user-select: none;
     }
-    .de-source:focus { background: var(--white); }
-    .de-preview {
-      padding: 1rem; overflow-x: auto; text-align: center; min-height: 3rem;
+    .flow-minimap.flow-minimap-dragging { cursor: grabbing; }
+    .flow-minimap-node {
+      position: absolute; background: var(--sky); border-radius: 2px; opacity: .8;
+      pointer-events: none;
     }
-    .de-error {
-      margin: 0 .85rem .75rem; padding: .5rem .75rem;
-      background: #FFEBEE; color: #B71C1C; border-radius: 5px;
-      font-size: .82rem; font-family: var(--mono); white-space: pre-wrap;
+    .flow-minimap-viewport {
+      position: absolute; border: 1.5px solid var(--navy); background: rgba(21,101,192,.08);
+      pointer-events: none; transition: none;
+    }
+    .flow-result {
+      padding: .65rem .85rem; font-size: .85rem; border-top: 1px solid var(--border);
+      background: var(--white); color: var(--gray); min-height: 1.2rem;
+    }
+    .flow-result:empty { padding: 0; border-top: none; }
+    .flow-result.flow-result-good { background: #E8F5E9; color: #1B5E20; }
+    .flow-result.flow-result-bad  { background: #FFF8E1; color: #7A4B00; }
+    .flow-result .flow-missing, .flow-result .flow-extra { margin-top: .3rem; font-size: .82rem; }
+
+    /* Drawflow node theme, matching the rest of the page */
+    .drawflow .drawflow-node {
+      background: var(--white); border: 1.5px solid var(--sky); border-radius: 7px;
+      padding: .5rem .65rem; width: auto; min-width: 140px; max-width: 190px;
+      box-shadow: 0 1px 4px rgba(13,27,62,.12);
+    }
+    .drawflow .drawflow-node.selected { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(21,101,192,.25); }
+    .drawflow .drawflow-node .flow-node-label {
+      font-size: .76rem; font-weight: 600; color: var(--navy); text-align: center; line-height: 1.3;
+      pointer-events: none;
+    }
+    .drawflow .connection .main-path { stroke: var(--blue); stroke-width: 2.5px; }
+    .drawflow .connection .main-path:hover { stroke: var(--sky); cursor: pointer; }
+    .drawflow .drawflow-node .input, .drawflow .drawflow-node .output {
+      background: var(--sky); border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--sky);
     }
 
     #lab-content blockquote {
@@ -229,7 +259,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.60/dist/drawflow.min.js"></script>
 <script>window.CURRENT_LAB_ID = 'lab6';</script>
 <script type="module" src="../assets/js/auth-header.js"></script>
 <script src="../assets/js/course-slides.js"></script>
@@ -242,13 +272,10 @@ fetch('lab.md')
   .then(md => {
     document.getElementById('lab-content').innerHTML = marked.parse(md);
     document.querySelectorAll('#lab-content pre code').forEach(el => {
-      if (el.classList.contains('language-mermaid-edit')) return;
+      if (el.classList.contains('language-flowgraph')) return;
       hljs.highlightElement(el);
     });
-    if (window.mermaid) {
-      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-    }
-    buildDiagramEditors();
+    buildFlowEditors();
     buildTOC();
     initScrollSpy();
     initQuiz();
@@ -263,107 +290,312 @@ fetch('lab.md')
   });
 
 /*
- * Every ```mermaid-edit fence (Parts 1-3's hands-on exercise diagrams)
- * becomes a live editor: a textarea with the (intentionally incomplete)
- * diagram source, a Render/Reset toolbar, and a preview pane. Edits are
- * kept per-block in localStorage (client-side only — nothing is uploaded
- * or graded automatically).
+ * Every ```flowgraph fence (Parts 1-2's hands-on exercise diagrams) becomes
+ * a live Drawflow canvas: the component boxes are pre-placed from the
+ * fence's JSON config, with no connections — drawing the connections is
+ * the exercise. A "Check" button auto-grades the student's connections
+ * against the config's "expected" edge list (by node key, not by Drawflow's
+ * internal numeric ids or port index — see buildFlowEditorWidget). Layout +
+ * connections persist per-diagram in localStorage (always, regardless of
+ * sign-in). Each Check click also reports the score to the student's
+ * account via window.recordQuizAttempt(), same as the #architecture-quiz —
+ * a no-op if nobody is signed in (see docs/assets/js/auth-header.js).
  */
-function buildDiagramEditors() {
-  const blocks = Array.from(document.querySelectorAll('#lab-content pre code.language-mermaid-edit'));
-  if (!blocks.length) return;
+function buildFlowEditors() {
+  const blocks = Array.from(document.querySelectorAll('#lab-content pre code.language-flowgraph'));
   blocks.forEach((code, i) => {
-    const starter = code.textContent;
-    const storageKey = `lab6-diagram-${i}`;
-    const widget = buildDiagramEditorWidget(storageKey, starter, i);
-    code.closest('pre').replaceWith(widget);
+    let config;
+    try {
+      config = JSON.parse(code.textContent);
+    } catch (e) {
+      code.closest('pre').insertAdjacentHTML('afterend',
+        '<p style="color:#B71C1C">⚠ Could not parse diagram config: ' + (e && e.message ? e.message : e) + '</p>');
+      return;
+    }
+    buildFlowEditorWidget(code.closest('pre'), `lab6-flow-${i}`, config, i);
   });
 }
 
-function buildDiagramEditorWidget(storageKey, starter, idx) {
+function buildFlowEditorWidget(preEl, storageKey, config, diagramIndex) {
   const wrap = document.createElement('div');
-  wrap.className = 'diagram-editor';
+  wrap.className = 'flow-editor';
 
   const toolbar = document.createElement('div');
-  toolbar.className = 'de-toolbar';
+  toolbar.className = 'flow-toolbar';
   toolbar.innerHTML =
-    '<span>Editable diagram — edit the Mermaid source, then Render (Ctrl+Enter also works)</span>' +
-    '<span class="de-actions">' +
-      '<button type="button" class="de-btn de-render">&#9654; Render</button>' +
-      '<button type="button" class="de-btn de-reset">&#8635; Reset</button>' +
+    '<span>Drag from the dot on a box\'s right edge to a dot on another box\'s left edge to connect them.</span>' +
+    '<span class="flow-zoom">' +
+      '<button type="button" class="flow-btn flow-zoom-out" title="Zoom out">&#8722;</button>' +
+      '<button type="button" class="flow-btn flow-zoom-label" title="Reset zoom">100%</button>' +
+      '<button type="button" class="flow-btn flow-zoom-in" title="Zoom in">&#43;</button>' +
+    '</span>' +
+    '<span class="flow-actions">' +
+      '<button type="button" class="flow-btn flow-check">&#10003; Check</button>' +
+      '<button type="button" class="flow-btn flow-reset">&#8635; Reset</button>' +
     '</span>';
 
-  const textarea = document.createElement('textarea');
-  textarea.className = 'de-source';
-  textarea.spellcheck = false;
-  const lineCount = starter.split('\n').length;
-  textarea.rows = Math.min(22, Math.max(6, lineCount + 1));
-  let saved = null;
-  try { saved = localStorage.getItem(storageKey); } catch (e) { /* storage unavailable — fall back to starter */ }
-  textarea.value = saved !== null ? saved : starter;
+  const canvasWrap = document.createElement('div');
+  canvasWrap.className = 'flow-canvas-wrap';
+  canvasWrap.style.height = (config.height || 460) + 'px';
+  const canvas = document.createElement('div');
+  canvas.className = 'flow-canvas drawflow';
+  canvasWrap.appendChild(canvas);
 
-  const preview = document.createElement('div');
-  preview.className = 'de-preview';
+  const minimap = document.createElement('div');
+  minimap.className = 'flow-minimap';
+  minimap.title = 'Click or drag to pan the diagram';
+  const minimapViewport = document.createElement('div');
+  minimapViewport.className = 'flow-minimap-viewport';
+  minimap.appendChild(minimapViewport);
+  canvasWrap.appendChild(minimap);
 
-  const error = document.createElement('div');
-  error.className = 'de-error';
-  error.style.display = 'none';
+  const result = document.createElement('div');
+  result.className = 'flow-result';
 
   wrap.appendChild(toolbar);
-  wrap.appendChild(textarea);
-  wrap.appendChild(preview);
-  wrap.appendChild(error);
+  wrap.appendChild(canvasWrap);
+  wrap.appendChild(result);
 
-  let debounceTimer = null;
+  // Attach to the document before initializing Drawflow — it reads the
+  // container's actual layout box, which is unreliable on a detached node.
+  preEl.replaceWith(wrap);
 
-  function save(src) {
-    try { localStorage.setItem(storageKey, src); } catch (e) { /* storage unavailable, edits just won't persist across reloads */ }
+  if (!window.Drawflow) {
+    result.textContent = 'The diagram tool failed to load (offline or CDN blocked) — connections cannot be drawn here.';
+    result.classList.add('flow-result-bad');
+    return;
   }
 
-  async function render(src) {
-    if (!window.mermaid) {
-      error.style.display = 'block';
-      error.textContent = 'Mermaid failed to load (offline or CDN blocked) — diagram cannot be rendered.';
-      return;
-    }
-    const svgId = `de-svg-${idx}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-    try {
-      const { svg } = await mermaid.render(svgId, src);
-      preview.innerHTML = svg;
-      error.style.display = 'none';
-      error.textContent = '';
-    } catch (e) {
-      error.style.display = 'block';
-      error.textContent = 'Diagram error: ' + (e && e.message ? e.message : e);
-      const stray = document.getElementById(svgId);
-      if (stray) stray.remove();
+  const editor = new Drawflow(canvas);
+  editor.reroute = true;
+  editor.force_first_input = false;
+  editor.start();
+
+  function addAllNodes() {
+    config.nodes.forEach(n => {
+      const label = String(n.label).split('\n').map(escapeHtml).join('<br>');
+      editor.addNode(n.key, 1, 1, n.x, n.y, 'flow-node', { key: n.key },
+        '<div class="flow-node-label">' + label + '</div>', false);
+    });
+  }
+
+  let saved = null;
+  try { saved = localStorage.getItem(storageKey); } catch (e) { /* storage unavailable */ }
+  if (saved) {
+    try { editor.import(JSON.parse(saved)); } catch (e) { addAllNodes(); }
+  } else {
+    addAllNodes();
+  }
+
+  function exportedData() {
+    return editor.export().drawflow.Home.data;
+  }
+
+  function idToKeyMap() {
+    const data = exportedData();
+    const map = {};
+    Object.keys(data).forEach(id => { map[id] = data[id].data && data[id].data.key; });
+    return map;
+  }
+
+  // Every connection is read off each node's own `outputs[...].connections`
+  // list, where each entry's `node` field is the *target* node's id — this
+  // is Drawflow's own export shape, not something this widget invents.
+  function currentPairs() {
+    const data = exportedData();
+    const map = idToKeyMap();
+    const pairs = new Set();
+    Object.keys(data).forEach(id => {
+      const outputs = data[id].outputs || {};
+      Object.keys(outputs).forEach(outKey => {
+        (outputs[outKey].connections || []).forEach(conn => {
+          const fromKey = map[id];
+          const toKey = map[conn.node];
+          if (fromKey && toKey) pairs.add(fromKey + '→' + toKey);
+        });
+      });
+    });
+    return pairs;
+  }
+
+  function persist() {
+    try { localStorage.setItem(storageKey, JSON.stringify(editor.export())); } catch (e) { /* storage unavailable */ }
+  }
+
+  // Assumed on-screen node footprint (Drawflow doesn't report rendered
+  // size in export data) — only used to pad the minimap's bounding box.
+  const NODE_W = 190, NODE_H = 60;
+
+  function nodeBounds() {
+    const data = exportedData();
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    Object.keys(data).forEach(id => {
+      const n = data[id];
+      minX = Math.min(minX, n.pos_x);
+      minY = Math.min(minY, n.pos_y);
+      maxX = Math.max(maxX, n.pos_x + NODE_W);
+      maxY = Math.max(maxY, n.pos_y + NODE_H);
+    });
+    if (!isFinite(minX)) { minX = 0; minY = 0; maxX = NODE_W; maxY = NODE_H; }
+    return { minX, minY, w: maxX - minX, h: maxY - minY };
+  }
+
+  function redrawMinimap() {
+    const mmW = minimap.clientWidth, mmH = minimap.clientHeight;
+    if (!mmW || !mmH) return;
+    const b = nodeBounds();
+    const pad = 24;
+    const scale = Math.min(mmW / (b.w + pad * 2), mmH / (b.h + pad * 2));
+    const offsetX = (mmW - (b.w + pad * 2) * scale) / 2 - (b.minX - pad) * scale;
+    const offsetY = (mmH - (b.h + pad * 2) * scale) / 2 - (b.minY - pad) * scale;
+
+    minimap.querySelectorAll('.flow-minimap-node').forEach(el => el.remove());
+    const data = exportedData();
+    Object.keys(data).forEach(id => {
+      const n = data[id];
+      const dot = document.createElement('div');
+      dot.className = 'flow-minimap-node';
+      dot.style.left = (n.pos_x * scale + offsetX) + 'px';
+      dot.style.top = (n.pos_y * scale + offsetY) + 'px';
+      dot.style.width = Math.max(4, NODE_W * scale) + 'px';
+      dot.style.height = Math.max(3, NODE_H * scale) + 'px';
+      minimap.insertBefore(dot, minimapViewport);
+    });
+
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    const vx0 = -editor.canvas_x / editor.zoom;
+    const vy0 = -editor.canvas_y / editor.zoom;
+    const vw = cw / editor.zoom;
+    const vh = ch / editor.zoom;
+    minimapViewport.style.left = (vx0 * scale + offsetX) + 'px';
+    minimapViewport.style.top = (vy0 * scale + offsetY) + 'px';
+    minimapViewport.style.width = Math.max(2, vw * scale) + 'px';
+    minimapViewport.style.height = Math.max(2, vh * scale) + 'px';
+
+    minimap.dataset.scale = String(scale);
+    minimap.dataset.offsetX = String(offsetX);
+    minimap.dataset.offsetY = String(offsetY);
+  }
+
+  // Click-or-drag anywhere on the minimap to pan the main canvas there,
+  // continuously while the pointer moves (not just on release). Drawflow
+  // has no public "pan to" API — this writes to the same two properties
+  // and reapplies the same transform string zoom_refresh() itself uses
+  // (verified against Drawflow 0.0.60's own source), not an undocumented
+  // hack. rAF-batched so a fast mousemove/touchmove stream can't queue up
+  // more redraws than the browser can actually paint.
+  let panRaf = null;
+  let pendingPanEvent = null;
+
+  function panToClientPoint(clientX, clientY) {
+    const rect = minimap.getBoundingClientRect();
+    const scale = parseFloat(minimap.dataset.scale || '1');
+    const offsetX = parseFloat(minimap.dataset.offsetX || '0');
+    const offsetY = parseFloat(minimap.dataset.offsetY || '0');
+    const posX = ((clientX - rect.left) - offsetX) / scale;
+    const posY = ((clientY - rect.top) - offsetY) / scale;
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    editor.canvas_x = cw / 2 - posX * editor.zoom;
+    editor.canvas_y = ch / 2 - posY * editor.zoom;
+    editor.precanvas.style.transform =
+      'translate(' + editor.canvas_x + 'px, ' + editor.canvas_y + 'px) scale(' + editor.zoom + ')';
+    redrawMinimap();
+  }
+
+  function flushPan() {
+    panRaf = null;
+    if (pendingPanEvent) {
+      panToClientPoint(pendingPanEvent.clientX, pendingPanEvent.clientY);
+      pendingPanEvent = null;
     }
   }
 
-  toolbar.querySelector('.de-render').addEventListener('click', () => {
-    save(textarea.value);
-    render(textarea.value);
+  function schedulePan(ev) {
+    pendingPanEvent = ev;
+    if (panRaf === null) panRaf = requestAnimationFrame(flushPan);
+  }
+
+  minimap.addEventListener('pointerdown', ev => {
+    minimap.setPointerCapture(ev.pointerId);
+    minimap.classList.add('flow-minimap-dragging');
+    panToClientPoint(ev.clientX, ev.clientY); // jump immediately, don't wait for the first move
   });
-  toolbar.querySelector('.de-reset').addEventListener('click', () => {
+  minimap.addEventListener('pointermove', ev => {
+    if (ev.buttons === 0) return; // not currently pressed/dragging
+    schedulePan(ev);
+  });
+  function endMinimapDrag(ev) {
+    minimap.classList.remove('flow-minimap-dragging');
+    try { minimap.releasePointerCapture(ev.pointerId); } catch (e) { /* already released */ }
+  }
+  minimap.addEventListener('pointerup', endMinimapDrag);
+  minimap.addEventListener('pointercancel', endMinimapDrag);
+
+  const quizId = 'diagram-' + (diagramIndex + 1);
+
+  function check() {
+    const have = currentPairs();
+    const expectedPairs = config.expected.map(p => p[0] + '→' + p[1]);
+    const missing = expectedPairs.filter(p => !have.has(p));
+    const extra = Array.from(have).filter(p => expectedPairs.indexOf(p) === -1);
+    const correctCount = expectedPairs.length - missing.length;
+
+    let html = '<strong>' + correctCount + ' / ' + expectedPairs.length + ' expected connections found.</strong>';
+    if (missing.length) {
+      html += '<div class="flow-missing">Still missing: ' + missing.join(', ') + '</div>';
+    }
+    if (extra.length) {
+      html += '<div class="flow-extra">Not expected — double-check these: ' + extra.join(', ') + '</div>';
+    }
+    result.innerHTML = html;
+    result.classList.toggle('flow-result-good', missing.length === 0 && extra.length === 0);
+    result.classList.toggle('flow-result-bad', missing.length > 0 || extra.length > 0);
+
+    // Tracked exactly like the #architecture-quiz: recorded on every Check
+    // click (so an instructor sees the student's progression, not just a
+    // final snapshot), a no-op if nobody is signed in.
+    if (window.recordQuizAttempt) {
+      window.recordQuizAttempt('lab6', quizId, correctCount, expectedPairs.length);
+    }
+  }
+
+  const zoomLabel = toolbar.querySelector('.flow-zoom-label');
+
+  editor.on('connectionCreated', () => { persist(); redrawMinimap(); });
+  editor.on('connectionRemoved', () => { persist(); redrawMinimap(); });
+  editor.on('nodeMoved', () => { persist(); redrawMinimap(); });
+  editor.on('translate', redrawMinimap);
+  editor.on('zoom', z => {
+    zoomLabel.textContent = Math.round(z * 100) + '%';
+    redrawMinimap();
+  });
+
+  toolbar.querySelector('.flow-check').addEventListener('click', check);
+  toolbar.querySelector('.flow-zoom-out').addEventListener('click', () => editor.zoom_out());
+  toolbar.querySelector('.flow-zoom-in').addEventListener('click', () => editor.zoom_in());
+  zoomLabel.addEventListener('click', () => editor.zoom_reset());
+  toolbar.querySelector('.flow-reset').addEventListener('click', () => {
     try { localStorage.removeItem(storageKey); } catch (e) { /* ignore */ }
-    textarea.value = starter;
-    render(starter);
-  });
-  textarea.addEventListener('input', () => {
-    save(textarea.value);
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => render(textarea.value), 700);
-  });
-  textarea.addEventListener('keydown', ev => {
-    if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') {
-      ev.preventDefault();
-      save(textarea.value);
-      render(textarea.value);
-    }
+    editor.clear();
+    addAllNodes();
+    editor.zoom = 1;
+    editor.zoom_last_value = 1;
+    editor.canvas_x = 0;
+    editor.canvas_y = 0;
+    editor.precanvas.style.transform = 'translate(0px, 0px) scale(1)';
+    zoomLabel.textContent = '100%';
+    result.innerHTML = '';
+    result.classList.remove('flow-result-good', 'flow-result-bad');
+    redrawMinimap();
   });
 
-  render(textarea.value);
-  return wrap;
+  redrawMinimap();
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
 }
 
 function initQuiz() {

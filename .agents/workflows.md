@@ -131,52 +131,72 @@ partially documents a step, that's stated explicitly.
 ## Learner: Lab 6 — software architecture
 
 1. Open `docs/lab6/index.html`. No install/prerequisite step — a short
-   recap + hands-on written/diagram exercise + quiz. Recommended: have
+   recap + two hands-on diagram exercises + quiz. Recommended: have
    already seen the Lesson 6 lecture/slides (this lab does not re-teach
    them — see the "Recap" section, ~7 short bullets, not a slide
-   reproduction) and complete [Lab 4](../lab4/) first, since Parts 1–3
-   analyze its requirement set and Scade One model.
+   reproduction) and complete [Lab 4](../lab4/) first, since Parts 1–2
+   assume you already know the Cruise Control system's *interface* (what
+   it takes in, what it outputs) — not its internals.
 2. Read the Context, Learning Objectives, and Recap — the Recap is a
    reminder of vocabulary already covered in the lecture (why architecture
    matters, the ISO/IEC/IEEE 42010 definition, architecture vs design, the
    four elements, quality attributes, requirements-driven architecture,
    and a one-paragraph pointer to the lecture's medical-monitoring
    example), not new teaching content — nothing to produce here.
-3. **Part 1 (hands-on):** write a component table, an interface table, and
-   a constraints list documenting the *already-existing* architecture of
-   the Lab 4 Cruise Control system (`Car_design`/`CC_design`/`Simulation`
-   packages; `cruise_control`/`regulator`/`limiter`/`car` nodes), then
-   **finish the component diagram directly in the page** — Activity 1D's
-   diagram ships with boxes but no arrows (`%% TODO` comments), edited live
-   in the built-in diagram editor. Instructor-graded, no fixed answer key
-   beyond matching the real model.
-4. **Part 2 (hands-on):** same pattern one level up — an incomplete
-   whole-vehicle, SysML-*style* block diagram (Driver/HMI, sensors, the
-   Part 1 box collapsed into one component, actuators, vehicle dynamics)
-   with the connections left as an exercise, edited in the same widget —
-   explicitly caveated in `lab.md` as a Mermaid stand-in, not real SysML
-   tool output.
-5. **Part 3 (hands-on):** propose an Emergency Braking Controller +
-   Obstacle/Distance Sensor extension on paper — new component/interface
-   table, two proposed EARS requirements (REQ-09/REQ-10, explicitly marked
-   "proposed — not implemented in the shipped model"), a prose description
-   of how it would extend Lab 4's scenario-CSV simulation approach, and
-   (Activity 3D) wiring the two new components into a copy of the Part 1
-   diagram in the editor. **No file under `src/lab4/` is created or
-   modified.**
-6. Read the Summary, then take the 10-question `#architecture-quiz`
+3. **Part 1 (hands-on):** Activity 1A opens with a bullet list describing
+   exactly how signals flow through the whole vehicle system (Driver →
+   HMI → shared bus → Cruise Control ECU → actuator → vehicle → sensor,
+   closing the loop; HMI status back to Driver) — the Cruise Control
+   system is treated as a single "ECU" box, using only its already-known
+   Lab 4 interface, not re-derived internals. **Draw the 11 connections
+   listed** on the 9-box canvas (Driver/HMI, three sensors, the bus, the
+   ECU, the actuator, the vehicle), then click **✓ Check** for an
+   auto-graded (self-graded, client-side) count of found/missing
+   connections. Explicitly caveated in `lab.md` as a Drawflow stand-in,
+   not real SysML tool output.
+4. **Part 2 (hands-on):** propose an Emergency Braking Controller +
+   Obstacle/Distance Sensor extension — new component/interface table, an
+   arbitration description (both new components join the system as
+   participants on the same shared bus every existing component already
+   uses — no special override wire; arbitration happens at the Powertrain
+   Actuator, where both commands are actually consumed), two proposed EARS
+   requirements (REQ-09/REQ-10, explicitly marked "proposed — not
+   implemented in the shipped model"), a prose description of how it would
+   extend Lab 4's scenario-CSV simulation approach, and (Activity 2D) an
+   11-box, 14-connection canvas that re-draws Part 1's 11 connections plus
+   3 new ones (`Obstacle→Bus`, `Bus→Emergency`, `Emergency→Bus`), also
+   auto-graded. **No file under `src/lab4/` is created or modified.**
+5. Read the Summary, then take the 10-question `#architecture-quiz`
    (self-authored — no instructor quiz file was supplied for this lab,
    unlike Lab 5's `Lab 5.pdf`), same `initQuiz()` scoring widget pattern as
    every other lab.
-7. **All three exercise diagrams (Parts 1–3) are live editors** — Mermaid.js
-   (loaded from cdnjs by `docs/lab6/index.html` — the first lab page in
-   this repo to load it) renders a textarea's contents into a preview pane
-   on a Render button click, Ctrl+Enter, or ~700ms after the student stops
-   typing; a Reset button restores the original (deliberately incomplete,
-   `%% TODO`-marked) text. Edits persist per-diagram in the browser's own
-   `localStorage` (`lab6-diagram-<index>`) — never uploaded, never graded
-   automatically. The Recap section has no diagrams at all, by design — it
+6. **Both exercise diagrams (Parts 1–2) are an interactive, auto-graded
+   canvas, not pictures** — Drawflow (loaded from jsdelivr by
+   `docs/lab6/index.html` — the first lab page in this repo to load it;
+   chosen over React Flow because React Flow has no plain `<script>` CDN
+   build and this repo has no bundler) places each fence's `nodes` on a
+   canvas with zero connections; **✓ Check** diffs the student's drawn
+   connections (by node key, not Drawflow's internal numeric ids — robust
+   across reloads) against the fence's `expected` edge list; **↺ Reset**
+   clears the canvas back to the unconnected starting layout, including
+   zoom/pan. Each canvas also has zoom controls and a draggable minimap
+   overview. The diagram layout/connections themselves persist only in the
+   browser's own `localStorage` (`lab6-flow-<index>`) — but every
+   **✓ Check** click also calls `window.recordQuizAttempt('lab6',
+   'diagram-1'/'diagram-2', correctCount, total)`, the exact same function
+   and Firestore `quizAttempts` collection the `#architecture-quiz` uses —
+   a no-op if nobody is signed in, same as the quiz. The Recap section has
+   no diagrams at all, by design — it
    points back at the lecture instead of reproducing its figures.
+
+An earlier revision of this lab had a **third** part (and a Part 1 ahead
+of the two above) that broke the Cruise Control system down into its
+internal components (Controller/Regulator/Limiter) as a separate diagram
+exercise. Per explicit feedback that this was too confusing, that part
+was **removed entirely** — not fixed — since Lab 4 already builds and
+explains that internal design; this lab treats it as a known black box
+throughout. See `project_docs/changelog.md` for the full revision
+sequence.
 
 ## Maintainer: comparing student work against reference
 

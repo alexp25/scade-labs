@@ -179,27 +179,68 @@ cannot be added or verified here — Lab 3 Part 9 and Lab 4 Activity 7A's
 discussion of the `CC_design.swan` excerpt instead uses the file already
 committed to this repo as evidence.
 
-## Lab 6 — no automated test beyond the quiz
+## Lab 6 — quiz is auto-graded server-uninvolved; Parts 1–2's diagrams are self-graded client-side; Part 2's written tables are not
 
-- Lab 6's Parts 10–12 deliverable is free-text/diagram markdown — no script
-  or harness to run, same completion model as Lab 3's requirements text and
-  all of Lab 5. The only automated component is the client-side
-  `#architecture-quiz` (self-authored, not from an instructor-supplied
-  answer key — see `project_docs/labs/lab-6-architecture.md`).
-- **Actually run this session (2026-09-23):**
-  `cd docs && bundle exec jekyll build --destination <tmp>` succeeded —
-  same pre-existing Sass deprecation warnings only (`jekyll-theme-cayman`'s
-  own `@import`/`invert()` usage, unrelated to this repo's content). Output
-  tree confirmed to contain `lab6/index.html` and `lab6/lab.md` alongside
-  the existing `lab1`–`lab5` and `account`/`admin` directories. Temp output
-  directory deleted after inspection, not committed.
+**Current structure (as of the 2026-09-24 restructuring — see
+`project_docs/changelog.md`): two diagram activities, Part 1 (Activity 1A,
+9 nodes/11 expected edges) and Part 2 (Activity 2D, 11 nodes/14 expected
+edges). An earlier revision had three diagram activities across three
+parts; the log entries below predate the restructuring and describe that
+earlier shape — kept as a historical record of what was actually run, not
+edited to match the current structure.**
+
+- Lab 6's Part 2 written component/interface tables are free-text
+  markdown — no script or harness to run, same completion model as Lab 3's
+  requirements text and all of Lab 5. The diagrams (Activities 1A/2D) are
+  a different case: each is a Drawflow canvas with a **✓ Check** button
+  that self-grades the student's connections against the
+  ```` ```flowgraph ```` fence's own `expected` edge list, entirely
+  client-side (see `project_docs/labs/lab-6-architecture.md` →
+  "Auto-grading" for exactly how). The other automated component is the
+  client-side `#architecture-quiz` (self-authored, not from an
+  instructor-supplied answer key).
+- **Actually run this session (2026-09-24, part-removal/renumbering
+  revision):** re-ran the same Node JSON-validation script described below
+  — now 2 blocks (was 3): block 1 (Part 1) 9 nodes/11 expected edges,
+  block 2 (Part 2) 11 nodes/14 expected edges, both valid, every
+  `expected` pair resolving to a real node key. Extracted both inline
+  `<script>` blocks from `docs/lab6/index.html` and syntax-checked each
+  with `new Function(...)` — both parse. `bundle exec jekyll build
+  --destination <tmp>` succeeded — same pre-existing Sass warnings only.
+- **Actually run this session (2026-09-24, Drawflow revision):**
+  - Confirmed `drawflow@0.0.60` exists on jsdelivr and ships
+    `dist/drawflow.min.js` + `dist/drawflow.min.css` (checked via the
+    jsdelivr package-data API) before pinning the CDN URLs in
+    `docs/lab6/index.html`.
+  - Fetched Drawflow's real `addNode`/`addConnection`/export source from
+    GitHub to confirm the exact API shapes (`addNode` parameter order, the
+    `{node, output}`/`{node, input}` connection-object field names used
+    inside `outputs[...].connections`/`inputs[...].connections`, the
+    `connectionCreated`/`connectionRemoved` event payload shape,
+    `.import()`/`.clear()` method names) before writing
+    `buildFlowEditorWidget()` against them.
+  - `npx marked@9.1.6` against a sample ` ```flowgraph ` fence — confirmed
+    it emits `class="language-flowgraph"`, matching the DOM selector
+    `buildFlowEditors()` queries for.
+  - Wrote and ran a Node script that extracts all three `flowgraph` JSON
+    blocks from `docs/lab6/lab.md`, `JSON.parse`s each, and cross-checks
+    every `expected` pair's node keys against that block's own `nodes`
+    array — all 3 valid (block 1: 7 nodes/9 expected edges; block 2: 9
+    nodes/11 edges; block 3: 9 nodes/12 edges).
+  - Extracted both inline `<script>` blocks from `docs/lab6/index.html`
+    and syntax-checked each with `new Function(...)` — both parse cleanly.
+  - `cd docs && bundle exec jekyll build --destination <tmp>` succeeded —
+    same pre-existing Sass deprecation warnings only. Output tree confirmed
+    to contain `lab6/index.html` and `lab6/lab.md`. Temp output directory
+    deleted after inspection, not committed.
 - **Link check:** grepped `href="./lab` in `docs/index.html` — six cards
   (`./lab1/` … `./lab6/`), all resolve to real directories.
 - **Not verified this session:** the page was not opened in an actual
-  browser, so Mermaid.js's CDN-loaded rendering of Lab 6's diagrams (the
-  first use of Mermaid in this repo) was not visually confirmed — only
-  code-reviewed against the working `marked.js`/`highlight.js` pattern the
-  rest of `docs/lab6/index.html` reuses from Lab 5.
+  browser — Drawflow's CDN load, the actual drag-to-connect interaction,
+  the Check/Reset button click handlers, and the `localStorage`
+  round-trip via `editor.import()`/`export()` were code-reviewed and
+  API-verified against Drawflow's real source (see above), not exercised
+  live in a browser.
 
 ## Manual/visual checks
 
