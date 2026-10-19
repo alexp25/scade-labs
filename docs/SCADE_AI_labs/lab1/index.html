@@ -193,6 +193,15 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>
+window.MathJax = {
+  tex: {
+    displayMath: [['$$', '$$']],
+    inlineMath: [['\\(', '\\)']]
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <script>window.CURRENT_LAB_ID = 'scade-ai-lab1';</script>
 <script type="module" src="../../assets/js/auth-header.js"></script>
 <script>
@@ -201,12 +210,18 @@ fetch('lab.md')
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.text();
   })
-  .then(md => {
-    document.getElementById('lab-content').innerHTML = marked.parse(md);
-    document.querySelectorAll('#lab-content pre code').forEach(el => hljs.highlightElement(el));
-    buildTOC();
-    initScrollSpy();
-    initQuiz();
+  .then(async md => {
+  const content = document.getElementById('lab-content');
+  content.innerHTML = marked.parse(md);
+
+  await MathJax.typesetPromise([content]);
+
+  document.querySelectorAll('#lab-content pre code')
+    .forEach(el => hljs.highlightElement(el));
+
+  buildTOC();
+  initScrollSpy();
+  initQuiz();
   })
   .catch(err => {
     document.getElementById('lab-content').innerHTML =

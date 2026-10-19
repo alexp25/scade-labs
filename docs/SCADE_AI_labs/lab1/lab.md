@@ -1,104 +1,5 @@
 <span id="_Toc242962054" class="anchor"></span>**Laboratory 1 — Introduction to AI Methods for Embedded Systems (Using Keras)**
 
-# Table of Contents
-
-[Laboratory 1 — Introduction to AI Methods for Embedded Systems (Using Keras) [1](#_Toc242962054)](#_Toc242962054)
-
-[1. Laboratory Overview [3](#laboratory-overview)](#laboratory-overview)
-
-[2. Learning Objectives [3](#learning-objectives)](#learning-objectives)
-
-[3. Prerequisites [4](#prerequisites)](#prerequisites)
-
-[5. Environment Setup [5](#environment-setup)](#environment-setup)
-
-[5.1 Creating a Python virtual environment [5](#creating-a-python-virtual-environment)](#creating-a-python-virtual-environment)
-
-[5.2 Starting Jupyter [6](#starting-jupyter)](#starting-jupyter)
-
-[6. Importing the Required Libraries [9](#importing-the-required-libraries)](#importing-the-required-libraries)
-
-[7. Keras Basics [9](#keras-basics)](#keras-basics)
-
-[7.1 What is Keras? [9](#what-is-keras)](#what-is-keras)
-
-[8. From Model Architecture to Training [11](#from-model-architecture-to-training)](#from-model-architecture-to-training)
-
-[9. Important Training Terminology [12](#important-training-terminology)](#important-training-terminology)
-
-[10. Introducing a regression problem: Neural-Network Sensor Calibration [13](#introducing-a-regression-problem-neural-network-sensor-calibration)](#introducing-a-regression-problem-neural-network-sensor-calibration)
-
-[11. Generating the Sensor Dataset [13](#generating-the-sensor-dataset)](#generating-the-sensor-dataset)
-
-[12. Splitting the Dataset [14](#splitting-the-dataset)](#splitting-the-dataset)
-
-[13. Input Normalization [15](#input-normalization)](#input-normalization)
-
-[14. Building the Regression Network [15](#building-the-regression-network)](#building-the-regression-network)
-
-[15. Compiling the Regression Model [16](#compiling-the-regression-model)](#compiling-the-regression-model)
-
-[16. Training the Model [16](#training-the-model)](#training-the-model)
-
-[17. Visualizing the Training Process [17](#visualizing-the-training-process)](#visualizing-the-training-process)
-
-[18. Evaluating the Regression Model [18](#evaluating-the-regression-model)](#evaluating-the-regression-model)
-
-[19. From Regression to Classification [19](#from-regression-to-classification)](#from-regression-to-classification)
-
-[20. Heart Sound Data [19](#heart-sound-data)](#heart-sound-data)
-
-[20.1 PhysioNet/Computing in Cardiology Challenge 2016 [19](#physionetcomputing-in-cardiology-challenge-2016)](#physionetcomputing-in-cardiology-challenge-2016)
-
-[20.2 George B. Moody PhysioNet Challenge 2022 [20](#george-b.-moody-physionet-challenge-2022)](#george-b.-moody-physionet-challenge-2022)
-
-[21. Dataset Exploration [20](#dataset-exploration)](#dataset-exploration)
-
-[22. Preprocessing the dataset [25](#preprocessing-the-dataset)](#preprocessing-the-dataset)
-
-[23. Creating the data pipeline for training the neural network [28](#creating-the-data-pipeline-for-training-the-neural-network)](#creating-the-data-pipeline-for-training-the-neural-network)
-
-[24. Introduction to Convolutional Neural Networks [30](#introduction-to-convolutional-neural-networks)](#introduction-to-convolutional-neural-networks)
-
-[25. Training the CNN [31](#training-the-cnn)](#training-the-cnn)
-
-[26. Evaluating the CNN on the testing dataset [33](#evaluating-the-cnn-on-the-testing-dataset)](#evaluating-the-cnn-on-the-testing-dataset)
-
-[27. Saving and loading the trained Keras model [35](#saving-and-loading-the-trained-keras-model)](#saving-and-loading-the-trained-keras-model)
-
-[28. Installing the neural network importer and converting the CNN in a SCADE One model [36](#installing-the-neural-network-importer-and-converting-the-cnn-in-a-scade-one-model)](#installing-the-neural-network-importer-and-converting-the-cnn-in-a-scade-one-model)
-
-[29. Generate the C code equivalent to the SCADE One model [37](#generate-the-c-code-equivalent-to-the-scade-one-model)](#generate-the-c-code-equivalent-to-the-scade-one-model)
-
-[30. Running and evaluating the generated C from Python [38](#running-and-evaluating-the-generated-c-from-python)](#running-and-evaluating-the-generated-c-from-python)
-
-[30.1. Generate the Python Wrapper and set up of the environment [39](#generate-the-python-wrapper-and-set-up-of-the-environment)](#generate-the-python-wrapper-and-set-up-of-the-environment)
-
-[30.2. Useful functions for testing the SCADE model [40](#useful-functions-for-testing-the-scade-model)](#useful-functions-for-testing-the-scade-model)
-
-[30.3. Compare the C and Keras outputs [43](#compare-the-c-and-keras-outputs)](#compare-the-c-and-keras-outputs)
-
-[31. Embedded-AI Considerations [43](#embedded-ai-considerations)](#embedded-ai-considerations)
-
-[31.1 Number of parameters [43](#number-of-parameters)](#number-of-parameters)
-
-[31.2 Model size [43](#model-size)](#model-size)
-
-[31.3 Inference time [44](#inference-time)](#inference-time)
-
-[31.4 Preprocessing cost [44](#preprocessing-cost)](#preprocessing-cost)
-
-[31.5 Fixed input dimensions [44](#fixed-input-dimensions)](#fixed-input-dimensions)
-
-[31.6 Architecture complexity [44](#architecture-complexity)](#architecture-complexity)
-
-[31.7 Numerical representation [44](#numerical-representation)](#numerical-representation)
-
-[32. Final Questions [45](#final-questions)](#final-questions)
-
-[33. Expected Deliverables [47](#expected-deliverables)](#expected-deliverables)
-
-[34. Key Takeaways [48](#key-takeaways)](#key-takeaways)
 
 # 1. Laboratory Overview
 
@@ -1181,9 +1082,8 @@ Early convolutional layers may respond to relatively simple local patterns, whil
 
 The main layers which are going to be used are:
 
-- **Conv2D  
-  **Applies learnable two-dimensional filters to the input.  
-  Important parameters include:
+- **Conv2D**  
+  **Applies learnable two-dimensional filters to the input. Important parameters include:**
 
   - number of filters;
 
@@ -1191,9 +1091,8 @@ The main layers which are going to be used are:
 
   - activation function.
 
-- **MaxPooling2D  
-  **Reduces the spatial dimensions of intermediate feature maps.  
-  Pooling can reduce:
+- **MaxPooling2D**
+  **Reduces the spatial dimensions of intermediate feature maps. Pooling can reduce:**
 
   - memory consumption;
 
@@ -1201,14 +1100,14 @@ The main layers which are going to be used are:
 
   - the number of values processed by subsequent layers.
 
-- **Flatten  
-  **Transforms multidimensional feature maps into a one-dimensional vector.
+- **Flatten**
+  **Transforms multidimensional feature maps into a one-dimensional vector.**
 
-- **Dense  
-  **Performs fully connected processing after the convolutional feature-extraction stages.
+- **Dense**  
+  **Performs fully connected processing after the convolutional feature-extraction stages.**
 
-- **Dropout  
-  **Randomly disables a proportion of activations during training and can help reduce overfitting.
+- **Dropout**  
+  **Randomly disables a proportion of activations during training and can help reduce overfitting.**
 
 # 
 
