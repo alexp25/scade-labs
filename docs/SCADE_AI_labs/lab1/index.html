@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lab 1 – Introduction to AI Methods for Embedded Systems (Using Keras)</title>
+  <title>SCADE AI Lab 1 – Introduction to AI Methods for Embedded Systems</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <style>
@@ -95,7 +95,6 @@
     /* indent levels */
     #toc-list .toc-h1 a { padding-left: .4rem; font-weight: 600; color: var(--navy); }
     #toc-list .toc-h2 a { padding-left: 1rem; }
-    #toc-list .toc-h4 a { padding-left: 2rem; font-size: .76rem; }
     #toc-list .toc-h3 a { padding-left: 1.8rem; font-size: .78rem; color: var(--muted); }
 
     /* ── Main content ── */
@@ -113,7 +112,6 @@
       border-bottom: 1px solid var(--border);
     }
     #lab-content h3 { font-size: 1rem; font-weight: 600; color: var(--blue); margin: 1.5rem 0 .45rem; }
-    #lab-content h4 { font-size: 1rem; color: var(--blue); margin: 1.25rem 0 .45rem; }
     #lab-content p  { margin-bottom: .85rem; }
     #lab-content ul, #lab-content ol { padding-left: 1.4rem; margin-bottom: .85rem; }
     #lab-content li { margin-bottom: .3rem; }
@@ -129,9 +127,9 @@
       font-family: var(--mono); font-size: .88rem;
       border-radius: 6px; overflow-x: auto;
       margin: .75rem 0 1rem; line-height: 1.55;
-      padding: 0; background: #EEF2F7;
+      padding: 0; background: transparent;
     }
-    #lab-content pre code { white-space: pre; display: block; padding: 1rem; font-size: inherit; background: none; }
+    #lab-content pre code { padding: 0; font-size: inherit; background: none; }
     #lab-content pre code.hljs {
       border-radius: 6px; padding: 1rem 1.25rem;
       font-size: .88rem; line-height: 1.55;
@@ -153,8 +151,6 @@
     #lab-content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
     #lab-content img { max-width: 100%; border-radius: 6px; margin: .5rem 0; }
 
-    #lab-content math { overflow-x: auto; max-width: 100%; margin: 1rem 0; }
-    .copy-code { cursor: pointer; border: 1px solid var(--border); border-radius: 4px; padding: .3rem .65rem; color: var(--blue); background: var(--white); font: inherit; font-size: .8rem; }
     .loading { color: var(--muted); font-style: italic; padding: 2rem 0; }
 
     footer { text-align: center; padding: 2rem; font-size: .82rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 3rem; }
@@ -171,16 +167,14 @@
 
 <header class="page-header">
   <a class="back-btn" href="../../">&#8592; All Labs</a>
-  <h1>Lab 1 — Introduction to AI Methods for Embedded Systems (Using Keras)</h1>
+  <h1>SCADE AI Lab 1 — Introduction to AI Methods for Embedded Systems</h1>
   <div class="meta">
-    <span>SCADE AI Labs</span>
-    <span>Keras · TensorFlow · Embedded AI</span>
+    <span>AI and Embedded Systems</span>
+    <span>Keras · TensorFlow · Scade One</span>
     <span>Approximately 4 hours</span>
   </div>
   <div style="margin-top:.75rem; display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
     <div id="auth-slot" data-base="../../"></div>
-    <a class="back-btn" href="Lab1.docx" download>Download Word document</a>
-    <a class="back-btn" href="https://github.com/alexp25/scade-labs/blob/main/src/SCADE%20AI%20Labs/lab1/lab01_keras_introduction.ipynb" target="_blank" rel="noopener">Jupyter notebook</a>
   </div>
 </header>
 
@@ -195,7 +189,7 @@
   </main>
 </div>
 
-<footer>SCADE AI Labs · Lab 1 · Keras and TensorFlow</footer>
+<footer>SCADE AI Lab 1 · AI and Embedded Systems</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -212,7 +206,7 @@ fetch('lab.md')
     document.querySelectorAll('#lab-content pre code').forEach(el => hljs.highlightElement(el));
     buildTOC();
     initScrollSpy();
-    addCopyButtons();
+    initQuiz();
   })
   .catch(err => {
     document.getElementById('lab-content').innerHTML =
@@ -223,22 +217,63 @@ fetch('lab.md')
       </p>`;
   });
 
-function addCopyButtons() {
-  document.querySelectorAll('#lab-content pre').forEach(pre => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'copy-code';
-    button.textContent = 'Copy code';
-    button.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(pre.querySelector('code').textContent);
-        button.textContent = 'Copied';
-        setTimeout(() => { button.textContent = 'Copy code'; }, 1500);
-      } catch {
-        button.textContent = 'Select and copy the code';
-      }
+function initQuiz() {
+  const submitBtn = document.getElementById('quiz-submit');
+  const resetBtn  = document.getElementById('quiz-reset');
+  if (!submitBtn) return;
+
+  submitBtn.addEventListener('click', function () {
+    const questions = document.querySelectorAll('#scade-ai-quiz .quiz-q');
+    let score = 0;
+    let unanswered = 0;
+
+    questions.forEach((q, i) => {
+      const correct  = q.dataset.correct;
+      const selected = q.querySelector(`input[name="q${i + 1}"]:checked`);
+      if (!selected) { unanswered++; return; }
+
+      q.querySelectorAll('.quiz-option').forEach(opt => {
+        const val = opt.querySelector('input').value;
+        if (val === correct && val === selected.value) {
+          opt.classList.add('correct'); score++;
+        } else if (val === selected.value) {
+          opt.classList.add('wrong');
+        } else if (val === correct) {
+          opt.classList.add('reveal');
+        }
+        opt.style.pointerEvents = 'none';
+      });
     });
-    pre.insertAdjacentElement('beforebegin', button);
+
+    const scoreEl = document.getElementById('quiz-score');
+    if (unanswered) {
+      scoreEl.textContent = `Please answer all ${unanswered} remaining question${unanswered > 1 ? 's' : ''}.`;
+      scoreEl.style.color = 'var(--orange)';
+      return;
+    }
+
+    const total = questions.length;
+    scoreEl.textContent = `${score} / ${total} correct`;
+    scoreEl.style.color = score === total ? 'var(--green)' : score >= Math.ceil(total / 2) ? 'var(--orange)' : '#B71C1C';
+    submitBtn.disabled = true;
+    resetBtn.style.display = 'inline-block';
+
+    if (window.recordQuizAttempt) {
+      window.recordQuizAttempt('scade-ai-lab1', 'final-quiz', score, total);
+    }
+  });
+
+  resetBtn.addEventListener('click', function () {
+    document.querySelectorAll('#scade-ai-quiz .quiz-q').forEach(q => {
+      q.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.classList.remove('correct', 'wrong', 'reveal');
+        opt.style.pointerEvents = '';
+        opt.querySelector('input').checked = false;
+      });
+    });
+    document.getElementById('quiz-score').textContent = '';
+    submitBtn.disabled = false;
+    resetBtn.style.display = 'none';
   });
 }
 
@@ -250,7 +285,7 @@ function slugify(text) {
 }
 
 function buildTOC() {
-  const headings = document.querySelectorAll('#lab-content h1, #lab-content h2, #lab-content h3, #lab-content h4');
+  const headings = document.querySelectorAll('#lab-content h1, #lab-content h2, #lab-content h3');
   const tocList  = document.getElementById('toc-list');
   const slugCount = {};
 
@@ -297,4 +332,5 @@ function initScrollSpy() {
 
 </body>
 </html>
+
 
