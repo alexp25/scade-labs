@@ -421,6 +421,15 @@ X = measured_voltage.reshape(-1, 1).astype("float32")
 y = temperature_c.reshape(-1, 1).astype("float32")
 ```
 
+Check the contents of the input and output arrays:
+
+``` python
+print(measured_voltage)
+print(X)
+print(temperature_c)
+print(y)
+```
+
 The quadratic term introduces a small nonlinear component, while the Gaussian noise approximates measurement noise.
 
 Visualize the generated data:
