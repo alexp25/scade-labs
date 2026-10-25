@@ -1056,7 +1056,7 @@ heart_sound_recordings_spectrograms_dataset = tf.keras.utils.image_dataset_from_
     labels='inferred',
     label_mode='binary',  # For binary classification
     batch_size=32,
-    image_size=(600, 400),  # The chosen size of the spectrograms images
+    image_size=(400, 600),  # The chosen size of the spectrograms images
     shuffle=True,
     seed=123
 )
@@ -1227,7 +1227,7 @@ testing_dataset = tf.keras.utils.image_dataset_from_directory(
     labels='inferred',
     label_mode='binary',  # For binary classification
     batch_size=8,
-    image_size=(600, 400),
+    image_size=(400, 600),
     shuffle=False,
 )
 
