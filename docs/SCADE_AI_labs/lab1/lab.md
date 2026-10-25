@@ -124,7 +124,7 @@ python -m pip install --upgrade pip
 Install the packages required throughout the laboratory:
 
 ``` bash
-pip install tensorflow keras numpy matplotlib pandas scikit-learn librosa soundfile jupyter
+pip install tensorflow keras numpy matplotlib pandas scikit-learn librosa soundfile jupyter ansys-scadeone-core
 ```
 
 Keras 3 can operate with several computational backends, including TensorFlow, JAX, and PyTorch. In this course, **TensorFlow will be used as the Keras backend** in order to maintain a common environment for all exercises. Current Keras documentation describes Keras as a multi-backend framework and allows TensorFlow to be selected explicitly.
@@ -196,6 +196,19 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import shutil
+import random
+import sys
+import ctypes
+import threading
+from sklearn.metrics import (
+    accuracy_score, confusion_matrix, classification_report,
+    ConfusionMatrixDisplay,
+)
+from sklearn.model_selection import train_test_split
+from pathlib import Path
+from ansys.scadeone.core import ScadeOne
+from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 ```
 
 For reproducibility, initialize the random number generators:
@@ -435,7 +448,6 @@ The dataset will be divided into:
 - 15% test data.
 
 ``` python
-from sklearn.model_selection import train_test_split
 X_train, X_temp, y_train, y_temp = train_test_split(
     X,
     y,
@@ -1372,9 +1384,6 @@ You can create in the current working directory where the jupyter notebook was s
 
 ``` python
 # RUN ONLY ONCE
-from pathlib import Path
-from ansys.scadeone.core import ScadeOne
-from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 SCADE_INSTALL = r"<path to the “Scade One” directory where the program was installed>"
 PROJECT_DIR = r"<path to the .sproj of the neural network>"
 app = ScadeOne(install_dir = SCADE_INSTALL)
@@ -1389,16 +1398,6 @@ A new directory containing the Python wrapper will be generated in the current w
 Import the generated module :
 
 ``` python
-import sys
-import ctypes
-import threading
-import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from sklearn.metrics import (
-    accuracy_score, confusion_matrix, classification_report,
-    ConfusionMatrixDisplay,
-)
 WRAPPER_NAME = <name of the python wrapper>
 sys.path.insert(0, r"<path to the wrapper folder>")
 from WRAPPER_NAME import <ROOT OPERATOR CLASS> as SOneWrapper
