@@ -1,0 +1,362 @@
+-- version swan: 2025.0 graph: 2.0 swant: 1.1
+use keras::layers;
+
+use keras::activations;
+
+_harness test_relu
+{
+  diagram
+    (let _stop_condition = _current_cycle >= 10_ui64;
+    #pragma diagram {"xy":"H-10877;V-5066","wh":"49005;3200"} #end)
+    (#2 expr [-1.0_f32, 0.0, 2.0, -4.2, 1.0]
+    #pragma diagram {"xy":"H-50969;V10736","wh":"33066;3200"} #end)
+    (#5 block (map activations::relu) <<5>>
+    #pragma diagram {"xy":"H-8036;V10748","wh":"25000;18000"} #end)
+    (#8 def _
+    #pragma diagram {"xy":"H21964;V10736"} #end)
+    
+    (#9 wire #2 => #5 .(x))
+    (#11 wire #5 => #8
+    #pragma diagram {"wp":"v-2012|#5 #8"} #end)
+}
+
+_harness example_dense
+{
+  diagram
+    (#0 expr [0.16513085, 0.9014813, 0.6309742, 0.4345461, 0.29193902]
+    #pragma diagram {"xy":"H-42916;V-30550","wh":"57443;3200"} #end)
+    (#1 #pragma swt under_test #end block layers::Dense <<10, 5>> 
+                                          #pragma diagram {"xy":"H-51617;V53606","wh":"20000;14000"} #end)
+    (#2 def bias
+    #pragma diagram {"xy":"H-195;V-30550"} #end)
+    (#3 expr [
+                 [0.51010704, 0.44353175, 0.4085331, 0.9924923, 0.68866396],
+                 [0.34584963, 0.436067, 0.601061, 0.45662427, 0.75269794],
+                 [0.18799722, 0.54875696, 0.54891527, 0.54952705, 0.2798947],
+                 [0.10895646, 0.63091135, 0.87381804, 0.53226304, 0.5610992],
+                 [0.29393423, 0.92848384, 0.1097362, 0.963542, 0.68593264],
+                 [0.28149652, 0.79469216, 0.0980103, 0.9760971, 0.8333335],
+                 [0.8609214, 0.66561294, 0.15616822, 0.9428265, 0.80456257],
+                 [0.9812653, 0.9833368, 0.04263258, 0.4261353, 0.56110215],
+                 [0.38354445, 0.1966815, 0.495443, 0.36849642, 0.22348094],
+                 [0.6453639, 0.21333098, 0.80625653, 0.05363059, 0.34727645]
+             ]
+    #pragma diagram {"xy":"H-48123;V-11743","wh":"64006;22814"} #end)
+    (#4 def kernel
+    #pragma diagram {"xy":"H1506;V-11743","wh":"9626;3200"} #end)
+    (#5 expr [0.8292774, 0.634228, 0.5147276, 0.39108086, 0.5809028, 0.04848182, 0.1776321, 0.70470166, 0.49190843, 0.3460425]
+    #pragma diagram {"xy":"H-34954;V7064","wh":"109949;3200"} #end)
+    (#6 def x
+    #pragma diagram {"xy":"H34020;V7064"} #end)
+    (#7 expr bias
+    #pragma diagram {"xy":"H-84017;V58273"} #end)
+    (#8 expr x
+    #pragma diagram {"xy":"H-84017;V48940"} #end)
+    (#9 expr kernel
+    #pragma diagram {"xy":"H-84830;V53606","wh":"9626;3200"} #end)
+    (#10 def _
+    #pragma diagram {"xy":"H13757;V35270"} #end)
+    (#11 block (map activations::relu) <<5>>
+    #pragma diagram {"xy":"H-14108;V33270","wh":"25000;18000"} #end)
+    (#13 def _
+    #pragma diagram {"xy":"H16020;V53606"} #end)
+    (#14 block activations::softmax <<5>> 
+               #pragma diagram {"xy":"H-13980;V53606","wh":"25000;14000"} #end)
+    (/* [[0.100431032 0.349494636 0.127233088 0.253317624 0.169523656]] */let
+    #pragma diagram {"xy":"H9146;V63875","wh":"71507;3200"} #end)
+    (/* [[2.38769 3.63470697 2.62423944 3.31286287 2.91121125]] */let
+    #pragma diagram {"xy":"H5395;V20064","wh":"64006;3200"} #end)
+    (let _stop_condition = _current_cycle > 1;
+    #pragma diagram {"xy":"H-44952;V-36660","wh":"42442;3200"} #end)
+    
+    (#18 wire #0 => #2)
+    (#19 wire #3 => #4)
+    (#20 wire #5 => #6)
+    (#21 wire #7 => #1 .(bias))
+    (#22 wire #8 => #1 .(x))
+    (#23 wire #9 => #1 .(kernel))
+    (#24 wire #1 .(y) => #11, #14
+    #pragma diagram {"wp":"v0|#1 h12363[v-17998 #11, #14]"} #end)
+    (#25 wire #11 .(y) => #10
+    #pragma diagram {"wp":"v0|#11 #10"} #end)
+    (#26 wire #14 .(y) => #13
+    #pragma diagram {"wp":"v0|#14 #13"} #end)
+    
+    (var
+        bias: float64^5;
+        kernel: float64^5^10;
+        x: float64^10;)
+}
+
+_harness test_gelu_f64
+{
+  diagram
+    (let _stop_condition = _current_cycle >= 1000_ui64;
+    #pragma diagram {"xy":"H2138;V-12250","wh":"50880;3200"} #end)
+    (#1 block activations::gelu
+              #pragma diagram {"xy":"H26881;V4512","wh":"20000;14000"} #end)
+    (#2 def _
+    #pragma diagram {"xy":"H55819;V14606"} #end)
+    (#3 expr -8.0_f64
+    #pragma diagram {"xy":"H-84369;V-2988","wh":"11501;3200"} #end)
+    (#4 expr 0.1
+    #pragma diagram {"xy":"H-60619;V4512"} #end)
+    (#5 expr #6 + #7
+      where
+        (#6 group)
+        (#7 group)
+    #pragma diagram {"xy":"H-41619;V2612"} #end)
+    (#8 expr if #9 then #10 else #11
+      where
+        (#9 group)
+        (#10 group)
+        (#11 group)
+    #pragma diagram {"xy":"H-1619;V4512"} #end)
+    (#12 expr #13 <= #14
+      where
+        (#13 group)
+        (#14 group)
+    #pragma diagram {"xy":"H-21619;V-4888"} #end)
+    (#15 expr 8.0
+    #pragma diagram {"xy":"H-40619;V-2988"} #end)
+    (#16 expr 0
+    #pragma diagram {"xy":"H-20619;V6412"} #end)
+    (#17 expr #18 pre #19
+      where
+        (#18 group)
+        (#19 group)
+    #pragma diagram {"xy":"H-62619;V-1088"} #end)
+    (#20 def x0
+    #pragma diagram {"xy":"H54381;V4512"} #end)
+    (#21 expr x0
+    #pragma diagram {"xy":"H37819;V14606"} #end)
+    
+    (#22 wire #21 => #2)
+    (#23 wire #3 => #18)
+    (#24 wire #4 => #7)
+    (#25 wire #5 => #13, #10, #19
+    #pragma diagram {"wp":"#5 h3500[v4500 h-36000 v-6300[v-7600 #13, #19], #10]"} #end)
+    (#26 wire #15 => #14)
+    (#27 wire #12 => #9
+    #pragma diagram {"wp":"#12 h16500 #9"} #end)
+    (#28 wire #8 => #1)
+    (#29 wire #16 => #11)
+    (#30 wire #17 => #6
+    #pragma diagram {"wp":"#17 h6500 v1800 #6"} #end)
+    (#31 wire #1 => #20
+    #pragma diagram {"wp":"v0|#1 #20"} #end)
+    
+    (var
+        x0:float64;)
+}
+
+_harness test_gelu_f32
+{
+  diagram
+    (let _stop_condition = _current_cycle >= 1000_ui64;
+    #pragma diagram {"xy":"H2138;V-12250","wh":"50880;3200"} #end)
+    (#1 block activations::gelu
+              #pragma diagram {"xy":"H26881;V4512","wh":"20000;14000"} #end)
+    (#2 def _
+    #pragma diagram {"xy":"H55819;V14606"} #end)
+    (#3 expr -8.0_f32
+    #pragma diagram {"xy":"H-84369;V-2988","wh":"11501;3200"} #end)
+    (#4 expr 0.1
+    #pragma diagram {"xy":"H-60619;V4512"} #end)
+    (#5 expr #6 + #7
+      where
+        (#6 group)
+        (#7 group)
+    #pragma diagram {"xy":"H-41619;V2612"} #end)
+    (#8 expr if #9 then #10 else #11
+      where
+        (#9 group)
+        (#10 group)
+        (#11 group)
+    #pragma diagram {"xy":"H-1619;V4512"} #end)
+    (#12 expr #13 <= #14
+      where
+        (#13 group)
+        (#14 group)
+    #pragma diagram {"xy":"H-21619;V-4888"} #end)
+    (#15 expr 8.0
+    #pragma diagram {"xy":"H-40619;V-2988"} #end)
+    (#16 expr 0
+    #pragma diagram {"xy":"H-20619;V6412"} #end)
+    (#17 expr #18 pre #19
+      where
+        (#18 group)
+        (#19 group)
+    #pragma diagram {"xy":"H-62619;V-1088"} #end)
+    (#20 def x0
+    #pragma diagram {"xy":"H54381;V4512"} #end)
+    (#21 expr x0
+    #pragma diagram {"xy":"H37819;V14606"} #end)
+    
+    (#22 wire #4 => #7)
+    (#23 wire #5 => #13, #10, #19
+    #pragma diagram {"wp":"#5 h3500[v4500 h-36000 v-6300[v-7600 #13, #19], #10]"} #end)
+    (#24 wire #15 => #14)
+    (#25 wire #12 => #9
+    #pragma diagram {"wp":"#12 h16500 #9"} #end)
+    (#26 wire #8 => #1)
+    (#27 wire #16 => #11)
+    (#28 wire #21 => #2)
+    (#29 wire #3 => #18)
+    (#30 wire #17 => #6
+    #pragma diagram {"wp":"#17 h6500 v1800 #6"} #end)
+    (#31 wire #1 => #20
+    #pragma diagram {"wp":"v0|#1 #20"} #end)
+    
+    (var
+        x0:float32;)
+}
+
+_harness test_tanh
+{
+  diagram
+    (#0 block activations::tanh
+              #pragma diagram {"xy":"H-16175;V1525","wh":"20000;14000"} #end)
+    (let _stop_condition = _current_cycle >= 10_ui64;
+    #pragma diagram {"xy":"H-20542;V-18075","wh":"49005;3200"} #end)
+    (#2 def _
+    #pragma diagram {"xy":"H9525;V2450"} #end)
+    (#3 expr 9.0_f64
+    #pragma diagram {"xy":"H-38793;V-275","wh":"10563;3200"} #end)
+    
+    (#4 wire #0 => #2
+    #pragma diagram {"wp":"v925|#0 #2"} #end)
+    (#5 wire #3 => #0)
+}
+
+_harness test_softplus
+{
+  diagram
+    (let _stop_condition = _current_cycle >= 1000_ui64;
+    #pragma diagram {"xy":"H2577;V-17675","wh":"50880;3200"} #end)
+    (#1 block activations::softplus
+              #pragma diagram {"xy":"H-2243;V925","wh":"20000;14000"} #end)
+    (#2 block activations::softplus
+              #pragma diagram {"xy":"H1850;V18288","wh":"20000;14000"} #end)
+    (#3 expr 5.0_f32
+    #pragma diagram {"xy":"H-31025;V925","wh":"10563;3200"} #end)
+    (#4 expr 10.0_f64
+    #pragma diagram {"xy":"H-27400;V18288","wh":"11501;3200"} #end)
+    (#5 def _
+    #pragma diagram {"xy":"H25257;V925"} #end)
+    (#6 def _
+    #pragma diagram {"xy":"H29350;V18288"} #end)
+    
+    (#7 wire #3 => #1)
+    (#8 wire #4 => #2)
+    (#9 wire #1 => #5
+    #pragma diagram {"wp":"v0|#1 #5"} #end)
+    (#10 wire #2 => #6
+    #pragma diagram {"wp":"v0|#2 #6"} #end)
+}
+
+const input_convo: float32^1^6^6 =
+[
+    [
+        [0.16513085],
+        [0.9014813],
+        [0.6309742],
+        [0.4345461],
+        [0.29193902],
+        [0.64250207]
+    ],
+    [
+        [0.9757855],
+        [0.43509948],
+        [0.6601019],
+        [0.60489583],
+        [0.6366315],
+        [0.6144488]
+    ],
+    [
+        [0.8893349],
+        [0.6277617],
+        [0.53197503],
+        [0.02597821],
+        [0.44087505],
+        [0.25267076]
+    ],
+    [
+        [0.8862232],
+        [0.88729346],
+        [0.78728163],
+        [0.05955195],
+        [0.0710938],
+        [0.3084147]
+    ],
+    [
+        [0.25118268],
+        [0.9084705],
+        [0.47147965],
+        [0.24238515],
+        [0.63300395],
+        [0.5860311]
+    ],
+    [[0.910012], [0.5701437], [0.49643457], [0.5939151], [0.5414331], [0.44291723]]
+]
+;
+
+const bias_convo: float32^5 = [0.51010704, 0.44353175, 0.4085331 , 0.9924923 , 0.68866396];
+
+const kernel_convo: float32^3^3^1^5 = 
+[
+[[[0.8292774  ,0.3821411,  0.6565993 ],
+   [0.04848182 ,0.96515214, 0.6934124 ],
+   [0.5079107  ,0.39806926, 0.8828918 ]]],
+ [[[0.634228   ,0.2798195,  0.93477833],
+   [0.1776321  ,0.75696373, 0.6765826 ],
+   [0.2216742  ,0.19708812, 0.48150814]]],
+ [[[0.5147276  ,0.0337733,  0.9694326 ],
+   [0.70470166 ,0.6727526,  0.40355945],
+   [0.8485558  ,0.8257885,  0.5112301 ]]],
+ [[[0.39108086 ,0.43190658, 0.48662198],
+   [0.49190843 ,0.5339211,  0.01624858],
+   [0.94408786 ,0.15289044, 0.5877986 ]]],
+ [[[0.5809028  ,0.09417534, 0.40057564],
+   [0.3460425  ,0.32353437, 0.48113513],
+   [0.52639234 ,0.60246646, 0.9723538 ]]]
+];
+
+_harness test_add
+{
+  diagram
+    (#16 expr [[10_i32, 20],[ 30, 40]]
+    #pragma diagram {"xy":"H-58250;V47894","wh":"28000;3200"} #end)
+    (#17 block (map 
+                 (map {text%(+)%text}) <<2>>)
+                <<2>>
+    #pragma diagram {"xy":"H-16350;V42650","wh":"24000;20975"} #end)
+    (#19 expr [[0_i32, 1], [2, 3]]
+    #pragma diagram {"xy":"H-56250;V37406","wh":"24000;3200"} #end)
+    (#20 def _
+    #pragma diagram {"xy":"H15150;V42650"} #end)
+    (#21 block (map 
+                 (map {text%(+)%text}) <<3>>)
+                <<2>>
+    #pragma diagram {"xy":"H-8217;V70647","wh":"24000;20950"} #end)
+    (#23 def _
+    #pragma diagram {"xy":"H23283;V70647"} #end)
+    (#24 expr [[0_i32, 1, 2], [3, 4, 5]]
+    #pragma diagram {"xy":"H-45117;V77631","wh":"30000;3200"} #end)
+    (#25 expr [[10_i32, 20, 30],[ 30, 40, 50]]
+    #pragma diagram {"xy":"H-51592;V65672","wh":"36000;3200"} #end)
+    (#26 expr [[2_i32, 2, 2],[ 3, 3, 3]]
+    #pragma diagram {"xy":"H-45117;V70647","wh":"30000;3200"} #end)
+    
+    (#27 wire #16 => #17 .(2))
+    (#28 wire #17 => #20
+    #pragma diagram {"wp":"v-3488|#17 #20"} #end)
+    (#29 wire #19 => #17 .(1)
+    #pragma diagram {"wp":"#19 h9450 v5310 #17"} #end)
+    (#30 wire #21 => #23
+    #pragma diagram {"wp":"v-3488|#21 #23"} #end)
+    (#31 wire #25 => #21 .(2)
+    #pragma diagram {"wp":"#25 h9925 v3325 #21"} #end)
+    (#32 wire #24 => #21 .(1))
+    (#33 wire #26 => #21 .(3))
+}

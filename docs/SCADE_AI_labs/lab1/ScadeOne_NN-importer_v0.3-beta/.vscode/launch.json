@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Main File: Lenet",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/s1_keras_importer.py",
+            "console": "integratedTerminal",
+            "args": [
+                "Examples/lenet/trained_lenet.h5",
+                "-o",
+                "app_model_debug",
+                // "--copy-keras"
+            ]
+        },
+        {
+            "name": "Main File: manual arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/s1_keras_importer.py",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Current File: External Code",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [],
+            "justMyCode": false
+        },
+        {
+            "name": "Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "DEBUG",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/debug_import_keras.py",
+            "console": "integratedTerminal",
+        },
+    ]
+}

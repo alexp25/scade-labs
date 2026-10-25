@@ -1,0 +1,788 @@
+-- version swan: 2025.2 graph: 2.1
+use keras::utils;
+
+use keras::activations;
+
+function ReLU <<N>> (x: 'T^N;
+                     has_max : bool default=false;
+                     max_value: 'T default = 0;
+                     threshold: 'T default = 0;
+                     negative_slope: 'T default = 0;)
+  returns (y: 'T^N;)
+  where 'T numeric
+{
+  diagram
+    (/* ReLU (Rectified Linear Unit) activation layer with:
+       * input_shape=(N,), 
+       * max_value=None by default,
+       * negative_slope=0 by default
+       * threshold=0 by default
+     */ let
+    #pragma diagram {"xy":"H-72523;V-68421","wh":"54630;13516"} #end)
+    
+    (activate #6 $ActivateIfRelu
+      if has_max
+      then
+        {
+          diagram
+            (#7 def y
+            #pragma diagram {"xy":"h42688;v0"} #end)
+            (#8 expr max_value ^ N
+            #pragma diagram {"xy":"h-33906;v7100","wh":"16189;3200"} #end)
+            (#9 expr threshold ^ N
+            #pragma diagram {"xy":"h-33906;v-3125","wh":"16189;3200"} #end)
+            (#10 expr negative_slope ^ N
+            #pragma diagram {"xy":"h-36250;v1987","wh":"20877;3200"} #end)
+            (#11 expr x
+            #pragma diagram {"xy":"h-29812;v-6625"} #end)
+            (#12 block (map activations::relu_max) <<N>>
+            #pragma diagram {"xy":"h12288;v0","wh":"25000;22700"} #end)
+            
+            (#14 wire #8 => #12 .(max_value))
+            (#15 wire #10 => #12 .(negative_slope))
+            (#16 wire #9 => #12 .(threshold))
+            (#17 wire #11 => #12 .(x))
+            (#18 wire #12 .(y) => #7
+            #pragma diagram {"wp":"v-2000|#12 #7"} #end)
+        #pragma diagram {"xy":"h0;v-27562","wh":"102377;28700"} #end
+        }
+      elsif (threshold <> 0) or (negative_slope <> 0)
+      then
+        {
+          diagram
+            (#19 expr negative_slope ^ N
+            #pragma diagram {"xy":"h-36250;v5193","wh":"20877;3200"} #end)
+            (#20 def y
+            #pragma diagram {"xy":"h42688;v0"} #end)
+            (#21 block (map activations::relu_no_max) <<N>>
+            #pragma diagram {"xy":"h12288;v0","wh":"25000;19950"} #end)
+            (#23 expr x
+            #pragma diagram {"xy":"h-29812;v-3500"} #end)
+            (#24 expr threshold ^ N
+            #pragma diagram {"xy":"h-33906;v0","wh":"16189;3200"} #end)
+            
+            (#25 wire #23 => #21 .(x))
+            (#26 wire #24 => #21 .(threshold))
+            (#27 wire #21 .(y) => #20
+            #pragma diagram {"wp":"v-2000|#21 #20"} #end)
+            (#28 wire #19 => #21 .(negative_slope))
+        #pragma diagram {"xy":"h0;v3963","wh":"102377;25950"} #end
+        }
+      else
+        {
+          diagram
+            (#2 block (map activations::relu) <<N>>
+            #pragma diagram {"xy":"h12688;v0","wh":"25000;18000"} #end)
+            (#1 expr x
+            #pragma diagram {"xy":"h-30000;v0"} #end)
+            (#0 def y
+            #pragma diagram {"xy":"h42688;v-12"} #end)
+            
+            (#4 wire #1 => #2)
+            (#5 wire #2 => #0
+            #pragma diagram {"wp":"v-2012|#2 #0"} #end)
+        #pragma diagram {"xy":"h0;v33125","wh":"102377;23975"} #end
+        }
+    #pragma diagram {"xy":"H-74744;V-9675","wh":"102377;93225"} #end)
+}
+
+function Dense <<N, M>> (x: 'T ^N;
+                         kernel : 'T ^M ^N;
+                         bias : 'T ^M;)
+  returns (y: 'T ^M;)
+  where 'T numeric
+{
+  diagram
+    (/*
+     ------------------
+     Dense layer with: 
+     * units=M
+     * input_shape=(N,)
+     * activation=None
+     ------------------
+     [ ∑i(wij*xi) + bj ]j
+     */
+     let
+    #pragma diagram {"xy":"H-72620;V-46053","wh":"24000;19095"} #end)
+    (#17 expr forward
+      <<M>> with <<i>>
+      diagram
+        (#18 block (fold {text%(+)%text}) <<N>>
+        #pragma diagram {"xy":"h41425;v-2247","wh":"24000;17975"} #end)
+        (#20 def yi
+        #pragma diagram {"xy":"h70925;v-2247"} #end)
+        (#21 expr bias[i]
+        #pragma diagram {"xy":"h20725;v-2778","wh":"12000;3200"} #end)
+        (#1 expr kernel
+        #pragma diagram {"xy":"h-70113;v6741","wh":"9626;3200"} #end)
+        (#22 expr x
+        #pragma diagram {"xy":"h-19925;v2247"} #end)
+        (#23 block (map {text%(*)%text}) <<N>>
+        #pragma diagram {"xy":"h-475;v2247","wh":"25000;17975"} #end)
+        (#3 expr transpose {1,2} (#5)
+          where
+            (#5 group)
+        #pragma diagram {"xy":"h-53200;v6741","wh":"20000;7000"} #end)
+        (#6 expr #7[i]
+          where
+            (#7 group)
+        #pragma diagram {"xy":"h-32875;v6741","wh":"12000;7000"} #end)
+        
+        (#26 wire #18 => #20
+        #pragma diagram {"wp":"v-2000|#18 #20"} #end)
+        (#27 wire #21 => #18 .(1))
+        (#28 wire #23 => #18 .(2)
+        #pragma diagram {"wp":"v-1506|#23 #18"} #end)
+        (#8 wire #6 => #23 .(2))
+        (#30 wire #22 => #23 .(1))
+        (#9 wire #1 => #5)
+        (#10 wire #3 => #7)
+      returns ([yi])
+    #pragma diagram {"xy":"H-71445;V-13636","wh":"158451;38869"} #end)
+    (#2 def y
+    #pragma diagram {"xy":"H22130;V-15683"} #end)
+    
+    (#4 wire #17 => #2
+    #pragma diagram {"wp":"v-2047|#17 #2"} #end)
+}
+
+function Dense_OLD <<N, M>> (x: 'T ^N;
+                             kernel : 'T ^M ^N;
+                             bias : 'T ^M;)
+  returns (y: 'T ^M;)
+  where 'T numeric
+{
+  diagram
+    (/*
+     ------------------
+     Dense layer with: 
+     * units=M
+     * input_shape=(N,)
+     * activation=None
+     ------------------
+     */
+     let
+    #pragma diagram {"xy":"H-84030;V-51732","wh":"20877;17235"} #end)
+    (#1 def y
+    #pragma diagram {"xy":"H-30069;V-25488"} #end)
+    (#2 block (map utils::dot_bias <<N>> ) <<M>>
+    #pragma diagram {"xy":"H-60069;V-25475","wh":"25000;18000"} #end)
+    (#4 expr bias
+    #pragma diagram {"xy":"H-90469;V-31479"} #end)
+    (#5 expr x
+    #pragma diagram {"xy":"H-120469;V-17988"} #end)
+    (#6 expr #7 ^ (M)
+      where
+        (#7 group)
+    #pragma diagram {"xy":"H-91469;V-17988","wh":"10000;7000"} #end)
+    (#8 expr kernel
+    #pragma diagram {"xy":"H-121281;V-25488","wh":"9626;3200"} #end)
+    (#9 expr transpose {1,2} (#10)
+      where
+        (#10 group)
+    #pragma diagram {"xy":"H-96469;V-25488","wh":"20000;7000"} #end)
+    
+    (#11 wire #4 => #2 .(b)
+    #pragma diagram {"wp":"#4 h8450 v3300 #2"} #end)
+    (#12 wire #6 => #2 .(x))
+    (#13 wire #5 => #7)
+    (#14 wire #8 => #10)
+    (#15 wire #9 => #2 .(w))
+    (#16 wire #2 => #1
+    #pragma diagram {"wp":"v-2013|#2 #1"} #end)
+}
+
+function Flatten2D <<N, M>> (x: 'T^M^N;)
+  returns (y: 'T^(N*M);)
+  where 'T numeric
+{
+  diagram
+    (/* Flatten layer with: input_shape=(N, M) and data_format="channels_last" */ let
+    #pragma diagram {"xy":"H-28384;V-14350","wh":"79008;3200"} #end)
+    (#1 block (mapi ({op_expr%function i, x => (x.[i/M][i mod M] default 0)%op_expr})) <<N*M>>
+    #pragma diagram {"xy":"H-24387;V-1988","wh":"32200;17975"} #end)
+    (#3 def y
+    #pragma diagram {"xy":"H11213;V-1988"} #end)
+    (#4 expr x ^(N*M)
+    #pragma diagram {"xy":"H-62138;V-1988","wh":"11501;3200"} #end)
+    
+    (#5 wire #4 => #1 .(x))
+    (#6 wire #1 => #3
+    #pragma diagram {"wp":"v-1988|#1 #3"} #end)
+}
+
+function Flatten3D <<N, M, L>> (x: 'T^L^M^N;)
+  returns (y: 'T^(N*M*L);)
+  where 'T numeric
+{
+  diagram
+    (/* Flatten layer with: input_shape=(N, M, L) and data_format="channels_last" */ let
+    #pragma diagram {"xy":"H-26116;V-13050","wh":"81821;3200"} #end)
+    (#1 block (mapi ({op_expr%function i, x => (x.[i/(M*L)][(i/L) mod M][i mod L] default 0)%op_expr})) <<N*M*L>>
+    #pragma diagram {"xy":"H-22150;V325","wh":"49300;18000"} #end)
+    (#3 def y
+    #pragma diagram {"xy":"H18050;V325"} #end)
+    (#4 expr x ^(N*M*L)
+    #pragma diagram {"xy":"H-60338;V2325","wh":"13376;3200"} #end)
+    
+    (#5 wire #4 => #1 .(x))
+    (#6 wire #1 => #3
+    #pragma diagram {"wp":"v-2000|#1 #3"} #end)
+}
+
+function TFlatten2D <<N, M>> (x: 'T^M^N;)
+  returns (y: 'T^(N*M);)
+  where 'T numeric
+{
+  diagram
+    (/* Flatten layer with: input_shape=(N, M) and data_format="channels_first" */ let
+    #pragma diagram {"xy":"H-31216;V-13550","wh":"79946;3200"} #end)
+    (#1 block (mapi ({op_expr%function i, x => (x . [i mod N][i / N] default 0)%op_expr})) <<N*M>>
+    #pragma diagram {"xy":"H-30094;V425","wh":"32200;18000"} #end)
+    (#3 def y
+    #pragma diagram {"xy":"H-1106;V2425"} #end)
+    (#4 expr x ^(N*M)
+    #pragma diagram {"xy":"H-60832;V2425","wh":"11501;3200"} #end)
+    
+    (#5 wire #4 => #1 .(x))
+    (#6 wire #1 => #3
+    #pragma diagram {"wp":"v0|#1 #3"} #end)
+}
+
+function TFlatten3D <<N, M, L>> (x: 'T^L^M^N;)
+  returns (y: 'T^(N*M*L);)
+  where 'T numeric
+{
+  diagram
+    (/* Flatten layer with: input_shape=(N, M, L) and data_format="channels_first" */ let
+    #pragma diagram {"xy":"H-25647;V-15350","wh":"82758;3200"} #end)
+    (#1 block (mapi ({op_expr%function i, x => (x . [i / M mod N][i mod M][i / (N * M)] default 0)%op_expr})) <<N*M*L>>
+    #pragma diagram {"xy":"H-19000;V325","wh":"55600;18000"} #end)
+    (#3 def y
+    #pragma diagram {"xy":"H19650;V3000"} #end)
+    (#4 expr x ^(N*M*L)
+    #pragma diagram {"xy":"H-60338;V2325","wh":"13376;3200"} #end)
+    
+    (#5 wire #4 => #1 .(x))
+    (#6 wire #1 => #3
+    #pragma diagram {"wp":"v675|#1 #3"} #end)
+}
+
+function MaxPool2D <<C, H, W, Ph, Pw, Sh, Sw>> (x: 'T^W^H^C;)
+  returns (y: 'T^((W - Pw + Sw) / Sw)^((H - Ph + Sh) / Sh)^C;)
+  where 'T numeric
+{
+  diagram
+    (/*
+     MaxPool2D layer with: 
+     * padding='valid' 
+     * data_format="channels_first"
+     * input_shape=(C, H, W,)
+     * pool_size=(Ph, Pw)
+     * strides=(Sh, Sw)
+     */ let
+    #pragma diagram {"xy":"H-26524;V-21362","wh":"32128;15376"} #end)
+    (#1 expr x
+    #pragma diagram {"xy":"H-50850;V4315"} #end)
+    (#2 def y
+    #pragma diagram {"xy":"H350;V4315"} #end)
+    (#3 block (map utils::max_pool <<H, W, Ph, Pw, Sh, Sw>> ) <<C>>
+    #pragma diagram {"xy":"H-25250;V2315","wh":"25000;18000"} #end)
+    
+    (#5 wire #1 => #3 .(x))
+    (#6 wire #3 => #2
+    #pragma diagram {"wp":"v0|#3 #2"} #end)
+}
+
+function TMaxPool2D <<C, H, W, Ph, Pw, Sh, Sw>> (x: 'T^C^W^H;)
+  returns (y: 'T^C^((W - Pw + Sw) / Sw)^((H - Ph + Sh) / Sh);)
+  where 'T numeric
+{
+  diagram
+    (#0 expr x
+    #pragma diagram {"xy":"H-50850;V4315"} #end)
+    (#1 def y
+    #pragma diagram {"xy":"H129550;V4315"} #end)
+    (#2 block (map utils::max_pool <<H, W, Ph, Pw, Sh, Sw>> ) <<C>>
+    #pragma diagram {"xy":"H39550;V4327","wh":"25000;18000"} #end)
+    (/*
+     MaxPool2D layer with: 
+     * padding='valid' 
+     * data_format="channels_last"
+     * input_shape=(H, W, C,)
+     * pool_size=(Ph, Pw)
+     * strides=(Sh, Sw)
+     
+     -- TODO optim transpose
+     */ let
+    #pragma diagram {"xy":"H36455;V-17924","wh":"31190;19095"} #end)
+    (#5 expr transpose {1, 2} (#6)
+      where
+        (#6 group)
+    #pragma diagram {"xy":"H3150;V4315","wh":"20000;7000"} #end)
+    (#7 expr transpose {2, 3} (#8)
+      where
+        (#8 group)
+    #pragma diagram {"xy":"H-26850;V4315","wh":"20000;7000"} #end)
+    (#9 expr transpose {2, 3} (#10)
+      where
+        (#10 group)
+    #pragma diagram {"xy":"H105550;V4315","wh":"20000;7000"} #end)
+    (#11 expr transpose {1, 2} (#12)
+      where
+        (#12 group)
+    #pragma diagram {"xy":"H75550;V4315","wh":"20000;7000"} #end)
+    
+    (#13 wire #0 => #8)
+    (#14 wire #2 => #12
+    #pragma diagram {"wp":"v-2012|#2 #12"} #end)
+    (#15 wire #7 => #6)
+    (#16 wire #5 => #2 .(x))
+    (#17 wire #11 => #10)
+    (#18 wire #9 => #1)
+}
+
+inline function PMaxPool2D <<C, H, W, Kh, Kw, Sh, Sw, Ph, Pw>> (x: 'T^W^H^C;
+                                                                v: 'T;)
+  returns (y: 'T^((W - 1 + Sw) / Sw)^((H - 1 + Sh) / Sh)^C;)
+  where 'T numeric
+{
+  diagram
+    (#1 expr x
+    #pragma diagram {"xy":"H-81700;V11675"} #end)
+    (#2 expr v^C
+    #pragma diagram {"xy":"H-81700;V2688"} #end)
+    (#3 def y
+    #pragma diagram {"xy":"H21900;V7181"} #end)
+    (#5 $N1 block (map utils::pad2d <<H, W, Ph, Pw>> ) <<C>>
+    #pragma diagram {"xy":"H-51300;V7194","wh":"25000;18000"} #end)
+    (#7 $N2 block (map utils::max_pool <<H+Ph, W+Pw, Kh, Kw, Sh, Sw>> ) <<C>>
+    #pragma diagram {"xy":"H-8500;V7194","wh":"25000;18000"} #end)
+    (/*
+     MaxPool2D layer with:
+     * padding='same' with paddings (Ph, Pw)
+     * data_format="channels_first"
+     * input_shape=(C, H, W,)
+     * pool_size=(Kh, Kw)
+     * strides=(Sh, Sw)
+     */
+      let
+    #pragma diagram {"xy":"H-31700;V-15562","wh":"40566;17235"} #end)
+    
+    (#9 wire #1 => #5 .(x))
+    (#10 wire #2 => #5 .(v))
+    (#11 wire #5 .(y) => #7 .(x)
+    #pragma diagram {"wp":"v312|#5 #7"} #end)
+    (#13 wire #7 .(y) => #3
+    #pragma diagram {"wp":"v-2013|#7 #3"} #end)
+}
+
+function TPMaxPool2D <<C, H, W, Kh, Kw, Sh, Sw, Ph, Pw>> (x: 'T^C^W^H;
+                                                          v: 'T;)
+  returns (y: 'T^C^((W - 1 + Sw) / Sw)^((H - 1 + Sh) / Sh);)
+  where 'T numeric
+{
+  diagram
+    (#0 expr transpose {1, 2} (#1)
+      where
+        (#1 group)
+    #pragma diagram {"xy":"H22850;V11650","wh":"20000;7000"} #end)
+    (#2 $N1 block (map utils::pad2d <<H, W, Ph, Pw>> ) <<C>>
+    #pragma diagram {"xy":"H59250;V7169","wh":"25000;18000"} #end)
+    (#4 expr x
+    #pragma diagram {"xy":"H-31150;V11650"} #end)
+    (#5 expr transpose {2, 3} (#6)
+      where
+        (#6 group)
+    #pragma diagram {"xy":"H-7150;V11650","wh":"20000;7000"} #end)
+    (#7 expr v^C
+    #pragma diagram {"xy":"H28850;V2663"} #end)
+    (#10 $N4 block (map utils::max_pool <<H+Ph, W+Pw, Kh, Kw, Sh, Sw>> ) <<C>>
+    #pragma diagram {"xy":"H102050;V7169","wh":"25000;18000"} #end)
+    (#13 def y
+    #pragma diagram {"xy":"H192450;V7156"} #end)
+    (#14 expr transpose {2, 3} (#15)
+      where
+        (#15 group)
+    #pragma diagram {"xy":"H168450;V7156","wh":"20000;7000"} #end)
+    (#16 expr transpose {1, 2} (#17)
+      where
+        (#17 group)
+    #pragma diagram {"xy":"H138450;V7156","wh":"20000;7000"} #end)
+    (/* 
+     MaxPool2D layer with: 
+     * padding='same' with paddings (Ph, Pw)
+     * data_format="channels_first"
+     * input_shape=(C, H, W,)
+     * pool_size=(Ph, Pw)
+     * strides=(Sh, Sw)
+     */
+     let
+    #pragma diagram {"xy":"H62350;V-18428","wh":"40566;17235"} #end)
+    
+    (#19 wire #4 => #6)
+    (#20 wire #5 => #1)
+    (#21 wire #0 => #2 .(x))
+    (#22 wire #7 => #2 .(v))
+    (#27 wire #16 => #15)
+    (#28 wire #14 => #13)
+    (#8 wire #2 .(y) => #10 .(x)
+    #pragma diagram {"wp":"v312|#2 #10"} #end)
+    (#9 wire #10 .(y) => #17
+    #pragma diagram {"wp":"v-2013|#10 #17"} #end)
+}
+
+function TConv2D <<F, C, H, W, Kh, Kw, Sh, Sw>> (/* input */ x: 'T^C^W^H;
+                                                 /* weights matrix */ kernel: 'T^Kw^Kh^C^F;
+                                                 /* bias vector */ bias: 'T^F;)
+  returns (y: 'T^F^((W - Kw + Sw) / Sw)^((H - Kh + Sh) / Sh);)
+  where 'T numeric
+{
+  diagram
+    (/*
+     Conv2D layer with: 
+     * padding='valid'
+     * data_format="channels_last"
+     * filters=F, 
+     * input_shape=(H, W, C,)
+     * kernel_size=(Kh, Kw)
+     * strides=(Sh, Sw)
+     * dilation_rate=(1, 1)
+     * groups=1
+     * activation=None
+     
+     -- TODO optim: instead of transposing the input and the output,
+      the convolution computation could be reversed
+     */ let
+    #pragma diagram {"xy":"H18384;V12184","wh":"63069;28392"} #end)
+    (#1 block (map utils::conv <<C, H, W, Kh, Kw, Sh, Sw>> ) <<F>>
+    #pragma diagram {"xy":"H9900;V37775","wh":"25000;18000"} #end)
+    (#3 expr bias
+    #pragma diagram {"xy":"H-27000;V34263"} #end)
+    (#4 expr x
+    #pragma diagram {"xy":"H-105000;V43754"} #end)
+    (#5 expr transpose {2, 3} (#6)
+      where
+        (#6 group)
+    #pragma diagram {"xy":"H-81000;V43754","wh":"20000;7000"} #end)
+    (#7 expr transpose {1, 2} (#8)
+      where
+        (#8 group)
+    #pragma diagram {"xy":"H-51000;V43754","wh":"20000;7000"} #end)
+    (#9 expr #10 ^ (F)
+      where
+        (#10 group)
+    #pragma diagram {"xy":"H-26000;V43754","wh":"10000;7000"} #end)
+    (#11 expr kernel
+    #pragma diagram {"xy":"H-25813;V37763","wh":"9626;3200"} #end)
+    (#12 expr transpose {2, 3} (#13)
+      where
+        (#13 group)
+    #pragma diagram {"xy":"H75900;V37763","wh":"20000;7000"} #end)
+    (#14 expr transpose {1, 2} (#15)
+      where
+        (#15 group)
+    #pragma diagram {"xy":"H45900;V37763","wh":"20000;7000"} #end)
+    (#16 def y
+    #pragma diagram {"xy":"H99900;V37763"} #end)
+    
+    (#17 wire #3 => #1 .(bias))
+    (#18 wire #4 => #6)
+    (#19 wire #5 => #8)
+    (#20 wire #7 => #10)
+    (#21 wire #9 => #1 .(x))
+    (#22 wire #11 => #1 .(weight))
+    (#23 wire #1 => #15
+    #pragma diagram {"wp":"v-2012|#1 #15"} #end)
+    (#24 wire #14 => #13)
+    (#25 wire #12 => #16)
+}
+
+function Conv2D <<F, C, H, W, Kh, Kw, Sh, Sw>> (x: 'T^W^H^C;
+                                                kernel : 'T^Kw^Kh^C^F;
+                                                bias : 'T^F;)
+  returns (y: 'T^((W - Kw + Sw) / Sw)^((H - Kh + Sh) / Sh)^F;)
+  where 'T numeric
+{
+  diagram
+    (/* Conv2D layer with: 
+         * padding='valid', 
+         * data_format="channels_first", 
+         * filters=F, 
+         * input_shape=(C, H, W,), 
+         * kernel_size=(Kh, Kw), 
+         * strides=(Sh, Sw), 
+         * dilation_rate=(1, 1), 
+         * groups=1, 
+         * activation=None. 
+     */let
+    #pragma diagram {"xy":"H-18550;V-28267","wh":"37754;20954"} #end)
+    (#2 def y
+    #pragma diagram {"xy":"H11850;V-3245"} #end)
+    (#3 expr x
+    #pragma diagram {"xy":"H-73450;V4201"} #end)
+    (#6 expr bias
+    #pragma diagram {"xy":"H-56750;V-7707","wh":"10000;7000"} #end)
+    (#8 block (map utils::conv <<C, H, W, Kh, Kw, Sh, Sw>> ) <<F>>
+    #pragma diagram {"xy":"H-18550;V-3232","wh":"25000;18000"} #end)
+    (#4 expr kernel
+    #pragma diagram {"xy":"H-62950;V-899","wh":"9626;3200"} #end)
+    (#5 expr #7 ^ (F)
+      where
+        (#7 group)
+    #pragma diagram {"xy":"H-51450;V4201","wh":"10000;7000"} #end)
+    
+    (#12 wire #6 => #8 .(bias))
+    (#14 wire #8 .(y) => #2
+    #pragma diagram {"wp":"v-2013|#8 #2"} #end)
+    (#9 wire #3 => #7)
+    (#10 wire #5 => #8 .(x))
+    (#11 wire #4 => #8 .(weight))
+}
+
+function PConv2D <<F, C, H, W, Kh, Kw, Sh, Sw, Ph, Pw>> (x: 'T^W^H^C;
+                                                         kernel: 'T^Kw^Kh^C^F;
+                                                         bias: 'T^F;)
+  returns (y: 'T^((W - 1 + Sw) / Sw)^((H - 1 + Sh) / Sh)^F;)
+  where 'T numeric
+{
+  diagram
+    (/* PConv2D layer with: 
+         * padding='same', 
+         * data_format="channels_first", 
+         * filters=F, 
+         * input_shape=(C, H, W,), 
+         * kernel_size=(Kh, Kw), 
+         * strides=(Sh, Sw), 
+         * dilation_rate=(1, 1), 
+         * groups=1,
+         * activation=None.
+     -- TODO optim: instead of padding the input before convolution, 
+         -the convolution could consider cells out range as 0
+     */let
+    #pragma diagram {"xy":"H-60160;V-39712","wh":"64006;24673"} #end)
+    (#2 expr x
+    #pragma diagram {"xy":"H-81743;V-15514"} #end)
+    (#3 block (map utils::pad2d <<H, W, Ph, Pw>> ) <<C>>
+    #pragma diagram {"xy":"H-48743;V-12114","wh":"25000;18000"} #end)
+    (#5 expr (0 :> 'T)
+    #pragma diagram {"xy":"H-90562;V-8426","wh":"12438;3200"} #end)
+    (#8 def L1
+    #pragma diagram {"xy":"H-18343;V-12126"} #end)
+    (#9 expr L1
+    #pragma diagram {"xy":"H-101362;V18102"} #end)
+    (#10 block (map utils::conv <<C, H+Ph, W+Pw, Kh, Kw, Sh, Sw>> ) <<F>>
+    #pragma diagram {"xy":"H-48743;V12123","wh":"25000;18000"} #end)
+    (#12 def y
+    #pragma diagram {"xy":"H-18343;V12110"} #end)
+    (#13 expr bias
+    #pragma diagram {"xy":"H-83643;V8610"} #end)
+    (#11 expr #14 ^ (F)
+      where
+        (#14 group)
+    #pragma diagram {"xy":"H-76550;V18102","wh":"10000;7000"} #end)
+    (#15 expr kernel
+    #pragma diagram {"xy":"H-87351;V12123","wh":"9626;3200"} #end)
+    (#16 expr #22 ^ (C)
+      where
+        (#22 group)
+    #pragma diagram {"xy":"H-76550;V-8426","wh":"10000;7000"} #end)
+    
+    (#18 wire #2 => #3 .(x))
+    (#20 wire #3 .(y) => #8
+    #pragma diagram {"wp":"v-2012|#3 #8"} #end)
+    (#21 wire #13 => #10 .(bias))
+    (#24 wire #10 .(y) => #12
+    #pragma diagram {"wp":"v-2013|#10 #12"} #end)
+    (#6 wire #5 => #22)
+    (#7 wire #16 => #3 .(v))
+    (#23 wire #15 => #10 .(weight))
+    (#25 wire #11 => #10 .(x))
+    (#27 wire #9 => #14)
+    
+    (var
+        L1: 'T^(W + Pw)^(H + Ph)^C;)
+}
+
+function TPConv2D <<F, C, H, W, Kh, Kw, Sh, Sw, Ph, Pw>> (/* input */ x: 'T^C^W^H;
+                                                          /* weights matrix */ kernel: 'T^Kw^Kh^C^F;
+                                                          /* bias vector */ bias: 'T^F;)
+  returns (y : 'T ^F ^(((W - 1) + Sw) / Sw) ^(((H - 1) + Sh) / Sh);)
+  where 'T numeric
+{
+  diagram
+    (/*
+     Conv2D layer with: 
+     * padding='same'
+     * data_format="channels_last"
+     * filters=F, 
+     * input_shape=(H, W, C,)
+     * kernel_size=(Kh, Kw)
+     * strides=(Sh, Sw)
+     * dilation_rate=(1, 1)
+     * groups=1
+     * activation=None
+     
+     -- TODO: optim padding and transpose
+     */ let
+    #pragma diagram {"xy":"H-5724;V4229","wh":"37754;26533"} #end)
+    (#1 block (map utils::conv <<C, H + Ph, W + Pw, Kh, Kw, Sh, Sw>> ) <<F>>
+    #pragma diagram {"xy":"H-33602;V34394","wh":"25000;18000"} #end)
+    (#3 expr bias
+    #pragma diagram {"xy":"H-68502;V28390"} #end)
+    (#4 expr #5 ^ (F)
+      where
+        (#5 group)
+    #pragma diagram {"xy":"H-69502;V40373","wh":"10000;7000"} #end)
+    (#6 expr kernel
+    #pragma diagram {"xy":"H-69315;V34381","wh":"9626;3200"} #end)
+    (#7 expr transpose {2, 3} (#8)
+      where
+        (#8 group)
+    #pragma diagram {"xy":"H32398;V28781","wh":"20000;7000"} #end)
+    (#9 expr transpose {1, 2} (#10)
+      where
+        (#10 group)
+    #pragma diagram {"xy":"H2398;V28781","wh":"20000;7000"} #end)
+    (#11 def y
+    #pragma diagram {"xy":"H56398;V28781"} #end)
+    (#12 def _
+    #pragma diagram {"xy":"H-96735;V69775"} #end)
+    (#13 def L2
+    #pragma diagram {"xy":"H8398;V34381"} #end)
+    (#14 expr L2
+    #pragma diagram {"xy":"H-114448;V76250"} #end)
+    (#15 expr L1
+    #pragma diagram {"xy":"H-114448;V69775"} #end)
+    (#16 expr x
+    #pragma diagram {"xy":"H-191302;V50467"} #end)
+    (#17 block (map utils::pad2d <<H, W, Ph, Pw>> ) <<C>>
+    #pragma diagram {"xy":"H-100902;V45986","wh":"25000;18000"} #end)
+    (#19 expr transpose {1, 2} (#20)
+      where
+        (#20 group)
+    #pragma diagram {"xy":"H-137302;V50467","wh":"20000;7000"} #end)
+    (#21 expr transpose {2, 3} (#22)
+      where
+        (#22 group)
+    #pragma diagram {"xy":"H-167302;V50467","wh":"20000;7000"} #end)
+    (#23 expr (0 :> 'T) ^C
+    #pragma diagram {"xy":"H-134928;V41479","wh":"15251;3200"} #end)
+    (#24 def L1
+    #pragma diagram {"xy":"H-68502;V45973"} #end)
+    (#25 def _
+    #pragma diagram {"xy":"H-96448;V76250"} #end)
+    (/* Note: L1 and L2 are kept for comparing with previous SCADE 6 Implementation */let
+    #pragma diagram {"xy":"H-93859;V64700","wh":"82758;3200"} #end)
+    
+    (#26 wire #3 => #1 .(bias)
+    #pragma diagram {"wp":"#3 h10700 v2673 #1"} #end)
+    (#27 wire #4 => #1 .(x))
+    (#28 wire #6 => #1 .(weight))
+    (#29 wire #1 => #10, #13
+    #pragma diagram {"wp":"v-2013|#1 h6750[v-5600 #10, #13]"} #end)
+    (#30 wire #9 => #8)
+    (#31 wire #7 => #11)
+    (#32 wire #14 => #25)
+    (#33 wire #15 => #12)
+    (#34 wire #21 => #20)
+    (#35 wire #16 => #22)
+    (#36 wire #19 => #17 .(x))
+    (#37 wire #23 => #17 .(v))
+    (#38 wire #17 .(y) => #24, #5
+    #pragma diagram {"wp":"v-3725|#17 h4475[h4950 v1712 #24, v-3888 #5]"} #end)
+    
+    (var
+        L1 : 'T ^(W + (Kw - 1)) ^(H + (Kh - 1)) ^C;
+        L2 : 'T ^((((W + (Kw - 1)) - Kw) + Sw) / Sw) ^((((H + (Kh - 1)) - Kh) + Sh) / Sh) ^F;)
+}
+
+{text%
+      /* LSTM layer with: units=U, input_shape=(TS,F), return_state=False, go_backwards=False, return_state=True, return_sequences=False, initial_state=[h_0, c_0], mask=None, activation='tanh' and recurrent_activation='sigmoid' */
+      function LSTM<<TS, F, U>> (
+            inputs: 'T^F^TS;
+            h_0: 'T^U;
+            c_0: 'T^U;
+            kernel: 'T^(4 * U)^F;
+            recurrent_kernel: 'T^(4 * U)^U;
+            bias: 'T^(4 * U))
+          returns (h: 'T^U) where 'T float {
+          let
+            h, _, _ = (
+                function (
+                  h_1: 'T^U;
+                  j_1: 'T^U;
+                  k: 'T^F^TS;
+                  l: 'T^(4 * U)^F^TS;
+                  m: 'T^(4 * U)^U^TS;
+                  n: 'T^(4 * U)^TS)
+                returns (
+                  p: 'T^U;
+                  q: 'T^U;
+                  r: 'T^U^TS){
+                  var
+                    opcall: ((l1 : 'T^U, l2 : 'T^U), 'T^U^TS);
+                  let
+                    opcall = (
+                        mapfold (
+                          function (
+                            a: (l1 : 'T^U, l2 : 'T^U);
+                            b_1: 'T^F;
+                            c_1: 'T^(4 * U)^F;
+                            d: 'T^(4 * U)^U;
+                            e: 'T^(4 * U))
+                          returns (
+                            f: (l1 : 'T^U, l2 : 'T^U);
+                            g: 'T^U){
+                            var
+                              v_1: 'T^U;
+                              v_1_1: 'T^U;
+                            let
+                              v_1, v_1_1, g = utils::LSTMCell <<F, U>> (a.(l1, l2), b_1, c_1, d, e);
+                              f = (l1: v_1, l2: v_1_1);
+                          }
+        
+                        )
+                      ) <<TS>> ((l1: h_1, l2: j_1), k, l, m, n);
+                    p, q = opcall.(1).(l1, l2);
+                    r = opcall.(2);
+                }
+        
+              ) (h_0, c_0, inputs, kernel^TS, recurrent_kernel^TS, bias^TS);
+        }
+            %text}
+
+{text% function BatchNorm3D<<C, H, W>> (
+          x: 'T^C^W^H;
+          scale: 'T^C;
+          offset: 'T^C;
+          mean: 'T^C;
+          variance: 'T^C;
+          epsilon: 'T)
+        returns (y: 'T^C^W^H) where 'T float {
+        let
+          L = (map (+)) <<C>> $N1 (variance, epsilon^C);
+          y = (map (map (map utils::normalize) <<C>>) <<W>>) <<H>> $N2 (
+              x, scale^W^H, offset^W^H, mean^W^H, L^W^H
+            );
+        var
+          L: 'T^C;
+      }
+       %text}
+
+{text% function TZeroPadding2D<<C, H, W, Pht, Phb, Pwl, Pwr>> (x: 'T^C^W^H)
+        returns (y: 'T^C^(W + Pwl + Pwr)^(H + Pht + Phb)) where 'T numeric {
+        let
+          _, y = (
+              mapi (mapfoldi utils::pad_cell_0v <<C, H, W, Pht, Pwl>>) <<W + Pwl
+              + Pwr>>
+            ) <<H + Pht + Phb>> $N1 (x^(W + Pwl + Pwr)^(H + Pht + Phb));
+      }
+       %text}
+
+{text% function ZeroPadding2D<<C, H, W, Pht, Phb, Pwl, Pwr>> (x: 'T^W^H^C)
+        returns (y: 'T^(W + Pwl + Pwr)^(H + Pht + Phb)^C) where 'T numeric {
+        let
+          y = (map utils::pad2d_v2 <<H, W, Pht, Phb, Pwl, Pwr>>) <<C>> $N1 (x, 0^C);
+      }
+       %text}

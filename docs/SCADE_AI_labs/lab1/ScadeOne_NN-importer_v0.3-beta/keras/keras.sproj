@@ -1,0 +1,12 @@
+{
+  "Version": "1.0",
+  "Name": "keras",
+  "Dependencies": [],
+  "Resources": [
+    {
+      "Kind": "SourceFile",
+      "Path": "resources\\math_imported.c",
+      "Key": ""
+    }
+  ]
+}
