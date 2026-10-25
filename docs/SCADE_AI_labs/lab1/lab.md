@@ -1031,6 +1031,7 @@ train_val_murmur_spectrograms_dest_dir = r'<path to Training/Validation Murmur s
 percentage_of_img_to_move = 0.15
 normal_spectrograms = [f for f in os.listdir(train_val_normal_spectrograms_dest_dir) if f.endswith(".png")]
 num_of_normal_spectrograms_to_move = int(len(normal_spectrograms)*percentage_of_img_to_move)
+random.seed(42)  # For reproducibility
 normal_spectrograms_to_move = random.sample(normal_spectrograms, num_of_normal_spectrograms_to_move)
 for normal_spectrogam in normal_spectrograms_to_move:
     source_path = os.path.join(train_val_normal_spectrograms_dest_dir, normal_spectrogam)
@@ -1039,6 +1040,7 @@ for normal_spectrogam in normal_spectrograms_to_move:
     print(f"Moved: {normal_spectrogam} -> {destination_path}")
 murmur_spectrograms = [f for f in os.listdir(train_val_murmur_spectrograms_dest_dir) if f.endswith(".png")]
 num_of_murmur_spectrograms_to_move = int(len(murmur_spectrograms)*percentage_of_img_to_move)
+random.seed(42)  # For reproducibility
 murmur_spectrograms_to_move = random.sample(murmur_spectrograms, num_of_murmur_spectrograms_to_move)
 for murmur_spectrogam in murmur_spectrograms_to_move:
     source_path = os.path.join(train_val_murmur_spectrograms_dest_dir, murmur_spectrogam)
