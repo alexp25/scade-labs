@@ -985,10 +985,7 @@ def save_spectrogram(filename, output_dir):
     output_filename = os.path.join(output_dir, base_filename + "_spectrogram.png")
     plt.savefig(output_filename)
     plt.close()
-normal_spectrograms_dest_dir = r'<path to Normal spectrograms destination directory>'
-murmur_spectrograms_dest_dir = r'<path to Murmur spectrograms destination directory>'
-os.makedirs(normal_spectrograms_dest_dir, exist_ok=True)
-os.makedirs(murmur_spectrograms_dest_dir, exist_ok=True)
+
 # Move the filtered recordings into batches of 300 files.
 # Only loose WAV files are included, so rerunning this cell skips existing batches.
 def split_filtered_recordings_into_batches(recordings_directory, batch_size=300):
@@ -1023,6 +1020,12 @@ def split_filtered_recordings_into_batches(recordings_directory, batch_size=300)
             )
 split_filtered_recordings_into_batches(filtered_normal_recordings_destination_directory)
 split_filtered_recordings_into_batches(filtered_murmur_recordings_destination_directory)
+
+normal_spectrograms_dest_dir = r'<path to Normal spectrograms destination directory>'
+murmur_spectrograms_dest_dir = r'<path to Murmur spectrograms destination directory>'
+os.makedirs(normal_spectrograms_dest_dir, exist_ok=True)
+os.makedirs(murmur_spectrograms_dest_dir, exist_ok=True)
+
 # Generate spectrograms for one batch at a time to limit memory usage.
 # Replace <add batch folder name> in both paths for the selected class, then
 # uncomment its loop. Comment the loop out again after generating that batch.
