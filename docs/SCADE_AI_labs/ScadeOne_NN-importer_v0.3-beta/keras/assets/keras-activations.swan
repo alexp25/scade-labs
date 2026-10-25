@@ -1,0 +1,650 @@
+-- version swan: 2025.0 graph: 2.0
+use math;
+
+use keras::utils;
+
+inline function relu (x: 'T;)
+  returns (y: 'T;)
+  where 'T numeric
+{
+  diagram
+    (#0 expr x
+    #pragma diagram {"xy":"H-24150;V-475"} #end)
+    (#1 expr if #2 then #3 else #4
+      where
+        (#2 group)
+        (#3 group)
+        (#4 group)
+    #pragma diagram {"xy":"H-5150;V1425"} #end)
+    (let zero = (0 :> 'T);
+    #pragma diagram {"xy":"H-10869;V-31600","wh":"23690;3200"} #end)
+    (#6 def y
+    #pragma diagram {"xy":"H13850;V1425"} #end)
+    (#7 expr zero
+    #pragma diagram {"xy":"H-24150;V3325"} #end)
+    (#8 expr x >= zero
+    #pragma diagram {"xy":"H-26369;V-5075","wh":"12438;3200"} #end)
+    (/*
+     Default rectified linear unit (ReLU) activation function:
+      max(x, 0)
+     */
+     let
+    #pragma diagram {"xy":"H-14088;V-13475","wh":"57443;9797"} #end)
+    
+    (#10 wire #0 => #3)
+    (#11 wire #8 => #2
+    #pragma diagram {"wp":"#8 h16500 #2"} #end)
+    (#12 wire #7 => #4)
+    (#13 wire #1 => #6)
+    
+    (var
+        zero: 'T;)
+}
+
+inline function relu_no_max (x: 'T;
+                             threshold: 'T;
+                             negative_slope: 'T;)
+  returns (y: 'T;)
+  where 'T numeric
+{
+  diagram
+    (#0 expr if #1 then #2 else #3
+      where
+        (#1 group)
+        (#2 group)
+        (#3 group)
+    #pragma diagram {"xy":"H-26450;V-9250"} #end)
+    (#4 expr x
+    #pragma diagram {"xy":"H-45450;V-11150"} #end)
+    (#5 expr (x - threshold) * negative_slope
+    #pragma diagram {"xy":"H-58452;V-7350","wh":"34003;3200"} #end)
+    (#6 def y
+    #pragma diagram {"xy":"H-7450;V-9250"} #end)
+    (/* Rectified linear unit (ReLU) activation function with unlimited max_value:
+     -- f(x) = x if  x >= threshold
+     -- f(x) = negative_slope * (x - threshold) otherwise.
+     
+     Equivalent to a standard `relu` if threshold = negative_slope = 0
+     */
+     let
+    #pragma diagram {"xy":"H-35236;V-29308","wh":"76195;13516"} #end)
+    (#8 expr x >= threshold
+    #pragma diagram {"xy":"H-50013;V-15750","wh":"17126;3200"} #end)
+    
+    (#9 wire #8 => #1
+    #pragma diagram {"wp":"#8 h16500 #1"} #end)
+    (#10 wire #4 => #2)
+    (#11 wire #5 => #3)
+    (#12 wire #0 => #6)
+}
+
+inline function relu_max (x: 'T;
+                          max_value: 'T;
+                          threshold: 'T;
+                          negative_slope: 'T;)
+  returns (y: 'T;)
+  where 'T numeric
+{
+  diagram
+    (#0 expr if #1 then #2 else #3
+      where
+        (#1 group)
+        (#2 group)
+        (#3 group)
+    #pragma diagram {"xy":"H-26450;V-9250"} #end)
+    (#4 expr max_value
+    #pragma diagram {"xy":"H-51169;V-12050","wh":"12438;3200"} #end)
+    (#5 expr threshold
+    #pragma diagram {"xy":"H-96769;V1717","wh":"12438;3200"} #end)
+    (#6 def y
+    #pragma diagram {"xy":"H-7450;V-9250"} #end)
+    (/* Rectified linear unit (ReLU) activation function 
+     with max value, threshold, and negative slope:
+     -- f(x) = max_value if x >= max_value
+     -- f(x) = x if threshold <= x < max_value
+     -- f(x) = negative_slope * (x - threshold) otherwise
+     
+     equivalent to min(max_value, relu(x)) if threshold = negative_slope = 0
+     */
+     let
+    #pragma diagram {"xy":"H-51420;V-34507","wh":"70570;17235"} #end)
+    (#8 expr x >= max_value
+    #pragma diagram {"xy":"H-53513;V-15750","wh":"17126;3200"} #end)
+    (#9 $N1 block relu_no_max
+                  #pragma diagram {"xy":"H-54950;V-2950","wh":"20000;14000"} #end)
+    (#10 expr negative_slope
+    #pragma diagram {"xy":"H-99113;V-7617","wh":"17126;3200"} #end)
+    (#11 expr x
+    #pragma diagram {"xy":"H-94550;V-2950"} #end)
+    
+    (#12 wire #8 => #1
+    #pragma diagram {"wp":"#8 h20000 #1"} #end)
+    (#13 wire #4 => #2
+    #pragma diagram {"wp":"#4 h8250 v900 #2"} #end)
+    (#14 wire #9 .(y) => #3
+    #pragma diagram {"wp":"v-4400|#9 #3"} #end)
+    (#15 wire #0 => #6)
+    (#16 wire #11 => #9 .(x))
+    (#17 wire #5 => #9 .(threshold))
+    (#18 wire #10 => #9 .(negative_slope))
+}
+
+inline function elu (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (#0 expr if #1 then #2 else #3
+      where
+        (#1 group)
+        (#2 group)
+        (#3 group)
+    #pragma diagram {"xy":"H-26450;V-9250"} #end)
+    (#5 expr x
+    #pragma diagram {"xy":"H-104888;V-3150"} #end)
+    (#6 block math::exp
+              #pragma diagram {"xy":"H-77388;V-3150","wh":"20000;14000"} #end)
+    (#7 expr #8 - #9
+      where
+        (#8 group)
+        (#9 group)
+    #pragma diagram {"xy":"H-46450;V-1250"} #end)
+    (#10 expr (1 :> 'T)
+    #pragma diagram {"xy":"H-73608;V5950","wh":"12438;3200"} #end)
+    (#11 def y
+    #pragma diagram {"xy":"H-7450;V-9250"} #end)
+    (/* Default exponential linear unit (ELU) activation function:
+     x if x >= 0 and (exp(x) - 1) if x < 0. */
+     let
+    #pragma diagram {"xy":"H-61254;V-29656","wh":"61194;7938"} #end)
+    (let zero = (0 :> 'T);
+    #pragma diagram {"xy":"H-79019;V-44525","wh":"23690;3200"} #end)
+    (#12 expr x >= zero
+    #pragma diagram {"xy":"H-47669;V-15750","wh":"12438;3200"} #end)
+    
+    (#19 wire #12 => #1
+    #pragma diagram {"wp":"#12 h16500 #1"} #end)
+    (#13 wire #5 => #2, #6
+    #pragma diagram {"wp":"#5 h8250[v-8000 #2, #6]"} #end)
+    (#14 wire #6 => #8
+    #pragma diagram {"wp":"v0|#6 #8"} #end)
+    (#15 wire #10 => #9
+    #pragma diagram {"wp":"#10 h8750 v-5300 #9"} #end)
+    (#16 wire #7 => #3
+    #pragma diagram {"wp":"#7 h6500 v-6100 #3"} #end)
+    (#17 wire #0 => #11)
+    
+    (var
+        zero: 'T;)
+}
+
+inline function elu_alpha (x: 'T;
+                           alpha: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (#0 expr if #1 then #2 else #3
+      where
+        (#1 group)
+        (#2 group)
+        (#3 group)
+    #pragma diagram {"xy":"H-26450;V-9250"} #end)
+    (#4 expr x
+    #pragma diagram {"xy":"H-124888;V-3150"} #end)
+    (#5 block math::exp
+              #pragma diagram {"xy":"H-97388;V-3150","wh":"20000;14000"} #end)
+    (#6 expr #7 - #8
+      where
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H-68888;V-1250"} #end)
+    (#9 expr (1 :> 'T)
+    #pragma diagram {"xy":"H-93608;V5950","wh":"12438;3200"} #end)
+    (#10 def y
+    #pragma diagram {"xy":"H-7450;V-9250"} #end)
+    (/* Exponential linear unit (ELU) activation function with alpha factor:
+     		-- f(x) =  alpha * (exp(x) - 1.) for x < 0
+     		-- f(x) = x for x >= 0
+     */
+     let
+    #pragma diagram {"xy":"H-66566;V-31197","wh":"70570;11657"} #end)
+    (let zero = (0 :> 'T);
+    #pragma diagram {"xy":"H-89019;V-47925","wh":"23690;3200"} #end)
+    (#13 expr x >= zero
+    #pragma diagram {"xy":"H-47669;V-15750","wh":"12438;3200"} #end)
+    (#14 expr #15 * #16
+      where
+        (#15 group)
+        (#16 group)
+    #pragma diagram {"xy":"H-46450;V650"} #end)
+    (#17 expr alpha
+    #pragma diagram {"xy":"H-68232;V4350","wh":"8688;3200"} #end)
+    
+    (#18 wire #13 => #1
+    #pragma diagram {"wp":"#13 h16500 #1"} #end)
+    (#19 wire #4 => #2, #5
+    #pragma diagram {"wp":"#4 h8250[v-8000 #2, #5]"} #end)
+    (#20 wire #5 => #7
+    #pragma diagram {"wp":"v0|#5 #7"} #end)
+    (#21 wire #9 => #8
+    #pragma diagram {"wp":"#9 h8250 v-5300 #8"} #end)
+    (#22 wire #14 => #3
+    #pragma diagram {"wp":"#14 h6500 v-8000 #3"} #end)
+    (#23 wire #0 => #10)
+    (#24 wire #6 => #15)
+    (#25 wire #17 => #16
+    #pragma diagram {"wp":"#17 h7719 v-1800 #16"} #end)
+    
+    (var
+        zero: 'T;)
+}
+
+inline function exponential (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (#0 expr x
+    #pragma diagram {"xy":"H-124888;V-3150"} #end)
+    (#1 block math::exp
+              #pragma diagram {"xy":"H-97388;V-3150","wh":"20000;14000"} #end)
+    (#2 def y
+    #pragma diagram {"xy":"H-69888;V-3150"} #end)
+    (/* Exponential activation function: exp(x). */
+     let
+    #pragma diagram {"xy":"H-109505;V-30286","wh":"47130;6078"} #end)
+    
+    (#4 wire #0 => #1)
+    (#5 wire #1 => #2
+    #pragma diagram {"wp":"v0|#1 #2"} #end)
+}
+
+inline function selu (x: 'T;
+                      alpha: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (#0 expr if #1 then #2 else #3
+      where
+        (#1 group)
+        (#2 group)
+        (#3 group)
+    #pragma diagram {"xy":"H-26450;V-9250"} #end)
+    (#4 expr (scale:>'T) * x
+    #pragma diagram {"xy":"H-53982;V-12050","wh":"18064;3200"} #end)
+    (#5 block math::exp
+              #pragma diagram {"xy":"H-107757;V-4550","wh":"20000;14000"} #end)
+    (#6 expr #7 - #8
+      where
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H-83850;V2650"} #end)
+    (#9 expr (1 :> 'T)
+    #pragma diagram {"xy":"H-103976;V4550","wh":"12438;3200"} #end)
+    (#10 def y
+    #pragma diagram {"xy":"H-7450;V-9250"} #end)
+    (/* Scaled exponential linear unit (SELU) activation function:
+     scale * x if x >= 0 and
+     scale * alpha * (exp(x) - 1) if x < 0
+     where alpha and scale are pre-defined constants (alpha=1.67326324 and scale=1.05070098).
+     */
+     let
+    #pragma diagram {"xy":"H-62228;V-39203","wh":"86509;11657"} #end)
+    (let zero = (0 :> 'T);
+    #pragma diagram {"xy":"H-92650;V-55931","wh":"23690;3200"} #end)
+    (#13 expr x >= zero
+    #pragma diagram {"xy":"H-51169;V-15750","wh":"12438;3200"} #end)
+    (#17 expr (alpha:>'T)
+    #pragma diagram {"xy":"H-86007;V-7617","wh":"14314;3200"} #end)
+    (#14 expr x
+    #pragma diagram {"xy":"H-127207;V-4550"} #end)
+    (#15 block {text%(*)%text}
+               #pragma diagram {"xy":"H-54950;V-2950","wh":"20000;14000"} #end)
+    (#16 expr (scale:>'T)
+    #pragma diagram {"xy":"H-86007;V-2950","wh":"14314;3200"} #end)
+    
+    (#18 wire #13 => #1
+    #pragma diagram {"wp":"#13 h20000 #1"} #end)
+    (#19 wire #4 => #2
+    #pragma diagram {"wp":"#4 h8250 v900 #2"} #end)
+    (#20 wire #5 .(exp) => #7
+    #pragma diagram {"wp":"v5300|#5 #7"} #end)
+    (#21 wire #9 => #8)
+    (#23 wire #0 => #10)
+    (#22 wire #15 => #3
+    #pragma diagram {"wp":"v-4400|#15 #3"} #end)
+    (#24 wire #6 => #15 .(1))
+    (#25 wire #17 => #15 .(2))
+    (#27 wire #14 => #5 .(x))
+    (#28 wire #16 => #15 .(3))
+    
+    (var
+        zero: 'T;)
+}
+
+inline function sigmoid (x: 'F;)
+  returns (y: 'F;)
+  where 'F float
+{
+  diagram
+    (#0 def y
+    #pragma diagram {"xy":"H0;V0"} #end)
+    (#1 expr 1.
+    #pragma diagram {"xy":"H-43700;V-1900"} #end)
+    (#2 block math::exp
+              #pragma diagram {"xy":"H-49700;V7200","wh":"20000;14000"} #end)
+    (#3 expr -x
+    #pragma diagram {"xy":"H-77600;V7200"} #end)
+    (#4 expr #5 / #6
+      where
+        (#5 group)
+        (#6 group)
+    #pragma diagram {"xy":"H-19000;V0"} #end)
+    (/*
+     Sigmoid activation function:
+           1
+     -------------
+      1 + exp(-x)
+     */
+     let
+    #pragma diagram {"xy":"H-42100;V-14450","wh":"31190;13516"} #end)
+    
+    (#8 wire #3 => #2 .(x))
+    (#9 wire #2 .(exp) => #6
+    #pragma diagram {"wp":"v-5300|#2 #6"} #end)
+    (#10 wire #4 => #0)
+    (#11 wire #1 => #5)
+}
+
+inline function gelu (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (/* Default gaussian error linear unit (GELU) activation function:
+     x * P(X <= x) = 0.5 * x * (1 + erf(x / sqrt(2))), where P(X) ~ N(0, 1)
+     */let
+    #pragma diagram {"xy":"H13600;V4925","wh":"70570;6078"} #end)
+    (#1 expr 1
+    #pragma diagram {"xy":"H61284;V28912"} #end)
+    (#2 expr #3 * #4
+      where
+        (#3 group)
+        (#4 group)
+    #pragma diagram {"xy":"H104184;V28912"} #end)
+    (#5 block math::sqrt
+              #pragma diagram {"xy":"H-2516;V45212","wh":"20000;14000"} #end)
+    (#6 expr #7 + #8
+      where
+        (#7 group)
+        (#8 group)
+    #pragma diagram {"xy":"H84184;V30812"} #end)
+    (#9 expr x
+    #pragma diagram {"xy":"H61284;V25212"} #end)
+    (#10 def y
+    #pragma diagram {"xy":"H123184;V28912"} #end)
+    (#11 block math::erf
+               #pragma diagram {"xy":"H55284;V38012","wh":"20000;14000"} #end)
+    (#12 expr #13 * #14
+      where
+        (#13 group)
+        (#14 group)
+    #pragma diagram {"xy":"H84184;V23312"} #end)
+    (#15 expr #16 / #17
+      where
+        (#16 group)
+        (#17 group)
+    #pragma diagram {"xy":"H26384;V38012"} #end)
+    (#18 expr (0.5:>'T)
+    #pragma diagram {"xy":"H59065;V21412","wh":"12438;3200"} #end)
+    (#19 expr 2
+    #pragma diagram {"xy":"H-30416;V45212"} #end)
+    (#20 expr x
+    #pragma diagram {"xy":"H3484;V36112"} #end)
+    
+    (#21 wire #12 => #3
+    #pragma diagram {"wp":"#12 h6500 v3700 #3"} #end)
+    (#22 wire #5 .(s) => #17
+    #pragma diagram {"wp":"v-5300|#5 #17"} #end)
+    (#23 wire #15 => #11 .(x))
+    (#24 wire #20 => #16)
+    (#25 wire #6 => #4)
+    (#26 wire #9 => #14)
+    (#27 wire #11 .(s) => #8
+    #pragma diagram {"wp":"v-5300|#11 #8"} #end)
+    (#28 wire #2 => #10)
+    (#29 wire #18 => #13)
+    (#30 wire #19 => #5 .(x))
+    (#31 wire #1 => #7)
+}
+
+inline function hard_sigmoid (x: 'F;)
+  returns (y: 'F;)
+  where 'F float
+{
+  diagram
+    (#0 def y
+    #pragma diagram {"xy":"H0;V0"} #end)
+    (#1 expr x > 2.5
+    #pragma diagram {"xy":"H-39282;V-6500","wh":"10563;3200"} #end)
+    (#2 expr if #3 then #4 else #5
+      where
+        (#3 group)
+        (#4 group)
+        (#5 group)
+    #pragma diagram {"xy":"H-39000;V6300"} #end)
+    (#6 expr if #7 then #8 else #9
+      where
+        (#7 group)
+        (#8 group)
+        (#9 group)
+    #pragma diagram {"xy":"H-19000;V0"} #end)
+    (#10 expr 1.
+    #pragma diagram {"xy":"H-38000;V-2800"} #end)
+    (#11 expr x < -2.5
+    #pragma diagram {"xy":"H-60314;V-200","wh":"11501;3200"} #end)
+    (/*
+     Hard Sigmoid activation function:
+      x < -2.5 => 0.
+      x > 2.5 => 1.
+     -2.5 <= x <= 2.5 => 0.2 * x + 0.5
+     */
+     let
+    #pragma diagram {"xy":"H-36476;V-20850","wh":"35878;13516"} #end)
+    (#13 expr 0.
+    #pragma diagram {"xy":"H-58563;V4400"} #end)
+    (#14 expr 0.2 * x + 0.5
+    #pragma diagram {"xy":"H-62658;V8200","wh":"16189;3200"} #end)
+    
+    (#15 wire #11 => #3
+    #pragma diagram {"wp":"#11 h17064 #3"} #end)
+    (#16 wire #6 => #0)
+    (#17 wire #10 => #8
+    #pragma diagram {"wp":"#10 h6500 v900 #8"} #end)
+    (#18 wire #1 => #7
+    #pragma diagram {"wp":"#1 h16500 #7"} #end)
+    (#19 wire #13 => #4)
+    (#20 wire #14 => #5)
+    (#21 wire #2 => #9
+    #pragma diagram {"wp":"#2 h6500 v-4400 #9"} #end)
+}
+
+inline function softmax <<N>> (x: 'F^N;)
+  returns (y: 'F^N;)
+  where 'F float
+{
+  diagram
+    (#0 def y
+    #pragma diagram {"xy":"H0;V0"} #end)
+    (#1 expr 0.
+    #pragma diagram {"xy":"H-142000;V8987"} #end)
+    (#2 block (fold {text%(+)%text}) <<N>>
+    #pragma diagram {"xy":"H-111600;V4506","wh":"25000;18000"} #end)
+    (#4 expr #5 ^ (N)
+      where
+        (#5 group)
+    #pragma diagram {"xy":"H-74900;V26942","wh":"10000;7000"} #end)
+    (#6 block (map ({op_expr%function a, b => math::exp(a - b)%op_expr})) <<N>>
+    #pragma diagram {"xy":"H-43500;V22461","wh":"25000;18000"} #end)
+    (#8 def exp_x
+    #pragma diagram {"xy":"H-13156;V22448","wh":"8688;3200"} #end)
+    (/*
+     Default Softmax activation function:
+      the softmax of vector x is computed as exp(x) / reduce_sum(exp(x))
+     */
+     let
+    #pragma diagram {"xy":"H-73144;V-19353","wh":"67757;9797"} #end)
+    (#10 expr x
+    #pragma diagram {"xy":"H-131700;V26942"} #end)
+    (#11 block utils::max_vector <<N>> 
+               #pragma diagram {"xy":"H-103800;V26942","wh":"20000;14000"} #end)
+    (#12 expr exp_x
+    #pragma diagram {"xy":"H-142344;V-5494","wh":"8688;3200"} #end)
+    (#13 block (map {text%(*)%text}) <<N>>
+    #pragma diagram {"xy":"H-30000;V12","wh":"25000;18000"} #end)
+    (#15 block ({op_expr%function red => (1. / red) ^ N%op_expr})
+               #pragma diagram {"xy":"H-69900;V4494","wh":"20000;14000"} #end)
+    
+    (#16 wire #12 => #2 .(2), #13 .(2)
+    #pragma diagram {"wp":"#12 h8450[v8794 #2, h79850 v4638 #13]"} #end)
+    (#17 wire #10 => #11 .(x), #6 .(a)
+    #pragma diagram {"wp":"#10 h8450[#11, v-8266 #6]"} #end)
+    (#18 wire #11 .(y) => #5
+    #pragma diagram {"wp":"v0|#11 #5"} #end)
+    (#19 wire #4 => #6 .(b))
+    (#20 wire #1 => #2 .(1))
+    (#21 wire #6 => #8
+    #pragma diagram {"wp":"v-2013|#6 #8"} #end)
+    (#22 wire #15 => #13 .(1)
+    #pragma diagram {"wp":"v1012|#15 #13"} #end)
+    (#23 wire #2 => #15 .(red)
+    #pragma diagram {"wp":"v-681|#2 #15"} #end)
+    (#24 wire #13 => #0
+    #pragma diagram {"wp":"v-2012|#13 #0"} #end)
+    
+    (var
+        exp_x: 'F^N;)
+}
+
+inline function tanh (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (#0 def y
+    #pragma diagram {"xy":"H0;V0"} #end)
+    (#1 expr x
+    #pragma diagram {"xy":"H-55000;V0"} #end)
+    (#2 block math::tanh
+              #pragma diagram {"xy":"H-27500;V0","wh":"20000;14000"} #end)
+    (/* Tanh activation function. */let
+    #pragma diagram {"xy":"H-26230;V-38088","wh":"51818;3200"} #end)
+    
+    (#4 wire #1 => #2)
+    (#5 wire #2 => #0
+    #pragma diagram {"wp":"v0|#2 #0"} #end)
+}
+
+inline function swish (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (#0 expr x
+    #pragma diagram {"xy":"H0;V0"} #end)
+    (#1 def y
+    #pragma diagram {"xy":"H75000;V-7200"} #end)
+    (#2 block sigmoid
+              #pragma diagram {"xy":"H27500;V0","wh":"20000;14000"} #end)
+    (/* Swish activation function: x * sigmoid(x). */let
+    #pragma diagram {"xy":"H27894;V-17612","wh":"51818;3200"} #end)
+    (#4 expr #5 * #6
+      where
+        (#5 group)
+        (#6 group)
+    #pragma diagram {"xy":"H56000;V-7200"} #end)
+    (#7 expr x
+    #pragma diagram {"xy":"H33500;V-9100"} #end)
+    
+    (#8 wire #0 => #2)
+    (#9 wire #4 => #1)
+    (#10 wire #2 => #6
+    #pragma diagram {"wp":"v-5300|#2 #6"} #end)
+    (#11 wire #7 => #5)
+}
+
+inline function softsign (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (/* Softsign activation function: x / (abs(x) + 1). */let
+    #pragma diagram {"xy":"H-15300;V-32950","wh":"55568;3200"} #end)
+    (#1 expr x
+    #pragma diagram {"xy":"H-8838;V-1100"} #end)
+    (#2 def y
+    #pragma diagram {"xy":"H31600;V700"} #end)
+    (#3 expr x
+    #pragma diagram {"xy":"H-66838;V-2700","wh":"10000;7000"} #end)
+    (#4 expr #5 / #6
+      where
+        (#5 group)
+        (#6 group)
+    #pragma diagram {"xy":"H11381;V700"} #end)
+    (#7 block math::abs
+              #pragma diagram {"xy":"H-38338;V-2700","wh":"20000;14000"} #end)
+    (#8 expr #9 + #10
+      where
+        (#9 group)
+        (#10 group)
+    #pragma diagram {"xy":"H-9838;V4500"} #end)
+    (#11 expr (1 :> 'T)
+    #pragma diagram {"xy":"H-34558;V6400","wh":"12438;3200"} #end)
+    
+    (#12 wire #3 => #7)
+    (#13 wire #7 => #9
+    #pragma diagram {"wp":"v5300|#7 #9"} #end)
+    (#14 wire #11 => #10)
+    (#15 wire #1 => #5
+    #pragma diagram {"wp":"#1 h6500 v1800 #5"} #end)
+    (#16 wire #8 => #6)
+    (#17 wire #4 => #2)
+}
+
+inline function softplus (x: 'T;)
+  returns (y: 'T;)
+  where 'T float
+{
+  diagram
+    (/* Softplus activation function: log(exp(x) + 1). */let
+    #pragma diagram {"xy":"H-10309;V-59711","wh":"69632;6078"} #end)
+    (#1 block math::log
+              #pragma diagram {"xy":"H62442;V-8450","wh":"20000;14000"} #end)
+    (#2 block math::exp
+              #pragma diagram {"xy":"H7442;V-15650","wh":"20000;14000"} #end)
+    (#3 expr #4 + #5
+      where
+        (#4 group)
+        (#5 group)
+    #pragma diagram {"xy":"H34942;V-8450"} #end)
+    (#6 expr (1 :> 'T)
+    #pragma diagram {"xy":"H12442;V-4650","wh":"10000;7000"} #end)
+    (#7 expr x
+    #pragma diagram {"xy":"H-22277;V-15650","wh":"12438;3200"} #end)
+    (#8 def y
+    #pragma diagram {"xy":"H89942;V-8450"} #end)
+    
+    (#9 wire #7 => #2)
+    (#10 wire #2 => #4
+    #pragma diagram {"wp":"v5467|#2 h9783 v1733 #4"} #end)
+    (#11 wire #6 => #5)
+    (#12 wire #3 => #1)
+    (#13 wire #1 => #8
+    #pragma diagram {"wp":"v0|#1 #8"} #end)
+}
+
+const alpha: float32 = 1.67326324;
+
+const scale: float32 = 1.05070098;

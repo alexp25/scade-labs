@@ -1,0 +1,18 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Always normalized and converted to native line endings on checkout.
+*.c text
+*.h text
+
+# Swan / Swant shall keep LF line ending
+*.swan text eol=lf
+*.swani text eol=lf
+*.swant text eol=lf
+
+# Binary files
+*.h5 binary
+*.png binary
+*.jpg binary
+*.whl binary
+*.zip binary

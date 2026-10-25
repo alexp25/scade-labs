@@ -1,0 +1,38 @@
+-- version swan: 2025.0 graph: 2.0
+function max (x1: 'T;
+              x2: 'T;)
+  returns (y: 'T;)
+  where 'T numeric;
+
+function abs (x: 'T;)
+  returns (y: 'T;)
+  where 'T numeric;
+
+function exp (x: 'F;)
+  returns (exp: 'F;)
+  where 'F float;
+
+function pow (x:'F;
+              k: int16;)
+  returns (pow: 'F;)
+  where 'F float;
+
+function sqrt (x: 'F;)
+  returns (s: 'F;)
+  where 'F float;
+
+function half (x: 'T;)
+  returns (y: 'T;)
+  where 'T unsigned;
+
+function log (x: 'F;)
+  returns (s: 'F;)
+  where 'F float;
+
+function tanh (x: 'F;)
+  returns (s: 'F;)
+  where 'F float;
+
+function erf (x: 'T;)
+  returns (s: 'T;)
+  where 'T float;

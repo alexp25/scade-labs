@@ -1,0 +1,144 @@
+= How to Contribute to Keras Importer to Scade One
+by SwaNN Team (Yingying H., Yiming C., Guilherme G., Tim P., Jeff T.)
+:description: Readme for Keras Importer to Swan🦢
+:icons: font
+:toc: left
+:sectnums:
+:favicon: static/favicon.png
+:stylesheet: static/asciidoctor-ansys.css
+
+
+:source-highlighter: pygments
+:pygments-style: manni
+
+:main_py: src/s1_keras_importer.py
+:app: src/app_keras_importer.py
+:install: install.bat
+
+image::static/ansys_logo.png[ansys]
+
+image:static/pyansys.svg[pyansys, link=https://docs.pyansys.com/]
+image:https://img.shields.io/badge/code%20style-black-000000.svg?style=flat[Black, link=https://github.com/psf/black]
+
+
+== Architecture of the Importer Source
+
+This section is about folder *src/keras_importer*.
+
+=== List of files
+
+* Folder *graph*: Code for converting Keras Model into a Networkx Graph
+* Folder *converters*: Conversion from the graph into Scade One Model
+  - *graph*: main part for conversion of the graph
+  - *operator*: methods for creation of main operator and operators for each layer
+  - *layers*: for the conversion of each layer (see details below)
+  - *constants*: for the conversion of constants to Swan or C
+* Folder *utils*: Misc utilities, including helpers for using Scade One API
+
+=== Details about Layers Conversion
+
+Conversion is done through a class: one class per Layer Type, in the file *src/keras_importer/converters/layers.py*.
+
+Each class shall derive from the top class `LayerConverter` and implement two methods:
+* `operator_call(self)` (property): returns a call to the operator blocl in `keras::layers` module with the correct sizes; it excludes activations and wires to any parameter (like kernel and bias)
+* `_convert(self)`: returns the block to put in the main operator for the model architecture, and if needed create additional operators (by storing them in the attribute `extra_operators`) and parameters constants (by storing them in the attribute `constants`)
+
+NOTE: The property `operator_call` might be used either in main operator or newly created operator based on configuration of the layer (activation, parameters, etc.) while the output of `_convert` is used exclusively in the main operator.
+
+
+For more convenience, we have created two subclasses:
+
+* Class *_ParamLayerConverter*: class for layers which have parameters (typically kernel and bias): it will automatically create an operator with activation and wires to parameters when `_convert` is called. Derived classes just need to implement the property `operator_call`, and if needed `_get_kernel` (when kernel from Keras needs additional computation)
+* Class *_NoParamLayerConverter*: class for layers with don't have parameters (e.g. `Flatten`). By default, the result of `_convert` is the property `operator_call`, which needs to be implemented by derived classes.
+
+Additional layers shall implemented that way.
+
+=== Dependencies
+
+[graphviz, target=static/architecture]
+....
+# Hand Written Style: https://sketchviz.com/
+
+digraph G {
+    graph [fontname = "Handlee"];
+    node [fontname = "Handlee"];
+    edge [fontname = "Handlee"];
+
+    bgcolor=transparent;
+
+    subgraph cluster_graph {
+        style=filled;
+        color=lightgrey;
+        node [style=filled,color=pink];
+        nodes [label="graph_nodes"];
+        keras_graph -> nodes;
+
+        label = "graph";
+        fontsize = 20;
+    }
+
+    subgraph cluster_utils {
+    style=filled;
+    color=lightgrey;
+    node [style=filled,color=cyan];
+    harness;
+    project;
+    luid [label="auto_luid"];
+    s1_utils;
+    auto_layout;
+
+    label = "utils";
+    fontsize = 20;
+    }
+
+    subgraph cluster_converter {
+    style=filled;
+    color=lightgrey;
+    node [style=filled,color=gold];
+    graph_ [label="graph"];
+    layers_ [label="layers"];
+    operator [label="operator"];
+    graph_ -> operator -> layers_;
+    layers_ -> constants;
+    constants;
+
+    label = "converters";
+    fontsize = 20;
+    }
+
+    main -> graph_;
+    nodes -> s1_utils [label="name", font="pink", color="gold"];
+    graph_ -> keras_graph;
+    graph_ -> project;
+    graph_ -> s1_utils [label="identif., add_declaration"; color="gold"];
+    graph_ -> harness;
+    graph_ -> luid;
+    graph_ -> auto_layout;
+    operator -> constants;
+    operator -> nodes;
+    operator -> luid;
+    operator -> s1_utils [label="identif., Connection, str2type"; color="gold"];
+    layers_ -> nodes;
+    layers_ -> luid;
+    layers_ -> s1_utils [label="identif., str2type, operator"; color="gold"];
+    constants -> nodes // [label="IOInfo"];
+    constants -> s1_utils [label="identif., str2type"; color="gold"];
+
+    main [label="main\n/ app", shape=Mdiamond];
+}
+....
+
+== What to do next
+
+* [ ] Re-viewing & optimizing the architecture (e.g. in *converters/layers.py*, the class `LayerInfo` could be merged in `LayerConverter`)
+* [ ] Finish conversion of operators to Graphical and optimize Keras Library implementation with new language constructs (esp. `keras::utils` and `keras::layers::LSTM`)
+* [x] Support of Dense layers with higher size
+* [ ] Checking existing implementations of other layers to match corner cases (comparison with SCADE 6 NN)
+* [ ] Adding implementation of missing layers compared to SCADE 6 NN (e.g. Activation ReLu, LSTM, etc.)
+* [ ] Adding support of more layers (e.g. `Add`, `GlobalAveragePooling2D`, `ZeroPadding2D` and `BatchNormalization` for support of ResNet50); a good list of layers to support could be found in this similar project: https://github.com/Dobiasd/frugally-deep/tree/master[frugally-deep]
+* [ ] Transformation of nested `Sequential`/`Functional` inside Keras model:
+    to do so, we need to improve the code by storing sub-graphs for each nested models,
+    and creating one operator for each sub-graph (with other additional operators for layers with activations)
+* [ ] Allowing multiple test inputs for the harness (currently only one value per input is supported)
+* [ ] Adding Python Wrapper (see old Importer + Work of Jean for tests of S1 Libraries)
+* [ ] Migrating SCADE 6 NN Test Cases for Scade One
