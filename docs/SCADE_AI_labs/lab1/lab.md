@@ -17,6 +17,8 @@ The emphasis of the laboratory is not only on obtaining a working neural network
 
 Estimated completion time: **approximately 4 hours**.
 
+❗️ The laboratory is NOT designed to be completted in one sitting. Some parts of the code will take a long time to run. Waiting time for some individual parts of the code might take couple hours to finish. Students are encouraged to take a break or to do something else while the code is running.
+
 # 2. Learning Objectives
 
 After completing this laboratory, the student should be able to:
@@ -790,6 +792,7 @@ Let’s merge the datasets and create a short dataset summary in the jupyter not
 We are going to use a data structure called **dataframe** implemented in the Pandas module. It is a useful data structure for manipulating large datasets.
 
 **PHYSIONET 2016 DATASET MANIPULATION :**
+❗️ Keep in mind that during the development of the laboratory it took around 1h to copy and rename all of the files.
 
 ``` python
 physionet_2016_source_directory = r"<path to physionet cinc 2016 dataset>"
@@ -829,10 +832,11 @@ print("Processing completed.")
 ```
 
 **PHYSIONET 2022 DATASET MANIPULATION**
+❗️ Keep in mind that during the development of the laboratory it took around 2h to copy and rename all of the files.
 
 ``` python
-physionet_2022_source_directory = r'<path to the PhysioNet2022 Challenge Dataset>'
-physionet_2022_csv_path = os.path.join(physionet_2022_source_directory, 'training_data.csv')
+physionet_2022_source_directory = r'<path to the training_data folder of the PhysioNet2022 Challenge Dataset>'
+physionet_2022_csv_path = r'<path to the training_data.csv file of the PhysioNet2022 Challenge Dataset>'
 # TO BE RUN ONLY ONCE. TO BE COMMENTED OUT AFTERWARDS. Otherwise, it will overwrite the files in the destination directory every time.
 physionet_2022_data = pd.read_csv(physionet_2022_csv_path)
 for index, row in physionet_2022_data.iterrows():
@@ -931,6 +935,7 @@ def butter_low_pass(samples, sample_rate, cutoff_freq, order, outputType):
     # Apply the filter to the signal
     s = signalpy.lfilter(b, a, samples).astype(outputType)
     return s
+# TO BE RUN ONLY ONCE
 for normal_recording in os.listdir(normal_recordings_destination_directory) :
     recording_path = os.path.join(normal_recordings_destination_directory , normal_recording)
     # The parameter sr=None ensures that the original sample rate of the audio file is preserved when loading it with librosa.
@@ -941,6 +946,7 @@ for normal_recording in os.listdir(normal_recordings_destination_directory) :
     filtered_recording_file_name = f"{os.path.splitext(normal_recording)[0]}_filtered.wav"
     filtered_recording_path = os.path.join(filtered_normal_recordings_destination_directory, filtered_recording_file_name)
     wavfile.write(filtered_recording_path, sample_rate, samples_filtered)
+# TO BE RUN ONLY ONCE
 for murmur_recording in os.listdir(murmur_recordings_destination_directory) :
     recording_path = os.path.join(murmur_recordings_destination_directory, murmur_recording)
     samples, sample_rate = librosa.load(recording_path, sr=None)
