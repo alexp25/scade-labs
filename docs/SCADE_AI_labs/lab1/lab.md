@@ -1374,16 +1374,13 @@ If you want to understand better how to use the Python Wrapper you can check the
 
 ## 30.1. Generate the Python Wrapper and set up of the environment
 
-First of all, install the library ansys-scadeone-core :
-
-``` bash
-pip install ansys-scadeone-core
-```
-
-You can create in the current working directory where the jupyter notebook was saved as well a new .py file just for creating the Python wrapper of the previously generated C code.
+You can create in the current working directory where the jupyter notebook was saved as well a new .py file just for creating the Python wrapper of the previously generated C code. Include the following code in the new .py file and run it. You need to replace the placeholders with the correct paths and names.
 
 ``` python
 # RUN ONLY ONCE
+from pathlib import Path
+from ansys.scadeone.core import ScadeOne
+from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 SCADE_INSTALL = r"<path to the “Scade One” directory where the program was installed>"
 PROJECT_DIR = r"<path to the .sproj of the neural network>"
 app = ScadeOne(install_dir = SCADE_INSTALL)
@@ -1395,7 +1392,7 @@ print('Wrapper Generated')
 
 A new directory containing the Python wrapper will be generated in the current working directory.
 
-Import the generated module :
+Import the generated module in the jupyter notebook you've been working on so far :
 
 ``` python
 WRAPPER_NAME = <name of the python wrapper>
