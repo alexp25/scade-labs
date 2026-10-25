@@ -1044,7 +1044,7 @@ os.makedirs(murmur_spectrograms_dest_dir, exist_ok=True)
 #     recording_path = os.path.join(filtered_murmur_recordings_destination_directory, '<add batch folder name>', murmur_recording)
 #     save_spectrogram(recording_path, murmur_spectrograms_dest_dir)
 ```
-❗️ Keep in mind that during the development of the laboratory it took around 1h to generate all of the spectrograms. However, it takes around 3 minutes the generate the spectrograms of a single batch of 300 recordings, so you should be around the computer to change the batch number from time to time.
+❗️ Keep in mind that during the development of the laboratory it took around 30 minutes to generate all of the spectrograms. However, it takes around 1 and a half minute to generate the spectrograms of a single batch of 300 recordings, so you should be around the computer to change the batch number from time to time.
 
 The spectrogram images also contain the time, frequency and magnitude axis. Even though it might not seem important to keep the axis it is better not to crop them out because the recordings have different lengths, but the images have the same 600x400 px dimension. Because of that, a murmur spike showing on the spectrogram might take more space in an image of a short recording rather than inside an image of a long recording. By keeping them, especially the time axis, the model can potentially learn how to make correlate the dimension of the spikes with the length of the whole recording. At the same time, if many short or long recordings happen to be aggregated in a single class, then the model might learn the correlation between the length of the recording and the label. However, we will not tackle this topic right now.
 
@@ -1376,7 +1376,7 @@ CNN_model.save(“<path containing the named of the model ending with the extens
 Use the method load_model() for loading the previously saved model. Use the parameter compile=False when loading for inference.
 
 ``` python
-reloaded_CNN_model = tf.keras.models.moad_model(“<path to the .keras file>”, compile=False)
+reloaded_CNN_model = tf.keras.models.load_model(“<path to the .keras file>”, compile=False)
 ```
 
 Run the summary() method and check if there are any differences from the previously trained model.
