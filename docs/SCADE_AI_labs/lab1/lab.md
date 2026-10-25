@@ -1218,7 +1218,24 @@ Potential responses to overfitting include:
 
 # 26. Evaluating the CNN on the testing dataset
 
-The first step is to compute the basic metrics : loss and the other metrics mentioned when the model was compiled (accuracy and recall in our case).
+The first step is to create a tf.data.Dataset object using the data of the testing directories so that we can evaluate the model on it.
+
+``` python
+test_spectrograms_dest_dir = r'<>path to Testing Spectrograms Dataset directory>'
+testing_dataset = tf.keras.utils.image_dataset_from_directory(
+    test_spectrograms_dest_dir,
+    labels='inferred',
+    label_mode='binary',  # For binary classification
+    batch_size=8,
+    image_size=(600, 400),
+    shuffle=False,
+)
+
+testing_dataset = testing_dataset.cache()
+testing_dataset = testing_dataset.prefetch(tf.data.AUTOTUNE)
+```
+
+Then, we need to evaluate the model on the testing dataset and to compute the basic metrics : loss and the other metrics mentioned when the model was compiled (accuracy and recall in our case).
 
 ! Because no split threshold was mentioned for the recall metric when the model was compiled, the 0.5 default threshold is used by the evaluate() method.  
 ! Accuracy measures how often predictions equal labels. The accuracy metric in this case is not ideal because it checks whether the predicted scores are identical to 0 or 1. Therefore, a 0.9 prediction score will not be counted as equal to 1. The BinaryAccuracy metric would have been more suitable.
