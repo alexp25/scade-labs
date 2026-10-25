@@ -1320,7 +1320,7 @@ reloaded_CNN_model.summary()
 
 # 28. Installing the neural network importer and converting the CNN in a SCADE One model
 
-In this section we are going to convert the Keras CNN we have just built in a SCADE One model. We need to use ScadeOne_NN-importer_v0.3-beta, found at **\[GitHub repo URL TO BE ADDED\]** which is a beta version of a module developed by Ansys which allows us to convert these kind of models.
+In this section we are going to convert the Keras CNN we have just built in a SCADE One model. We need to use ScadeOne_NN-importer_v0.3-beta, found at **\https://github.com/alexp25/scade-labs/tree/main/docs/SCADE_AI_labs/ScadeOne_NN-importer_v0.3-beta** which is a beta version of a module developed by Ansys which allows us to convert these kind of models.
 
 If the laboratory could be done until now on any operating system, from now on it can only be done on Windows. Use Windows 11 and SCADE One 2026R1 Student.
 
