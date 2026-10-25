@@ -1132,7 +1132,7 @@ The sigmoid function maps the output to a value between zero and one.
 
 ``` python
 input = tf.keras.Input(shape=(400,600,3))
-x = tf.keras.layers.Conv2D(96, (3,3), activation='relu')(x)
+x = tf.keras.layers.Conv2D(96, (3,3), activation='relu')(input)
 x = tf.keras.layers.MaxPooling2D((2, 2))(x)
 x = tf.keras.layers.Conv2D(32, (5,5), activation='relu')(x)
 x = tf.keras.layers.MaxPooling2D((2, 2))(x)
