@@ -124,7 +124,7 @@ python -m pip install --upgrade pip
 Install the packages required throughout the laboratory:
 
 ``` bash
-pip install tensorflow keras numpy matplotlib pandas scikit-learn librosa soundfile jupyter ansys-scadeone-core
+pip install tensorflow keras numpy matplotlib pandas scikit-learn librosa soundfile jupyter ansys-scadeone-core seaborn
 ```
 
 Keras 3 can operate with several computational backends, including TensorFlow, JAX, and PyTorch. In this course, **TensorFlow will be used as the Keras backend** in order to maintain a common environment for all exercises. Current Keras documentation describes Keras as a multi-backend framework and allows TensorFlow to be selected explicitly.
@@ -207,6 +207,7 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 from pathlib import Path
+import seaborn as sns
 from ansys.scadeone.core import ScadeOne
 from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 ```
