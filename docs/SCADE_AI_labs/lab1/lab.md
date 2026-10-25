@@ -458,6 +458,7 @@ The dataset will be divided into:
 - 15% test data.
 
 ``` python
+# 70% of the dataset is used for training, the remaining 30% is split equally between validation and test sets.
 X_train, X_temp, y_train, y_temp = train_test_split(
     X,
     y,
@@ -574,7 +575,8 @@ early_stopping = keras.callbacks.EarlyStopping(
 )
 ```
 
-Train the model (it will take awhile) :
+Train the model :
+(It only took ~7s to train the model on a MacBook Pro M4 Pro with 10 CPU cores and 16GB RAM)
 
 ``` python
 history = regression_model.fit(
@@ -643,8 +645,9 @@ test_mse, test_mae = regression_model.evaluate(
 print("Test MSE:", test_mse)
 print("Test MAE:", test_mae, "°C")
 ```
-
 The test MAE represents the average absolute prediction error measured in degrees Celsius.
+
+During the implementation of this lab, Test MSE was around 1.09 and Test MAE was around 0.83°C.
 
 Generate predictions:
 
@@ -662,24 +665,27 @@ Visualize predictions against the true temperatures:
 plt.scatter(
     true_values,
     predictions,
-    alpha=0.5
+    alpha=0.5,
+    color="tab:blue",
+    label="Model predictions"
 )
-minimum = min(
-    true_values.min(),
-    predictions.min()
-)
-maximum = max(
-    true_values.max(),
-    predictions.max()
-)
+
+minimum = min(true_values.min(), predictions.min())
+maximum = max(true_values.max(), predictions.max())
+
 plt.plot(
     [minimum, maximum],
     [minimum, maximum],
-    "--"
+    "--",
+    color="tab:orange",
+    label="Perfect prediction (y = x)"
 )
+
 plt.xlabel("True temperature [°C]")
 plt.ylabel("Predicted temperature [°C]")
 plt.title("True vs. Predicted Temperature")
+plt.legend()
+plt.grid(alpha=0.2)
 plt.show()
 ```
 
