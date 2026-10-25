@@ -925,6 +925,12 @@ This transformation allows a two-dimensional convolutional neural network to lea
 First of all, since the relevant frequency range of the heart sounds is 20-500Hz and the recordings are flooded in noise, they need to be filtered. Most conventional microphones capture anyway the frequency range 20Hz-20kHz. It is unlikely that the heart sounds recordings store any information in the range 0-20Hz. Therfore, using a low-pass filter is a good enough choice.
 
 ``` python
+filtered_normal_recordings_destination_directory = r'<path to destination directory for filtered normal recordings>'
+filtered_murmur_recordings_destination_directory = r'<path to destination directory for filtered murmur recordings>'
+# Make sure the destination directories exist
+os.makedirs(filtered_normal_recordings_destination_directory, exist_ok=True)
+os.makedirs(filtered_murmur_recordings_destination_directory, exist_ok=True)
+
 # A Butterworth low pass filter was chosen because it behaves close to an ideal filter
 def butter_low_pass(samples, sample_rate, cutoff_freq, order, outputType):
     # Normalize the cutoff frequency
