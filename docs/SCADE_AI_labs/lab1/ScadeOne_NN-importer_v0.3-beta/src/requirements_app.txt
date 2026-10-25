@@ -1,9 +1,0 @@
-# Keras Importer
-keras >= 3.2.1
-tensorflow
-networkx >= 3.0
-
-# App
-streamlit >= 1.24
-matplotlib
-pydot

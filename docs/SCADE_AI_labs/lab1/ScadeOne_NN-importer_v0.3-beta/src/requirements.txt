@@ -1,3 +1,0 @@
-keras >= 3.2.1
-tensorflow >= 2.16
-networkx >= 3.0
