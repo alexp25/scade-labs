@@ -126,7 +126,7 @@ python -m pip install --upgrade pip
 Install the packages required throughout the laboratory:
 
 ``` bash
-pip install tensorflow keras numpy matplotlib pandas scikit-learn librosa soundfile jupyter ansys-scadeone-core seaborn ipykernel
+pip install tensorflow keras numpy matplotlib pandas scikit-learn librosa soundfile jupyter ansys-scadeone-core seaborn ipykernel librosa scipy
 ```
 
 Keras 3 can operate with several computational backends, including TensorFlow, JAX, and PyTorch. In this course, **TensorFlow will be used as the Keras backend** in order to maintain a common environment for all exercises. Current Keras documentation describes Keras as a multi-backend framework and allows TensorFlow to be selected explicitly.
@@ -210,6 +210,9 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 import seaborn as sns
+import librosa
+import scipy.signal as signalpy
+from scipy.io import wavfile
 from ansys.scadeone.core import ScadeOne
 from ansys.scadeone.core.svc.pywrapper.python_wrapper import PythonWrapper
 ```
@@ -832,7 +835,7 @@ print("Processing completed.")
 ```
 
 **PHYSIONET 2022 DATASET MANIPULATION**
-❗️ Keep in mind that during the development of the laboratory it took around 2h to copy and rename all of the files.
+❗️ Keep in mind that during the development of the laboratory it took around 50 minutes to copy and rename all of the files.
 
 ``` python
 physionet_2022_source_directory = r'<path to the training_data folder of the PhysioNet2022 Challenge Dataset>'
@@ -880,15 +883,17 @@ def count_wav_files_in_folder(folder_path, image_extensions=(".wav")):
     return count
 normal_recordings_count = count_wav_files_in_folder(normal_recordings_destination_directory)
 murmur_recordings_count = count_wav_files_in_folder(murmur_recordings_destination_directory)
-print(f”There are {normal_recordings_count} normal recordings in the merged dataset”)
-print(f”There are {murmur_recordings_count} recordings containing murmurs in the merged dataset”)
+print(f"There are {normal_recordings_count} normal recordings in the merged dataset")
+print(f"There are {murmur_recordings_count} recordings containing murmurs in the merged dataset")
 ```
+There should be 5237 normal recordings and 1164 recordings containing murmurs in the merged dataset.
 
 **COUNT TOTAL NUMBER OF .wav FILES :**
 
 ``` python
-print(f”There are {normal_recordings_count + murmur_recordings_count} recordings in the merged dataset”)
+print(f"There are {normal_recordings_count + murmur_recordings_count} recordings in the merged dataset")
 ```
+There should be 6401 recordings in the merged dataset.
 
 **COUNT THE PERCENTAGE OF EACH CLASS :**
 
@@ -899,6 +904,7 @@ murmur_percentage = (murmur_recordings_count / total_recordings_count) * 100
 print(f"Normal recordings: {normal_recordings_count} ({normal_percentage:.2f}%)")
 print(f"Murmur recordings: {murmur_recordings_count} ({murmur_percentage:.2f}%)")
 ```
+There should be 81.82% normal recordings and 18.18% recordings containing murmurs in the merged dataset.
 
 **Proposed EXERCISE :**
 
@@ -962,6 +968,8 @@ for murmur_recording in os.listdir(murmur_recordings_destination_directory) :
     wavfile.write(filtered_recording_path, sample_rate, samples_filtered)
 ```
 
+It should only take around 15s to filter all of the recordings in the merged dataset.
+
 **Generate and save the spectrograms :**
 
 ``` python
@@ -974,7 +982,7 @@ def save_spectrogram(filename, output_dir):
     D = librosa.stft(y, n_fft=n_fft, hop_length=hop_length, win_length=win_length)
     S = np.abs(D)
     S_dB = librosa.amplitude_to_db(S, ref=np.max)
-    plt.figure(figsize=(600, 400, “px”))
+    plt.figure(figsize=(600, 400, "px"))
     librosa.display.specshow(S_dB, sr=sr, x_axis='time', y_axis='linear')
     plt.colorbar(format='%+2.0f dB')
     plt.title('Spectrogram')
@@ -1036,6 +1044,7 @@ os.makedirs(murmur_spectrograms_dest_dir, exist_ok=True)
 #     recording_path = os.path.join(filtered_murmur_recordings_destination_directory, '<add batch folder name>', murmur_recording)
 #     save_spectrogram(recording_path, murmur_spectrograms_dest_dir)
 ```
+❗️ Keep in mind that during the development of the laboratory it took around 1h to generate all of the spectrograms. However, it takes around 3 minutes the generate the spectrograms of a single batch of 300 recordings, so you should be around the computer to change the batch number from time to time.
 
 The spectrogram images also contain the time, frequency and magnitude axis. Even though it might not seem important to keep the axis it is better not to crop them out because the recordings have different lengths, but the images have the same 600x400 px dimension. Because of that, a murmur spike showing on the spectrogram might take more space in an image of a short recording rather than inside an image of a long recording. By keeping them, especially the time axis, the model can potentially learn how to make correlate the dimension of the spikes with the length of the whole recording. At the same time, if many short or long recordings happen to be aggregated in a single class, then the model might learn the correlation between the length of the recording and the label. However, we will not tackle this topic right now.
 
