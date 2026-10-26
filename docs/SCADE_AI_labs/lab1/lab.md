@@ -1191,7 +1191,8 @@ Inspect the architecture of the neural network by running in a sepparate cell :
 CNN_model.summary()
 ```
 
-Train the model (it will probably take couple of hours) :
+Train the model :
+❗️ Keep in mind that during the development of the laboratory it took around 2h and 45 minutes to train the model for 10 epochs.
 
 ``` python
 CNN_model_history = CNN_model.fit(training_dataset, epochs=10, validation_data = validation_dataset)
@@ -1307,7 +1308,7 @@ Predict each sample individually :
 testing_dataset = testing_dataset.unbatch() #Comment out if running this cell multiple times
 y_true, y_pred = [], []
 for images, labels in testing_dataset:
-    predictions = heart_sounds_recordings_resnet50_model.predict(tf.expand_dims(images, axis=0))
+    predictions = CNN_model.predict(tf.expand_dims(images, axis=0))
     predicted_class = predictions[0][0]
     true_class = labels.numpy()
     y_pred.append(predicted_class)
