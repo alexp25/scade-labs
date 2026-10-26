@@ -189,6 +189,8 @@ All exercises in this laboratory can be completed inside this notebook excepting
 
 The Keras backend must be selected before importing Keras.
 
+❗️ If you run the lab on a MacBook you need to comment out for now the imports from ansys.scadeone.core. It definitely works on a Windows computer. It should also work on a Linux computer, but it has not been tested yet.
+
 ``` python
 import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
@@ -1192,7 +1194,8 @@ CNN_model.summary()
 ```
 
 Train the model :
-❗️ Keep in mind that during the development of the laboratory it took around 2h and 45 minutes to train the model for 10 epochs.
+
+❗️ Keep in mind that during the development of the laboratory it took around 2h and 45 minutes to train the model for 10 epochs. on a MacBook Pro with Apple M4 CPU with 10 CPU cores and 16 GB of RAM.
 
 ``` python
 CNN_model_history = CNN_model.fit(training_dataset, epochs=10, validation_data = validation_dataset)
