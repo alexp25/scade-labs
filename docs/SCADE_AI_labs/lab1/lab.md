@@ -19,6 +19,8 @@ Estimated completion time: **approximately 4 hours**.
 
 ❗️ The laboratory is NOT designed to be completted in one sitting. Some parts of the code will take a long time to run. Waiting time for some individual parts of the code might take couple hours to finish. Students are encouraged to take a break or to do something else while the code is running.
 
+❗️ If you run into problems settting up the environment or running the code, you can find a solution of the lab up until the part when SCADE One is involved at the following path : https://github.com/alexp25/scade-labs/blob/main/src/SCADE_AI_labs/lab1/lab1.ipynb . The solution will not include the answers to the proposed exercises and questions.
+
 # 2. Learning Objectives
 
 After completing this laboratory, the student should be able to:
