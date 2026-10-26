@@ -1258,12 +1258,16 @@ Potential responses to overfitting include:
 
 - using early stopping.
 
+**PROPOSED EXERCISES :**
+1\. Examine the plots of the training metrics. Did the model overfit or underfit?
+2\. When did the model stop updating the validation accuracy or recall?
+
 # 26. Evaluating the CNN on the testing dataset
 
 The first step is to create a tf.data.Dataset object using the data of the testing directories so that we can evaluate the model on it.
 
 ``` python
-test_spectrograms_dest_dir = r'<>path to Testing Spectrograms Dataset directory>'
+test_spectrograms_dest_dir = r'<path to Testing Spectrograms Dataset directory>'
 testing_dataset = tf.keras.utils.image_dataset_from_directory(
     test_spectrograms_dest_dir,
     labels='inferred',
