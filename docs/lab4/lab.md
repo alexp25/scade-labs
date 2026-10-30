@@ -1,8 +1,11 @@
 # Lab 4 — Implementing a Cruise Control System with Scade One
 
-**Course:** Software Engineering &nbsp;·&nbsp; **Lesson:** Model-Based Design with Scade One  
-**Duration:** 2–3 hours &nbsp;·&nbsp; **Tool:** Ansys Scade One (Student Edition) &nbsp;·&nbsp; **Work mode:** Individual  
-**Prerequisites:** [Lab 2 — Applying the SDLC (Python)](../lab2/) (conceptual) &nbsp;·&nbsp; [Lab 3 — Software Requirements Engineering, Scade One &amp; Traceability](../lab3/) (hard prerequisite — Scade One install, Swan basics, and the REQ-01–REQ-08 requirement set all come from there)
+- **Course:** Software Engineering
+- **Lesson:** Model-Based Design with Scade One
+- **Duration:** 2–3 hours
+- **Tool:** Ansys Scade One (Student Edition)
+- **Work mode:** Individual
+- **Prerequisites:** [Lab 2 — Applying the SDLC (Python)](../lab2/) (conceptual) · [Lab 3 — Software Requirements Engineering, Scade One &amp; Traceability](../lab3/) (hard prerequisite — Scade One install, Swan basics, and the REQ-01–REQ-08 requirement set all come from there)
 
 ---
 

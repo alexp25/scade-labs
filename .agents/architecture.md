@@ -25,6 +25,9 @@ scade-labs/
 │   ├── lab4/{index.html, lab.md, lab_old.md, img/}   Lab 4 page (Cruise Control design/implementation/traceability; lab_old.md is unused/orphaned)
 │   ├── lab5/{index.html, lab.md}                     Lab 5 page (design principles, reading + quiz only, no src/lab5/) — see note below, this tree predates its addition
 │   ├── lab6/{index.html, lab.md}                     Lab 6 page (software architecture, reading + hands-on written exercise + quiz, no src/lab6/; the only lab page loading Mermaid.js)
+│   ├── m2/lab1/{index.html, lab.md, cmp-submit.js, CMP_template_CruiseControl.docx}  Module 2 · Lab 1 (CM Plan; ID `m2-lab1`; two levels deep → `../../` asset paths — ADR 0003)
+│   ├── m2/lab2/{index.html, lab.md, repo-checker.js}  Module 2 · Lab 2 (CM on GitHub + repo checker; ID `m2-lab2`)
+│   ├── courses/{lab1..lab6, m2-lab1, m2-lab2}.pdf, ieee-828-2012.pdf  published slide decks for the "Course Slides" button + the IEEE 828 standard linked from M2 Lab 1
 │   ├── assets/js/{firebase-config.js, firebase-client.js, auth-header.js}  Firebase bootstrap + shared auth/tracking widget (ADR 0002)
 │   ├── account/index.html                            login/register + "my progress" page
 │   ├── admin/index.html                               admin-only progress view (protected by Firestore rules, not by hiding this URL)
@@ -34,6 +37,7 @@ scade-labs/
 │   ├── lab2/{starter, solution, README.md, .gitignore}
 │   ├── lab3/{starter, solution}  (both hold requirements text + a Scade One project — demo.sproj, blocks.swan, test.swant, wrappers, Python test scripts; starter/ has blocks.swan/test.swant flattened, which breaks Scade One's discovery, left as-is per maintainer instruction; solution/ has the correct assets/ layout and actually opens — see .agents/scade-models.md)
 │   └── lab4/starter/CruiseControl/  (Swan model + C/Python wrapper; populated/working, doubles as the reference — no separate solution/)
+│   └── m2/lab1/{tools/build_cmp_docs.py, solution/CMP_CruiseControl_reference.docx, README.md}  generator for both CMP .docx files + instructor-only reference (never under docs/)
 ├── old/                  tracked legacy archive (old/lab2_old/, old/scade_demo/) — superseded, not linked from any published page
 └── scade_demo/           untracked local Scade One codegen job output at repo root — not part of the curriculum, left as-is
 ```
@@ -110,6 +114,11 @@ acts as a static-file build/serve tool, not a templating engine. Full detail:
   matching `src/lab2/`, `src/lab3/`, `src/lab4/`; also `docs/lab1/`,
   `docs/lab5/`, `docs/lab6/` (all reading/quiz/written-exercise-only, no
   matching `src/labN/`) — all linked from `docs/index.html`.
+- **Module 2 (since 2026-10-29; split into two labs 2026-10-30):** `docs/m2/lab1/`
+  + `src/m2/lab1/` (CM plan) and `docs/m2/lab2/` (GitHub + checker), its
+  own portfolio section. Source PDFs in `project_docs/courses/m2/`
+  (unpublished originals); the IEEE 828 copy is also published as
+  `docs/courses/ieee-828-2012.pdf` at the maintainer's direction. See ADR 0003.
 - **Legacy/out of scope:** `old/lab2_old/` and `old/scade_demo/` (tracked,
   superseded), and root `scade_demo/` (untracked local SCADE codegen job
   output). None are referenced from any published page (verified: no
@@ -130,4 +139,6 @@ acts as a static-file build/serve tool, not a templating engine. Full detail:
   `src/lab2/starter/lab2_cruise_control_starter.py` — if you change one, change
   the other.
 - Never place instructor solution content (`src/*/solution/`) under `docs/`.
+- Licensed third-party documents go under `docs/` only with explicit
+  maintainer approval (the IEEE 828 PDF has it, see ADR 0003).
 - Never hand-edit generated Scade One wrapper/codegen output (see above).

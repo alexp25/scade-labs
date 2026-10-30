@@ -11,6 +11,16 @@ Published at `https://alexp25.github.io/scade-labs/` (`docs/index.html`).
 | Lab 5 | `docs/lab5/` (no `src/lab5/` — reading + quiz only) | Active — created earlier this session | [lab-5-design-principles.md](lab-5-design-principles.md) |
 | Lab 6 | `docs/lab6/` (no `src/lab6/` — reading + hands-on written exercise + quiz) | Active — created this session, fully registered (portfolio card, both `LAB_TITLES` maps, `.agents/lab-map.md`) | [lab-6-architecture.md](lab-6-architecture.md) |
 
+### Module 2 — Advanced Critical Software Engineering (own portfolio section)
+
+| Card | Directory | Status | Overview |
+|---|---|---|---|
+| M2 · Lab 1 | `docs/m2/lab1/` + `src/m2/lab1/` | Active — created 2026-10-29 (split 2026-10-30: CM plan only), fully registered | [m2-lab1-configuration-management.md](m2-lab1-configuration-management.md) |
+| M2 · Lab 2 | `docs/m2/lab2/` (no `src/m2/lab2/`) | Active — created 2026-10-30 from the original lab's Part 2, fully registered | [m2-lab2-github-configuration.md](m2-lab2-github-configuration.md) |
+
+The SCADE AI labs section (`docs/SCADE_AI_labs/lab1/`) also exists on the
+portfolio; it is not otherwise documented in these maintainer docs.
+
 ## Sequencing
 
 Lab 4's own `lab.md` lists Lab 2 (conceptual) and Lab 3 (hard prerequisite —

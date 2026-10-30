@@ -6,7 +6,8 @@ partially documents a step, that's stated explicitly.
 ## Learner: portfolio → lab
 
 1. Open `https://alexp25.github.io/scade-labs/` → `docs/index.html`.
-2. Click a lab card (`Lab 1` through `Lab 6` — 6 cards, all linked).
+2. Click a lab card (`Lab 1` through `Lab 6` in "Laboratories", plus the
+   "SCADE AI Labs" and "Module 2" sections — all linked).
 3. The lab's `index.html` fetches and renders its sibling `lab.md`.
 
 ## Learner: Lab 1 — introduction to software engineering
@@ -265,6 +266,46 @@ in `docs/index.html`, `lab6` added to both `LAB_TITLES` maps, this file,
 with Lab 5 (created earlier the same day), which still lacks its
 `LAB_TITLES` entries and a `.agents/workflows.md` section as of this
 writing.
+
+## Learner: Module 2 · Lab 1 — configuration management plan
+
+1. Prerequisites: Lab 3 requirements and the Lab 4 `CruiseControl/` project
+   folder; Word (or any `.docx` editor).
+2. Read the IEEE 828 Annex D outline table, work through Activities 1A–1D
+   (identification, branching, versioning, baselining), download
+   `CMP_template_CruiseControl.docx`, complete every red TODO and enrich the
+   given content (1E), send it to the mentor with the upload form at the
+   end of 1E (FormSubmit, or the **Email it instead** `mailto:` fallback),
+   take `#cm-quiz` (1F).
+
+## Learner: Module 2 · Lab 2 — configuration management on GitHub
+
+1. Prerequisites: the completed CMP from M2 Lab 1, the Lab 4
+   `CruiseControl/` folder; a GitHub account.
+2. "Getting Started with Git" (skippable if already set up): install Git,
+   set `user.name`/`user.email`/`init.defaultBranch main`, sign in to GitHub
+   (Git Credential Manager on Windows, `gh auth login` elsewhere), read the
+   four-places model and the command table, run the Step 6 practice in a
+   throw-away `git-practice/` folder.
+3. Create a public repo with `requirements/`, the unchanged Lab 4
+   `CruiseControl/` folder, `verification/`, `docs/CMP_CruiseControl.docx`
+   and a Scade-aware `.gitignore` (2A); tag `baseline/req-v1.0`, create
+   `develop`, protect `main` (2B); run one change through issue →
+   `feature/REQ-07-…` → traced commits → PR → `develop` → `main` →
+   `v1.0.0` + GitHub Release (2C); write the traceability chain in the
+   README (2D).
+4. Paste the repo URL into the checker (Activity 2E), fix failures, re-check.
+
+## Maintainer: regenerating the Module 2 · Lab 1 CMP documents
+
+1. Edit content in `src/m2/lab1/tools/build_cmp_docs.py` (plain text = same
+   in both documents; `R(reference, template)` = differs).
+2. From the repo root: `python src/m2/lab1/tools/build_cmp_docs.py` (needs
+   `python-docx`). It rewrites `docs/m2/lab1/CMP_template_CruiseControl.docx`
+   and `src/m2/lab1/solution/CMP_CruiseControl_reference.docx`.
+3. If CI paths / tag names / branch names change, update `docs/m2/lab1/lab.md`,
+   `docs/m2/lab2/lab.md` and the checker rules in `docs/m2/lab2/repo-checker.js`
+   together.
 
 ## Incomplete/partially documented workflows
 

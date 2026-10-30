@@ -134,3 +134,11 @@ Explicitly stated by the repo itself, not inferred:
 
 Lab 2 has **zero** import statements in either `.py` file (stdlib only, and
 that's exactly why it also runs under Skulpt in-browser).
+
+## Module 2 · Lab 1 — document generator (maintainer only)
+
+`src/m2/lab1/tools/build_cmp_docs.py` (needs `python-docx`; run from the
+repo root) generates `docs/m2/lab1/CMP_template_CruiseControl.docx` and the
+instructor-only `src/m2/lab1/solution/CMP_CruiseControl_reference.docx` from
+one content definition. Not student-facing; validated only by reading the
+output back (see `.agents/testing.md`).

@@ -160,3 +160,32 @@ just the browser's native PDF rendering.
   (GitHub Pages has no redirect mechanism configured in this repo). See
   `project_docs/changelog.md`'s newest entries for the full detail of each
   pass.
+
+## Lab page shell: TOC scroll-spy
+
+Every lab `index.html` has its own copy of `initScrollSpy()`. When it
+highlights the active TOC entry it adjusts only the sidebar's `scrollTop`;
+do not use `scrollIntoView()` there — it also scrolls the page and, with
+`html { scroll-behavior: smooth }`, fights the reader's own scrolling
+(fixed 2026-10-30). Keep the copies identical when editing one.
+
+## Module sub-sections (`docs/m2/`, and the pre-existing `docs/SCADE_AI_labs/`)
+
+- Module 2 labs live at `docs/m2/labN/` (ADR 0003). Pages are two levels
+  deep: back button `../../`, `auth-slot`/`course-slides-slot`
+  `data-base="../../"`, `../../assets/js/*`. `CURRENT_LAB_ID` is `m2-labN`,
+  so `course-slides.js` serves `docs/courses/m2-labN.pdf` with no widget
+  change. Cross-links to the original labs are `../../labN/`.
+- `docs/courses/m2-lab1.pdf` and `docs/courses/m2-lab2.pdf` are both
+  hand-made copies of `project_docs/courses/m2/M2 Slides 1.pdf` (the two
+  labs share Lesson 1; `course-slides.js` only knows `<labId>.pdf`, so the
+  deck is duplicated rather than the widget changed) — same sync rule as
+  the `labN.pdf` decks; update both copies together.
+- `LAB_TITLES` in `docs/admin/index.html` and `docs/account/index.html`
+  include `"m2-lab1"` and `"m2-lab2"`.
+- `docs/m2/lab1/CMP_template_CruiseControl.docx` is **generated** (by
+  `src/m2/lab1/tools/build_cmp_docs.py`) — do not edit the `.docx` by hand.
+- `docs/courses/ieee-828-2012.pdf` is a published copy of
+  `project_docs/courses/m2/828-2012 1.pdf` (university-licensed; published
+  at the maintainer's direction for course use, ADR 0003), linked from
+  `docs/m2/lab1/lab.md` ("The IEEE 828 CMP outline").

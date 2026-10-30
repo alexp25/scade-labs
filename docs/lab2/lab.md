@@ -1,6 +1,10 @@
 # Lab 2 — Applying the SDLC: Cruise Control Safety System
 
-**Course:** Software Engineering &nbsp;·&nbsp; **Lesson:** SDLC &nbsp;·&nbsp; **Duration:** 2 hours &nbsp;·&nbsp; **Language:** Python 3 &nbsp;·&nbsp; **Work mode:** Individual
+- **Course:** Software Engineering
+- **Lesson:** SDLC
+- **Duration:** 2 hours
+- **Language:** Python 3
+- **Work mode:** Individual
 
 ---
 

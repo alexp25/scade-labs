@@ -122,3 +122,14 @@ Only concepts actually present in this repo, and the concrete role each plays he
   Mermaid stand-in, not output from a real SysML tool, since this repo has
   none — to describe the whole vehicle, not just the embedded-software
   boundary Lab 4's model lives inside.
+
+- **Configuration management (CM) vocabulary** — taught in Module 2 · Labs 1–2
+  (`docs/m2/lab1/lab.md` plan, `docs/m2/lab2/lab.md` GitHub; after IEEE Std 828-2012): **configuration item
+  (CI)** = an artifact under version control because it can influence
+  behaviour, verification or the safety argument (IDs
+  `CC-<REQ|MDL|TST|GEN|TOOL|VER|DOC>-<nnn>`); **baseline** = an approved set
+  of CI versions, changed only via change control (tags
+  `baseline/req|des|ver-vX.Y`); **release** = a delivered baseline
+  (`vMAJOR.MINOR.PATCH[-rcN]` tag + GitHub Release); **CMP** = Configuration
+  Management Plan (IEEE 828 Annex D, D.1–D.9); **change request** = a GitHub
+  issue naming the affected REQ IDs.

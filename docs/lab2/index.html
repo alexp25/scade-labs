@@ -347,7 +347,14 @@ function initScrollSpy() {
         const active = items.find(li => li.dataset.id === entry.target.id);
         if (active) {
           active.classList.add('active');
-          active.scrollIntoView({ block: 'nearest' });
+          // Scroll only the sidebar. scrollIntoView() would also scroll the page
+          // (smoothly, via scroll-behavior) and fight the user's own scrolling.
+          const box = active.closest('.toc-sidebar');
+          if (box) {
+            const r = active.getBoundingClientRect(), b = box.getBoundingClientRect();
+            if (r.top < b.top) box.scrollTop -= b.top - r.top;
+            else if (r.bottom > b.bottom) box.scrollTop += r.bottom - b.bottom;
+          }
         }
       }
     });

@@ -1,11 +1,11 @@
 # Lab 6 — Software Architecture
 
-**Course:** Software Engineering
-**Lesson:** Software Architecture
-**Duration:** 45–60 minutes
-**Tool:** None — a short recap, then the page's interactive, auto-graded diagram canvas for two hands-on exercises
-**Work mode:** Individual, written deliverable
-**Recommended prerequisite:** the Lesson 6 lecture/slides on Software Architecture (this lab assumes you've already seen that material) and [Lab 4](../lab4/) (you need to already know the Cruise Control system's interface — what it takes in, what it outputs — to complete Parts 1–2)
+- **Course:** Software Engineering
+- **Lesson:** Software Architecture
+- **Duration:** 45–60 minutes
+- **Tool:** None — a short recap, then the page's interactive, auto-graded diagram canvas for two hands-on exercises
+- **Work mode:** Individual, written deliverable
+- **Recommended prerequisite:** the Lesson 6 lecture/slides on Software Architecture (this lab assumes you've already seen that material) and [Lab 4](../lab4/) (you need to already know the Cruise Control system's interface — what it takes in, what it outputs — to complete Parts 1–2)
 
 ---
 

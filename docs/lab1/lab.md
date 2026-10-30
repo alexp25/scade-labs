@@ -1,11 +1,11 @@
 # Lab 1 — Introduction to Software Engineering
 
-**Course:** Software Engineering  
-**Lesson:** Software Engineering as an Engineering Discipline  
-**Duration:** 1 hour  
-**Tool:** None — reading + quiz only  
-**Work mode:** Individual  
-**Recommended prerequisite:** None — this is the first lab in the portfolio
+- **Course:** Software Engineering
+- **Lesson:** Software Engineering as an Engineering Discipline
+- **Duration:** 1 hour
+- **Tool:** None — reading + quiz only
+- **Work mode:** Individual
+- **Recommended prerequisite:** None — this is the first lab in the portfolio
 
 ---
 

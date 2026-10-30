@@ -9,6 +9,27 @@ validation notes, file lists, and session narration. Newest first.
 
 ---
 
+## 2026-10-30 — Module 2: Configuration Management split into two labs
+
+The Module 2 configuration management lab is now two labs. **Lab 1** is the
+Configuration Management Plan (IEEE 828 template, upload to the mentor,
+quiz); **Lab 2** puts the project on GitHub following that plan and checks
+the student's public repository in the page. Lab 2 also teaches Git from
+scratch: installing it, connecting it to GitHub, the everyday commands and
+how to recover from common mistakes. Also fixed uneven page scrolling
+(noticeable on touchpads) on every lab page.
+
+## 2026-10-29 — Module 2 · Lab 1: Configuration Management (new module, new lab)
+
+Started a Module 2 section on the portfolio with its first lab. Students
+write a Configuration Management Plan for the Lab 4 Cruise Control project
+(downloadable Word template structured on IEEE 828), take a 10-question
+quiz on versioning, branching and baselining, then put the project under
+configuration on GitHub and check their public repository with an in-page
+checker. Registered on the portfolio, the admin/account labels and the
+slides viewer. Students can upload their completed plan from the page;
+it is emailed to the mentor.
+
 ## 2026-09-23 — Lab 6: Software Architecture (new lab)
 
 Added a sixth lab on software architecture, built around the existing Lab 4

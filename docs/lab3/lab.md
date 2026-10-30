@@ -1,11 +1,11 @@
 # Lab 3 — Software Requirements Engineering, Scade One &amp; Traceability
 
-**Course:** Software Engineering  
-**Lesson:** From System Intent to Traceable Software Requirements  
-**Duration:** 4–6 hours (can be split across sessions — a natural break point is after Part 6)  
-**Tool:** Ansys Scade One Student Edition (Parts 2–7, 9) + pen/paper or a text editor (Parts 1, 8)  
-**Work mode:** Individual  
-**Recommended prerequisite:** [Lab 2 — Applying the SDLC (Python)](../lab2/) (informal system description, decision table, REQ-01…REQ-06)
+- **Course:** Software Engineering
+- **Lesson:** From System Intent to Traceable Software Requirements
+- **Duration:** 4–6 hours (can be split across sessions — a natural break point is after Part 6)
+- **Tool:** Ansys Scade One Student Edition (Parts 2–7, 9) + pen/paper or a text editor (Parts 1, 8)
+- **Work mode:** Individual
+- **Recommended prerequisite:** [Lab 2 — Applying the SDLC (Python)](../lab2/) (informal system description, decision table, REQ-01…REQ-06)
 
 ---
 

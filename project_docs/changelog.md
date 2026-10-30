@@ -5,6 +5,131 @@ maintainer documentation. One entry per work session. Newest first.
 
 ---
 
+## 2026-10-30 — Module 2: the CM lab split into Lab 1 (plan) and Lab 2 (GitHub + checker)
+
+### Summary for reporting
+
+At the maintainer's request the single Module 2 lab was split in two along
+its existing Part 1 / Part 2 boundary. **M2 Lab 1 — A Configuration
+Management Plan for a Scade One Project** keeps the IEEE 828 outline,
+Activities 1A–1F, the Word template, the upload form and the quiz. **M2
+Lab 2 — Putting a Scade One Project Under Configuration on GitHub** takes
+Activities 2A–2E and the repository checker, with a new context, objectives
+and a recap table mapping each CMP decision to its GitHub mechanism.
+
+### Changes
+
+- `docs/m2/lab1/lab.md`: Part 2 removed, "Part 1" heading flattened,
+  context/objectives/tools/summary rewritten for the plan only, links to
+  Lab 2. `index.html`: checker CSS/script removed, new title.
+  `cmp-submit.js`: repository URL field labelled optional.
+- New `docs/m2/lab2/{index.html, lab.md}`; `repo-checker.js` moved there
+  from `lab1/`, progress key now `m2-lab2`/`repo-check`, token key
+  `m2-lab2-gh-token`, CMP hint mentions Lab 1.
+- New `docs/courses/m2-lab2.pdf` (copy of the Lesson 1 deck).
+- `docs/index.html`: Lab 1 card retitled, new Lab 2 card.
+  `docs/admin/index.html`, `docs/account/index.html`: `m2-lab2` labels.
+- Docs: `.agents/{lab-map, workflows, testing, verification, publishing,
+  architecture, integrations, domain}.md`, ADR 0003,
+  `project_docs/labs/{m2-lab1-configuration-management, portfolio-map}.md`,
+  new `project_docs/labs/m2-lab2-github-configuration.md`,
+  `src/m2/lab1/README.md`, `docs/changelog/changelog.md`.
+
+- Follow-up: M2 Lab 2 now starts with **Getting Started with Git** —
+  install per OS, `git config`, GitHub sign-in, the four places, a command
+  table, a scratch-repo practice script and a recovery table; Activity 2A
+  now spells out creating and cloning the repository. Tools line and
+  objectives updated.
+
+- Follow-up (all 9 lab pages: `docs/lab1..6`, `docs/SCADE_AI_labs/lab1`,
+  `docs/m2/lab1..2` `index.html`): page scrolling felt uneven on a touchpad
+  near section boundaries. Cause: `initScrollSpy()` called
+  `scrollIntoView({block:'nearest'})` on the active TOC item, which also
+  scrolls the page (the sidebar is sticky inside it) and, with
+  `html { scroll-behavior: smooth }`, started an animated page scroll every
+  time a heading crossed the threshold. Now only the sidebar's own
+  `scrollTop` is adjusted.
+
+### Validation
+
+See `.agents/testing.md` → "Module 2 · Labs 1–2 — after the split". Not
+tested in a real browser.
+
+---
+
+## 2026-10-29 — Module 2 · Lab 1: Configuration Management (new module section + lab)
+
+### Summary for reporting
+
+Processed the instructor's Module 2 resources (Lesson 1 slides, module
+syllabus, IEEE Std 828-2012) into a new lab at `docs/m2/lab1/`, under a new
+"Module 2 — Advanced Critical Software Engineering" portfolio section.
+Part 1: a CM Plan for the Lab 4 Cruise Control project structured on
+IEEE 828 Annex D (identification, branching, versioning, baselining), as a
+generated Word template students enrich and complete, plus a 10-question
+quiz. Part 2: put the project on a public GitHub repo (baseline tags,
+develop/feature branches, issue → PR → release) and grade it with an
+in-page GitHub API checker (14 rules, optional token for rate limits).
+
+### Files
+
+- New: `docs/m2/lab1/{index.html, lab.md, repo-checker.js, CMP_template_CruiseControl.docx}`,
+  `docs/courses/m2-lab1.pdf`, `src/m2/lab1/{README.md, tools/build_cmp_docs.py, solution/CMP_CruiseControl_reference.docx}`,
+  `.agents/decisions/0003-module-2-labs-and-github-checker.md`,
+  `project_docs/labs/m2-lab1-configuration-management.md`.
+- Moved (never committed): `docs/courses/m2/*.pdf` → `project_docs/courses/m2/`.
+  The IEEE PDF is university-licensed and is now gitignored.
+- Edited: `docs/index.html` (new section + card), `docs/admin/index.html`
+  and `docs/account/index.html` (`LAB_TITLES`), `docs/changelog/changelog.md`,
+  `.gitignore`, `.agents/{architecture, lab-map, publishing, workflows,
+  testing, integrations, verification, domain, python}.md`,
+  `project_docs/labs/portfolio-map.md`.
+
+### Decisions (user-confirmed)
+
+Module path `docs/m2/lab1/` (not Lab 7); source PDFs out of `docs/`;
+Lab 4 Cruise Control as the project under CM; checker works without a
+token, optional token on rate limit. Design change during implementation:
+the student repo keeps Lab 4's `CruiseControl/` folder intact (its scripts
+need `cc_wrapper/` and `scenarios/` beside them), so the checker's test
+rule accepts `scenarios/` as well as `tests/`.
+
+### Validation
+
+See `.agents/testing.md` → "Module 2 · Lab 1". Not tested in a real browser.
+
+### Follow-up, same day (maintainer review of the rendered page)
+
+- Header metadata ran together as one paragraph (consecutive markdown
+  lines); now a bullet list.
+- Replaced `§` section-sign references with "section N".
+- Added an explanation of what an IEEE annex is (normative vs
+  informative; Annex D = CMP contents, Annex K = version naming, Clause 8 =
+  identification).
+- **Reversed the IEEE PDF decision:** it is now published as
+  `docs/courses/ieee-828-2012.pdf` and linked from Part 1.1 (training
+  material delivered by UPB, the licensee); the `.gitignore` rule was
+  removed. ADR 0003 was updated.
+- Same header bug fixed in `docs/lab5/lab.md` and `docs/lab6/lab.md`
+  (bold-label lines without trailing double spaces, so they ran together);
+  both now use a bullet list. Then, per maintainer request, Labs 1–4 were
+  aligned to the same format: Labs 1/3 (trailing double-space hard breaks)
+  and Labs 2/4 (`&nbsp;·&nbsp;`-separated fields on one line) are now one
+  `- **Label:** value` bullet per field. Every `docs/labN/lab.md` and
+  `docs/m2/lab1/lab.md` header now uses this format; the SCADE AI lab was
+  deliberately left unchanged.
+- Added a CMP upload section at the end of Activity 1E
+  (`docs/m2/lab1/cmp-submit.js`): the form emails the student's `.docx` to
+  the mentor through FormSubmit (third-party form-to-email, since the site
+  is static). Recipient is the placeholder `xxxx@upb.ro` in one constant;
+  needs a one-time activation by the real mentor address. Not exercised
+  with a real submission.
+- FormSubmit then turned out to be down (HTTP 521 on every URL). Per
+  maintainer choice, kept it and added an **Email it instead** `mailto:`
+  button (same recipient, pre-filled subject/body, manual attachment).
+
+---
+
 ## 2026-09-24 — Lab 6: diagram checks now tracked to user progress, same as quiz answers
 
 ### Summary for reporting

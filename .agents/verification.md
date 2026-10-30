@@ -166,6 +166,26 @@ one. See the table below.
   completion model as Lab 3's requirements text and Lab 5's whole lesson);
   (c) the `#architecture-quiz` score.
 
+## Module 2 · Labs 1–2 — configuration management (process evidence, not behaviour)
+
+- No new requirements or tests of model behaviour. The lab teaches
+  traceability *through configuration management*: REQ ID → issue → commit
+  → test case → release tag, planned in Lab 1 and demonstrated in the
+  student's own repo in Lab 2.
+- Automated: `#cm-quiz` (Lab 1, fixed answer key) and `repo-checker.js`
+  (Lab 2, 14 rules
+  — evidence that CIs, branches, baseline/release tags, a GitHub Release,
+  merged PRs, REQ-referencing issues and traced commits exist). It cannot
+  judge the quality of the plan.
+- Manual: the student's CMP `.docx` (Lab 1, emailed to the mentor), against
+  `src/m2/lab1/solution/CMP_CruiseControl_reference.docx`.
+- Completion: Lab 1 — CMP sent to the mentor + quiz; Lab 2 — CMP committed
+  as `docs/CMP_CruiseControl.docx` in the student repo + all 14 checks
+  passing (or explained in the README).
+- `lab.md` names DO-178C / ISO 26262 / IEC 62304 / EN 50716 as context
+  only, and states explicitly that neither the lab nor GitHub makes a
+  project compliant.
+
 ## Safety-standard mentions — never a compliance claim
 
 Grepped the whole repo for DO-178C, DO-331, ISO 26262, IEC 61508, EN 50128,

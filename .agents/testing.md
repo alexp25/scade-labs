@@ -242,6 +242,76 @@ edited to match the current structure.**
   API-verified against Drawflow's real source (see above), not exercised
   live in a browser.
 
+## Module 2 · Lab 1 — CMP generator, repo checker, page render (run 2026-10-29)
+
+- `python src/m2/lab1/tools/build_cmp_docs.py` → writes both `.docx`;
+  read back with python-docx: both have the 9 Annex D sections + document
+  history and 6 tables; template has 100+ `TODO` markers, reference **0**.
+- **Checker, pure logic (Node):** `evaluateRepo()` on a hand-built
+  compliant snapshot → 14/14 pass; on an empty-repo snapshot → only
+  `public` passes; `REQ-SAFE-021` in an issue body is recognised;
+  `v2.0.0-rc1` accepted, `release-1` rejected; `parseRepoUrl` handles
+  `https://github.com/a/b`, a `.git` suffix, a `/tree/main` suffix and
+  `a/b`, and rejects garbage. Load with
+  `require('<repo>/docs/m2/lab2/repo-checker.js')` (moved there by the
+  2026-10-30 split; at the time of this run it was under `lab1/`).
+- **Checker, live (Node 24, real GitHub API, unauthenticated):**
+  `fetchSnapshot('alexp25','scade-labs')` parsed every endpoint (280 blob
+  paths, 55 commits, 0 tags/PRs/issues); a nonexistent repo → `notfound`.
+  This live run exposed an over-broad CMP rule (any `.docx` under `docs/`
+  passed) — tightened to require `cmp`/`configuration` in the file name.
+- `lab.md` rendered with `marked@9.1.6` (the version the page loads) in
+  Node: 10 quiz questions / 40 radios, answer key `abcacbbcdc`, the
+  `#repo-checker` placeholder, the `.docx` link, no escaped HTML.
+- `bundle exec jekyll build --destination <tmp>` succeeded (only the
+  pre-existing Cayman Sass deprecation warnings); output contains
+  `m2/lab1/{index.html, lab.md, repo-checker.js, CMP_template_CruiseControl.docx}`
+  and `courses/m2-lab1.pdf`, and no `courses/m2/`.
+- Relative links/assets from `docs/m2/lab1/` (`../../`, both shared JS
+  files, `repo-checker.js`, `../../lab3/`, `../../lab4/`) resolve; no
+  `*reference*.docx` under `docs/`. (The IEEE PDF is published on purpose
+  as `docs/courses/ieee-828-2012.pdf`, link checked in the follow-up session.)
+- CMP upload form (`cmp-submit.js`, added later the same day): `node --check`
+  passes; `lab.md` renders the `#cmp-submit` placeholder and the in-page
+  link to Activity 1E (slug checked against `slugify()`). **No real
+  submission was sent** — the recipient is a placeholder, and the first
+  FormSubmit POST to a new address triggers an activation email.
+  formsubmit.co itself returned HTTP 521 (Cloudflare: origin down) on
+  2026-10-29 for every URL, checked from PowerShell. The `mailto:`
+  fallback was tested in Node with a stubbed DOM: recipient, subject and
+  body (name/group/repo/message/attachment reminder) are encoded correctly.
+- **Not done:** loading the page in a real browser (checker UI/CORS, quiz
+  clicks, slides modal); a full student walk-through on a repo following
+  Part 2; the rate-limit (403) and token paths were code-reviewed only.
+
+## Module 2 · Labs 1–2 — after the split into two labs (run 2026-10-30)
+
+- Both `lab.md` files rendered with `marked@9.1.6` in Node: Lab 1 has 10
+  quiz questions / 40 radios, key `abcacbbcdc`, the `.docx` link, no
+  `#repo-checker`; Lab 2 has the `#repo-checker` placeholder, no quiz; no
+  escaped HTML in either; heading lists as expected (1A–1F, 2A–2E).
+- Checker fixtures re-run from `docs/m2/lab2/repo-checker.js`: compliant
+  14/14, empty repo passes only `public`, `parseRepoUrl` ok.
+- `node --check` on `cmp-submit.js`, `repo-checker.js` and the inline
+  `<script>` of both `index.html` files.
+- `bundle exec jekyll build` succeeded; output has `m2/lab1/{index.html,
+  lab.md, cmp-submit.js, CMP_template_CruiseControl.docx}`,
+  `m2/lab2/{index.html, lab.md, repo-checker.js}`, `courses/m2-lab{1,2}.pdf`.
+- Every relative `href`/`src`/markdown link in both pages and both
+  `lab.md` files resolves on disk.
+- Lab 2 "Getting Started with Git" (added the same day): page re-rendered
+  (no escaped HTML; Steps 1–6 + recovery table before Activity 2A); the
+  skip link's anchor matches `slugify()`; the **Step 6 practice script was
+  extracted from `lab.md` and run with real Git** (Git for Windows, bash,
+  `set -e`) in a scratch folder — every command succeeded, final log shows
+  REQ-01..03 on `main` after a fast-forward merge. Install commands
+  (`winget`, `brew`, `apt`, `dnf`) and the GitHub sign-in flows were not
+  executed.
+- Scroll-spy fix (all 9 lab `index.html` files): `node --check` on every
+  page's inline scripts passes. The scrolling behaviour itself was **not**
+  checked in a browser — diagnosis is from the code (see changelog).
+- **Not done:** either page in a real browser.
+
 ## Manual/visual checks
 
 - No student-facing page exposes instructor solution content: confirmed by

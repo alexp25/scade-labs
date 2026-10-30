@@ -1,11 +1,11 @@
 # Lab 5 — Software Design Principles in Safety-Critical Software Engineering
 
-**Course:** Software Engineering
-**Lesson:** Software Design Principles in Safety-Critical Software Engineering and Best Practices
-**Duration:** 1 hour
-**Tool:** None — a short recap, then a reading + quiz
-**Work mode:** Individual
-**Recommended prerequisite:** the Lesson 5 lecture/slides on Software Design Principles (this lab assumes you've already seen that material — open it any time with the **Course Slides** button above) and [Lab 1](../lab1/) for the foundational software-engineering vocabulary
+- **Course:** Software Engineering
+- **Lesson:** Software Design Principles in Safety-Critical Software Engineering and Best Practices
+- **Duration:** 1 hour
+- **Tool:** None — a short recap, then a reading + quiz
+- **Work mode:** Individual
+- **Recommended prerequisite:** the Lesson 5 lecture/slides on Software Design Principles (this lab assumes you've already seen that material — open it any time with the **Course Slides** button above) and [Lab 1](../lab1/) for the foundational software-engineering vocabulary
 
 ---
 
