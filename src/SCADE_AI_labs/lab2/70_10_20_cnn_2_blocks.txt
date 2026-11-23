@@ -1,0 +1,60 @@
+Model file: 70_10_20_cnn_2_blocks.keras
+Train/validation/test (%): 70/10/20
+Split seed: 42; training seed: 123
+Classes: ['Normal', 'Murmur'] (indices 0, 1)
+Input: (64, 64), grayscale, pixels divided by 255
+Epochs: 15; batch size: 32
+Optimizer: Adam; loss: binary_crossentropy
+CNN configuration: {'name': 'cnn_2_blocks', 'filters': [4, 8], 'dense_units': 16, 'dropout': 0.2, 'learning_rate': 0.001}
+Blocks: Conv2D (3x3, valid, ReLU) + MaxPooling2D (2x2)
+Head: Flatten, Dense (ReLU), Dropout, Dense (sigmoid)
+
+Architecture summary:
+Model: "cnn_2_blocks"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv2d (Conv2D)                 │ (None, 62, 62, 4)      │            40 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d (MaxPooling2D)    │ (None, 31, 31, 4)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_1 (Conv2D)               │ (None, 29, 29, 8)      │           296 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_1 (MaxPooling2D)  │ (None, 14, 14, 8)      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 1568)           │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 16)             │        25,104 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout (Dropout)               │ (None, 16)             │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_1 (Dense)                 │ (None, 1)              │            17 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 76,373 (298.34 KB)
+ Trainable params: 25,457 (99.44 KB)
+ Non-trainable params: 0 (0.00 B)
+ Optimizer params: 50,916 (198.89 KB)
+
+
+Validation at the last epoch (threshold 0.5):
+val_accuracy: 0.8185
+val_loss: 0.4118
+val_precision: 0.0000
+val_recall: 0.0000
+
+
+Test evaluation — threshold: 0.5
+
+Classification report:
+              precision    recall  f1-score   support
+
+      Normal       0.82      1.00      0.90      1047
+      Murmur       0.00      0.00      0.00       232
+
+    accuracy                           0.82      1279
+   macro avg       0.41      0.50      0.45      1279
+weighted avg       0.67      0.82      0.74      1279
+
+Confusion matrix (rows: true, columns: predicted; order: Normal, Murmur):
+[[1047    0]
+ [ 232    0]]
