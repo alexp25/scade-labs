@@ -1,0 +1,4 @@
+Wrappper_cnn_70_10_20_KT_7_convs.def
+Wrappper_cnn_70_10_20_KT_7_convs.c
+Wrappper_cnn_70_10_20_KT_7_convs.py
+swan_config.h

@@ -1,0 +1,3 @@
+-- version swan: 2025.2 graph: 2.1
+function resnet50_murmur_detection (input_layer: float32^3^64^64;)
+  returns (keras_tensor_46: float32^1;);

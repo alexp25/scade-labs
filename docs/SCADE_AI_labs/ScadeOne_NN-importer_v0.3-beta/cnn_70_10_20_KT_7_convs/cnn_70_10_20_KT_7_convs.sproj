@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Name": "cnn_70_10_20_KT_7_convs",
+  "Dependencies": [
+    "keras_lib\\keras.sproj"
+  ],
+  "Resources": [
+    {
+      "Kind": "SourceFile",
+      "Path": "resources\\constants.c",
+      "Key": ""
+    }
+  ]
+}

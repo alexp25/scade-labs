@@ -1,0 +1,15 @@
+-- version swan: 2025.2 graph: 2.1 swant: 1.1
+use cnn_70_10_20_KT_7_convs;
+
+_harness harness_cnn_70_10_20_KT_7_convs
+{
+  diagram
+    (#0 block cnn_70_10_20_KT_7_convs::cnn_70_10_20_KT_7_convs)
+    (#1 expr 0^1^64^64)
+    
+    (#2 wire #1 => #0 .(1))
+    
+    (#3 def _)
+    
+    (#4 wire #0 => #3)
+}

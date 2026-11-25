@@ -1,0 +1,240 @@
+-- version swan: 2025.2 graph: 2.1
+use keras::layers;
+
+use keras::activations;
+
+function cnn_70_10_20_KT_7_convs (input_layer: float32^1^64^64;)
+  returns (keras_tensor_104: float32^1;)
+{
+  diagram
+    (#0 expr input_layer)
+    (#1 $conv2d block conv2d)
+    (#2 $conv2d_1 block conv2d_1)
+    (#3 $max_pooling2d block layers::TMaxPool2D <<8, 60, 60, 2, 2, 2, 2>>)
+    (#4 $conv2d_2 block conv2d_2)
+    (#5 $conv2d_3 block conv2d_3)
+    (#6 $max_pooling2d_1 block layers::TMaxPool2D <<16, 26, 26, 2, 2, 2, 2>>)
+    (#7 $conv2d_4 block conv2d_4)
+    (#8 $conv2d_5 block conv2d_5)
+    (#9 $conv2d_6 block conv2d_6)
+    (#10 $max_pooling2d_2 block layers::TMaxPool2D <<24, 7, 7, 2, 2, 2, 2>>)
+    (#11 $flatten block layers::Flatten3D <<3, 3, 24>>)
+    (#12 $dense block dense)
+    (#13 $dropout block function Dropout => Dropout)
+    (#14 $dense_1 block dense_1)
+    (#15 def keras_tensor_104)
+    
+    (#16 wire #0 => #1 .(1))
+    (#17 wire #1 => #2 .(1))
+    (#18 wire #2 => #3 .(1))
+    (#19 wire #3 => #4 .(1))
+    (#20 wire #4 => #5 .(1))
+    (#21 wire #5 => #6 .(1))
+    (#22 wire #6 => #7 .(1))
+    (#23 wire #7 => #8 .(1))
+    (#24 wire #8 => #9 .(1))
+    (#25 wire #9 => #10 .(1))
+    (#26 wire #10 => #11 .(1))
+    (#27 wire #11 => #12 .(1))
+    (#28 wire #12 => #13 .(1))
+    (#29 wire #13 => #14 .(1))
+    (#30 wire #14 => #15)
+}
+
+const kernel__conv2d__6: float32^3^3^1^8;
+
+const bias__conv2d__6: float32^8;
+
+function conv2d (input_layer: float32^1^64^64;)
+  returns (keras_tensor: float32^8^62^62;)
+{
+  diagram
+    (#0 expr input_layer)
+    (#1 expr kernel__conv2d__6)
+    (#2 expr bias__conv2d__6)
+    (#3 def keras_tensor)
+    (#4 block layers::TConv2D <<8, 1, 64, 64, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<8>>) <<62>>) <<62>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__conv2d_1__4: float32^3^3^8^8;
+
+const bias__conv2d_1__4: float32^8;
+
+function conv2d_1 (keras_tensor_1: float32^8^62^62;)
+  returns (keras_tensor_2: float32^8^60^60;)
+{
+  diagram
+    (#0 expr keras_tensor_1)
+    (#1 expr kernel__conv2d_1__4)
+    (#2 expr bias__conv2d_1__4)
+    (#3 def keras_tensor_2)
+    (#4 block layers::TConv2D <<8, 8, 62, 62, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<8>>) <<60>>) <<60>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__conv2d_2__4: float32^3^3^8^16;
+
+const bias__conv2d_2__4: float32^16;
+
+function conv2d_2 (keras_tensor_8: float32^8^30^30;)
+  returns (keras_tensor_9: float32^16^28^28;)
+{
+  diagram
+    (#0 expr keras_tensor_8)
+    (#1 expr kernel__conv2d_2__4)
+    (#2 expr bias__conv2d_2__4)
+    (#3 def keras_tensor_9)
+    (#4 block layers::TConv2D <<16, 8, 30, 30, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<16>>) <<28>>) <<28>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__conv2d_3__4: float32^3^3^16^16;
+
+const bias__conv2d_3__4: float32^16;
+
+function conv2d_3 (keras_tensor_13: float32^16^28^28;)
+  returns (keras_tensor_14: float32^16^26^26;)
+{
+  diagram
+    (#0 expr keras_tensor_13)
+    (#1 expr kernel__conv2d_3__4)
+    (#2 expr bias__conv2d_3__4)
+    (#3 def keras_tensor_14)
+    (#4 block layers::TConv2D <<16, 16, 28, 28, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<16>>) <<26>>) <<26>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__conv2d_4__4: float32^3^3^16^24;
+
+const bias__conv2d_4__4: float32^24;
+
+function conv2d_4 (keras_tensor_26: float32^16^13^13;)
+  returns (keras_tensor_27: float32^24^11^11;)
+{
+  diagram
+    (#0 expr keras_tensor_26)
+    (#1 expr kernel__conv2d_4__4)
+    (#2 expr bias__conv2d_4__4)
+    (#3 def keras_tensor_27)
+    (#4 block layers::TConv2D <<24, 16, 13, 13, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<24>>) <<11>>) <<11>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__conv2d_5__4: float32^3^3^24^24;
+
+const bias__conv2d_5__4: float32^24;
+
+function conv2d_5 (keras_tensor_34: float32^24^11^11;)
+  returns (keras_tensor_35: float32^24^9^9;)
+{
+  diagram
+    (#0 expr keras_tensor_34)
+    (#1 expr kernel__conv2d_5__4)
+    (#2 expr bias__conv2d_5__4)
+    (#3 def keras_tensor_35)
+    (#4 block layers::TConv2D <<24, 24, 11, 11, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<24>>) <<9>>) <<9>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__conv2d_6__4: float32^3^3^24^24;
+
+const bias__conv2d_6__4: float32^24;
+
+function conv2d_6 (keras_tensor_43: float32^24^9^9;)
+  returns (keras_tensor_44: float32^24^7^7;)
+{
+  diagram
+    (#0 expr keras_tensor_43)
+    (#1 expr kernel__conv2d_6__4)
+    (#2 expr bias__conv2d_6__4)
+    (#3 def keras_tensor_44)
+    (#4 block layers::TConv2D <<24, 24, 9, 9, 3, 3, 1, 1>>)
+    (#5 block (map (map (map activations::relu) <<24>>) <<7>>) <<7>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__dense__6: float32^32^216;
+
+const bias__dense__6: float32^32;
+
+function dense (keras_tensor_76: float32^216;)
+  returns (keras_tensor_77: float32^32;)
+{
+  diagram
+    (#0 expr keras_tensor_76)
+    (#1 expr kernel__dense__6)
+    (#2 expr bias__dense__6)
+    (#3 def keras_tensor_77)
+    (#4 block layers::Dense <<216, 32>>)
+    (#5 block (map activations::relu) <<32>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}
+
+const kernel__dense_1__6: float32^1^32;
+
+const bias__dense_1__6: float32^1;
+
+function dense_1 (keras_tensor_103: float32^32;)
+  returns (keras_tensor_104: float32^1;)
+{
+  diagram
+    (#0 expr keras_tensor_103)
+    (#1 expr kernel__dense_1__6)
+    (#2 expr bias__dense_1__6)
+    (#3 def keras_tensor_104)
+    (#4 block layers::Dense <<32, 1>>)
+    (#5 block (map activations::sigmoid) <<1>>)
+    
+    (#6 wire #0 => #4 .(1))
+    (#7 wire #1 => #4 .(kernel))
+    (#8 wire #2 => #4 .(bias))
+    (#9 wire #4 .(1) => #5)
+    (#10 wire #5 .(1) => #3)
+}

@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Name": "resnet50_murmur_detection",
+  "Dependencies": [
+    "keras_lib\\keras.sproj"
+  ],
+  "Resources": [
+    {
+      "Kind": "SourceFile",
+      "Path": "resources\\constants.c",
+      "Key": ""
+    }
+  ]
+}
