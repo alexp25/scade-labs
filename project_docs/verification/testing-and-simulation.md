@@ -62,6 +62,59 @@ documented expected value.
   `cc_active` regulator behavior is evaluated visually via the generated
   charts, not asserted (no automated diff against Lab 2 exists either way).
 
+## SCADE AI Raspberry Pi pipeline — local validation, 2026-11-24
+
+The new `src/SCADE_AI_labs/raspberry_pi/check_pipeline.py` is a standalone
+assert/PASS smoke-check script. Run from repo root with
+`.venv/bin/python src/SCADE_AI_labs/raspberry_pi/check_pipeline.py`, or use
+the configured Pi Python environment inside that directory. All checks
+passed locally: WAV PCM16/PCM24/float loading, stereo-to-mono/native rate,
+11th-order Butterworth agreement with the notebook's direct form at 4 kHz,
+finite SOS filtering at 2/44.1/48 kHz, STFT/silence/plot/tensor properties,
+CNN and ResNet normalization, HWC ctypes transfer, proxy reset/cycle,
+label boundary/invalid scores, worker exceptions, and integrated reporting.
+A temporary **Python stub** supplied proxy behavior and a stub score
+supplied the runner integration. Neither is real generated-model evidence.
+The check process imported no TensorFlow/Keras/librosa/Numba. All five
+runtime/check Python modules also passed `py_compile`.
+
+A separate desktop-only comparison read all 16 existing `.keras` ZIP
+configs and confirmed profile names, 64x64x1/3 shapes and one sigmoid output.
+Synthetic recordings at 4000 Hz/3.4 s, 44100 Hz/2 s, 4000 Hz/0.08 s and
+2000 Hz/62 s gave **exactly equal** dB matrices and 600x400 RGB renderings
+against librosa STFT/amplitude_to_db/specshow in the same environment.
+The reference rendering used 6x4 inches at 100 dpi, implementing the
+notebook's intended pixel size in place of its invalid three-item figsize.
+All profiles' final tensors exactly matched TensorFlow's PNG grayscale
+decode, bilinear resize and notebook CNN/ResNet input preparation. No
+saved-model inference, retraining or artifact replacement was performed.
+These results establish preprocessing agreement for the tested samples
+and software environment, not agreement across different fonts/renderers.
+
+The desktop used NumPy 2.5.4, SciPy 1.18.1, Matplotlib 3.11.2, librosa
+1.0.0 and TensorFlow 2.21.0. Those last two libraries are only references
+for development checks, not Raspberry Pi dependencies. Runtime imports
+are NumPy, SciPy, Matplotlib/Agg and soundfile, plus Python standard
+library and the eventual generated proxy.
+
+The existing cruise-control browser/standalone starter content was
+compared with its pre-existing terminal blank-line difference ignored.
+Both AI notebooks' JSON and code-cell syntax were checked, as was
+`git diff --check`. No published-site or notebook content was edited by
+this pipeline task; no Jekyll build or proprietary-tool check applies.
+
+**Still pending:** actual model/proxy files, Linux ARM64 loader/native
+library compatibility, Scade support for quantized graph operations,
+target package installation, generated C execution/accuracy, and actual
+Pi peak RAM and <=60-second full-process wall time. These cannot be
+inferred from the stub checks or laptop preprocessing comparison. The
+README/configuration explain where to add artifacts and set the actual
+proxy identifiers. `/usr/bin/time -v python3 run.py` on the Pi captures
+complete process wall time and peak RSS; the internal timer starts before
+scientific imports and ends after classification. Record first-run
+font-cache overhead and repeated fresh-process results. The initial
+64 MiB native worker stack is configurable and not a measured requirement.
+
 ## Do not claim
 
 - That any Scade One simulation, wrapper test, or generated-code output was

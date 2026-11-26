@@ -142,3 +142,87 @@ repo root) generates `docs/m2/lab1/CMP_template_CruiseControl.docx` and the
 instructor-only `src/m2/lab1/solution/CMP_CruiseControl_reference.docx` from
 one content definition. Not student-facing; validated only by reading the
 output back (see `.agents/testing.md`).
+
+## SCADE AI · Lab 2 — Transfer Learning summary export
+
+In `src/SCADE_AI_labs/lab2/lab2.ipynb`, the Transfer Learning cell selects
+`best_model` using KerasTuner's validation PR-AUC ranking, displays its summary,
+and writes the summary through `print_fn` to `{best_model.name}.txt` in the
+kernel's working directory (UTF-8, overwritten on rerun). The current model
+name produces `resnet50_murmur_detection.txt`; the model itself is saved
+separately as `{best_model.name}.keras`. This notebook is separate from the
+published cruise-control Lab 2 and has no corresponding `docs/` Lab 2 page.
+
+## SCADE AI · Lab 2 — INT8 quantization example
+
+The notebook's `Quantization example` section loads
+`resnet50_murmur_detection_copy.keras` and saves a native Keras archive,
+`resnet50_murmur_detection_copy_int8.keras`, using `model.save()`. Loading
+uses `keras.models.load_model(..., compile=False)` with no custom objects;
+`tf.keras.models.load_model` is also supported in the tested environment.
+Do not use `TFLiteConverter` or write TFLite bytes with a `.keras` extension.
+
+Keras 3.15.1 supports Dense INT8 quantization but not Conv2D directly.
+`QUANTIZE_CONVOLUTIONS = True` rewrites each ordinary channels-last Conv2D
+as patch extraction plus a Dense projection, reshaping its original kernel
+without retraining. Unit-stride 1x1 convolutions use Dense directly. This
+quantizes all six convolution kernels and the two original Dense kernels
+using built-in `model.quantize("int8", filters=...)`. Setting the option to
+False leaves Conv2D unchanged and quantizes only the two Dense kernels.
+Unsupported groups/data format/unequal dilation raise an error.
+
+Biases, scales, batch normalization, residual operations, and model I/O
+remain float32; this is mixed precision, not integer-only inference. The
+rewrite changes the internal graph, can increase memory/latency, and does
+not imply compatibility with downstream Scade importers. No custom layer
+classes or new packages are needed. Generated `.keras` files are runtime
+outputs, not maintained source; rerunning replaces the output file.
+
+Run imports/options, `load_images`, `prepare_resnet_input`, and the two
+quantization cells only. Eight validation images from `val_70` check float32
+rewrite equivalence before quantization and save/reload equivalence after
+quantization; the actual INT8 kernel dtypes are asserted and reported.
+There is no calibration pass, splitting, pruning, or retraining.
+
+The earlier `Test the saved models` cell now selects the saved quantized
+model by default, loads it into `int8_resnet50_model`, and aliases it as
+`model` so the existing prediction/report loop stays unchanged. The former
+pruned-model selection and generic loading lines remain commented. Testing
+still uses `load_images(test_70, shuffle=False).map(prepare_resnet_input)`: no
+manual INT8 casting or output dequantization. Run the ResNet helper
+definition (located later in the notebook) before returning to this cell.
+With threshold 0.5, raw scores overwrite
+`resnet50_murmur_detection_copy_int8_test_predictions.txt`; the report and
+confusion matrix append to `resnet50_murmur_detection_copy_int8.txt`, created
+if missing. This evaluation does not change the saved model.
+
+## SCADE AI — Raspberry Pi inference pipeline
+
+`src/SCADE_AI_labs/raspberry_pi/` is a standalone, hand-maintained runtime
+for a 1 GB Raspberry Pi 3 B with 64-bit Raspberry Pi OS. `config.py` selects
+one hardcoded SD-card WAV and one of all 16 current Lab 2 model names.
+The Pi runs generated C through a proxy only; it never loads `.keras` or
+imports TensorFlow, Keras, librosa, or Numba. NumPy, SciPy, Matplotlib/Agg,
+and soundfile supply preprocessing. Runtime install/run instructions are
+in the directory's README.
+
+`preprocessing.py` keeps native sample rate, mixes to mono float32, applies
+the causal 11th-order 600 Hz Butterworth filter using stable second-order
+sections, and computes the centered Hann STFT (8192 FFT/window, hop 512,
+relative dB, 80 dB range) in small FFT batches. It recreates Lab 1's
+600x400 plot including axes/title/colorbar before grayscale/bilinear resize.
+CNN profiles use 64x64x1 normalized grayscale; ResNet profiles use
+64x64x3 replicated grayscale with BGR mean subtraction, including the
+mixed-precision INT8 variant's float32 interface. WAVs are neither trimmed
+nor resampled; the 600 Hz filter needs a sample rate above 1200 Hz.
+The whole WAV/dB matrix still scales with recording length/sample rate.
+
+`inference.py` implements Lab 1's reset/input-copy/cycle/output proxy API
+with an adjustable worker-thread stack (initially 64 MiB per profile).
+`run.py` reports Normal=0/Murmur=1 at score >= threshold (default 0.5),
+per-stage elapsed times, total from before scientific imports, and peak
+process RAM. `/usr/bin/time -v python3 run.py` measures complete process
+wall time, including interpreter startup/output/shutdown. No timeout is
+enforced. Wrapper names are placeholders; generated model files have not
+been provided. Real C inference, ARM64 compatibility and the 60-second
+Pi target remain unverified. See `.agents/testing.md` for local checks.

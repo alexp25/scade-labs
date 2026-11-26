@@ -312,6 +312,133 @@ edited to match the current structure.**
   checked in a browser — diagnosis is from the code (see changelog).
 - **Not done:** either page in a real browser.
 
+## SCADE AI · Lab 2 — native Keras quantization example
+
+- Use the repository `.venv/bin/python` (tested: Keras 3.15.1 / TensorFlow
+  2.21.0). Run the imports/options defining `val_70`, `CLASS_NAMES`,
+  `IMAGE_SIZE`, `BATCH_SIZE`, `TRAIN_SEED`, the `load_images` and
+  `prepare_resnet_input` definitions, then both code cells under
+  `Quantization example`. Do not execute data splitting/training/tuning or
+  pruning as part of validation.
+- Requires the existing `resnet50_murmur_detection_copy.keras` and validation
+  PNG directories. The default rewrites ordinary channels-last Conv2D as
+  patch extraction plus Dense, then quantizes every Dense kernel. Check
+  float32 rewrite equivalence, actual INT8 kernel dtypes, save/reload output
+  equivalence, and that the original source model's hash is unchanged.
+- Confirm the generated `resnet50_murmur_detection_copy_int8.keras` is a ZIP
+  archive containing `config.json`, `metadata.json`, and `model.weights.h5`.
+  In a fresh process, load using `tf.keras.models.load_model(...,
+  compile=False)` without custom objects and compare predictions. This
+  catches the previous error of writing TFLite bytes with a `.keras` suffix.
+- Exercise `QUANTIZE_CONVOLUTIONS = False` in a temporary directory: two
+  Dense kernels must be INT8 and six Conv2D kernels must stay float32, with
+  successful save/reload/inference. For the convolution rewrite, compare
+  float32 outputs for 1x1/3x3 kernels, stride 1/2, dilation 1/2,
+  same/valid padding, bias/no bias, and ReLU/linear activations; unsupported
+  grouped convolutions must raise explicitly.
+- **Run 2026-11-23 (current example):** both notebook cells executed unchanged
+  against the real model and eight preprocessed validation images. Float32
+  rewrite check and quantized save/reload check passed; all eight kernels
+  were INT8. Original file: 453.6 KiB; native quantized Keras file: 228.6 KiB.
+  Maximum score difference from the original on these eight images:
+  0.028426. The original file hash was unchanged. The genuine `.keras`
+  output was kept in the notebook directory, replacing the old misnamed
+  TFLite artifact. Fresh-process loading/inference with `tf.keras` passed.
+  Six convolution rewrite geometry cases, grouped-convolution rejection,
+  and the Dense-only fallback's dtype/save/reload checks also passed.
+  The AST-based helper extraction emitted TensorFlow AutoGraph source-code
+  lookup warnings; execution completed successfully.
+- Notebook JSON, unique cell IDs and all code-cell syntax validated; all
+  cells before the quantization heading preserved exactly. The separate
+  cruise-control Lab 2 browser `STARTER_CODE` still matches its standalone
+  starter. `git diff --check` passed.
+- This model retains float32 biases/scales/batch normalization/residuals and
+  float32 I/O. Full float32-versus-INT8 accuracy comparison, runtime
+  performance, Scade One import and embedded deployment have not been
+  validated. The saved INT8 model test-set evaluation is recorded below.
+  No published AI Lab 2 page exists to rebuild/synchronize.
+- **Historical, superseded example (also 2026-11-23):** the original TFLite
+  full integer conversion passed with 200 training calibration images and
+  INT8/INT32 tensors only (117.7 KiB). It was replaced by the native Keras
+  mixed-precision example above; its calibration/interpreter procedure is
+  no longer the notebook workflow.
+
+## SCADE AI · Lab 2 — test the saved INT8 model
+
+- Under `Test the saved models`, the active cell selects
+  `resnet50_murmur_detection_copy_int8`, loads the native `.keras` file into
+  `int8_resnet50_model`, and assigns it to `model` for the existing loop.
+  Every original testing line is preserved, either active or commented.
+- Run imports/options plus the `load_images` and `prepare_resnet_input`
+  definitions first. The latter appears later in the notebook, so execute
+  its definition before returning to the testing section. The quantization
+  cells need not rerun if the genuine saved artifact already exists.
+- Keep `test_70`, `shuffle=False`, ResNet input preprocessing, threshold 0.5,
+  Normal=0/Murmur=1, and the original prediction/report logic. Inputs remain
+  float32 RGB; no INT8 casting or TFLite scaling/dequantization is needed.
+- **Run 2026-11-23:** the updated cell executed unchanged using the real
+  saved model and all 1,279 images in the configured testing folder (1,047
+  Normal, 232 Murmur). Confusion matrix: `[[970, 77], [110, 122]]`; accuracy
+  approximately 85.4%, Murmur precision 61.3%, Murmur recall 52.6%.
+  This evaluates the quantized model only, not its change from float32.
+- Verified float32, three-channel inputs; finite predictions; both classes;
+  one raw-score row per test image; confusion-matrix total matches the test
+  count; model file hash unchanged. Raw predictions were saved to
+  `resnet50_murmur_detection_copy_int8_test_predictions.txt`; the report and
+  confusion matrix were appended to
+  `resnet50_murmur_detection_copy_int8.txt`. Both outputs remain in the
+  notebook directory. Reruns overwrite predictions and append a new report.
+- Notebook JSON and every code cell parse; only the testing instructions
+  and active test cell changed in this follow-up. Original lines are
+  preserved verbatim, active or commented; other cells/metadata preserved.
+  Stale test outputs cleared. `git diff --check` and the separate published
+  cruise-control Lab 2 browser/starter consistency check passed. No site or
+  Scade One source changed, so no Jekyll build or proprietary-tool check
+  applies to this edit.
+
+## SCADE AI — Raspberry Pi audio-to-C pipeline
+
+- From repo root: `.venv/bin/python src/SCADE_AI_labs/raspberry_pi/check_pipeline.py`.
+  On a configured Pi, `python3 check_pipeline.py` inside that directory is
+  equivalent. This is a plain assert/PASS script, not a new test framework.
+- Run `python -m py_compile` on `config.py`, `preprocessing.py`,
+  `inference.py`, `run.py`, and `check_pipeline.py` in the new directory.
+- **Run 2026-11-24 on the local desktop:** all smoke checks passed:
+  PCM16/PCM24/float WAV decode, stereo-to-mono and preserved sample rate;
+  filter agreement with the notebook's direct form at 4 kHz and finite
+  second-order-section output at 2/44.1/48 kHz; STFT shape/dB/silence;
+  600x400 plot and both model input formats; proxy reset/cycle/HWC copy
+  through a temporary Python stub; Normal/Murmur threshold boundary and
+  invalid-score rejection; worker error propagation; integrated runner
+  timing/RAM-report fields with stub inference. No TensorFlow, Keras,
+  librosa or Numba was imported by that smoke-check process.
+- **Separate desktop parity check, run 2026-11-24:** all 16 profile names,
+  input shapes and single sigmoid outputs matched the actual Lab 2 Keras
+  ZIP metadata. Synthetic audio at 4 kHz/3.4 s, 44.1 kHz/2 s, 4 kHz/0.08 s
+  and 2 kHz/62 s produced exactly matching dB matrices and 600x400 RGB
+  plots compared with librosa STFT/amplitude_to_db/specshow in the same
+  environment (using the intended 6x4 inch/100 dpi figure). For every
+  profile, final 64x64 tensors exactly matched TensorFlow PNG grayscale
+  decoding, bilinear resize, CNN normalization and ResNet preprocessing.
+  This used existing desktop NumPy 2.5.4, SciPy 1.18.1, Matplotlib 3.11.2,
+  librosa 1.0.0 and TensorFlow 2.21.0; it did not run model inference or
+  retrain/alter any model. Other rendering environments may differ.
+- Existing cruise-control Lab 2 browser and standalone starter content
+  compared after ignoring their pre-existing terminal blank-line
+  difference. AI notebook JSON/code-cell syntax and `git diff --check`
+  also checked. No published source changed, so Jekyll/browser checks
+  and proprietary model-generation checks do not apply to this task.
+- **Pending:** generated models/proxies have not been supplied. No real
+  C inference, ARM64 loader/build, Scade import (including INT8 operation
+  compatibility), target package install, Pi RAM fit or Pi 60-second
+  performance was validated. Once artifacts arrive, inspect actual
+  module/class/input/output names, use the Linux ARM64 native library,
+  configure the relevant profile, and run `/usr/bin/time -v python3 run.py`
+  on the actual Pi/SD card. Internal total includes scientific imports
+  through classification; external wall time also includes interpreter
+  startup/output/shutdown. Record the first font-cache run and subsequent
+  fresh-process measurements. The target is measured, not enforced.
+
 ## Manual/visual checks
 
 - No student-facing page exposes instructor solution content: confirmed by

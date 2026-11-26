@@ -25,6 +25,19 @@ unchanged.
 | FormSubmit (`formsubmit.co`) | Module 2 · Lab 1 CMP upload: emails the student's `.docx` (+ name, email, group, repo URL, message) to the mentor | `docs/m2/lab1/cmp-submit.js` (`MENTOR_EMAIL` constant, currently the placeholder `xxxx@upb.ro`) | remote, third-party free service | runtime, when a student clicks **Send to mentor** | — | Regular multipart POST (attachments are not forwarded via AJAX); redirects back via `_next` to `#cmp-submitted`. **First submission triggers an activation email to `MENTOR_EMAIL`; nothing is forwarded until it is confirmed once.** Student files and personal data pass through this third party. The page enforces `.docx` and ≤ 5 MB client-side only. **Observed down (HTTP 521 from Cloudflare on every URL) on 2026-10-29**, so the form also has an **Email it instead** `mailto:` fallback (no third party; the student attaches the file manually) |
 | `python-docx` (1.1.0 verified) | Generates the Module 2 · Lab 1 CMP template + reference `.docx` | `src/m2/lab1/tools/build_cmp_docs.py` | local (pip) | maintainer, regeneration-time only | not pinned (no requirements file for this tool) | Students never run it |
 
+## SCADE AI Raspberry Pi runtime
+
+`src/SCADE_AI_labs/raspberry_pi/requirements.txt` lists NumPy >=1.20,
+SciPy >=1.7, Matplotlib >=3.5 and soundfile >=0.10 (not exact pins).
+The README offers Raspberry Pi OS apt packages and a system-site-packages
+virtual environment to avoid scientific-library compilation on the Pi.
+Package installation on ARM64 has not been exercised. The runtime is
+offline after installation and artifact provisioning. It imports neither
+TensorFlow/Keras/librosa nor the Ansys generator API. The actual generated
+proxy may introduce dependencies that must be checked when provided.
+Development-only notebook-parity checks used the existing desktop
+TensorFlow/librosa environment; those are not Pi runtime dependencies.
+
 ## Offline / reproducibility concerns worth flagging to a maintainer
 
 - Lab 2's live-editor path (Skulpt + CodeMirror + marked.js + highlight.js)

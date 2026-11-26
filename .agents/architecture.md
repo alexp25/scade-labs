@@ -38,6 +38,7 @@ scade-labs/
 │   ├── lab3/{starter, solution}  (both hold requirements text + a Scade One project — demo.sproj, blocks.swan, test.swant, wrappers, Python test scripts; starter/ has blocks.swan/test.swant flattened, which breaks Scade One's discovery, left as-is per maintainer instruction; solution/ has the correct assets/ layout and actually opens — see .agents/scade-models.md)
 │   └── lab4/starter/CruiseControl/  (Swan model + C/Python wrapper; populated/working, doubles as the reference — no separate solution/)
 │   └── m2/lab1/{tools/build_cmp_docs.py, solution/CMP_CruiseControl_reference.docx, README.md}  generator for both CMP .docx files + instructor-only reference (never under docs/)
+│   └── SCADE_AI_labs/raspberry_pi/  standalone WAV-to-Lab-2-generated-C inference runtime; configuration, audio/image preprocessing, proxy adapter, timing runner and smoke checks (no generated model supplied yet)
 ├── old/                  tracked legacy archive (old/lab2_old/, old/scade_demo/) — superseded, not linked from any published page
 └── scade_demo/           untracked local Scade One codegen job output at repo root — not part of the curriculum, left as-is
 ```
